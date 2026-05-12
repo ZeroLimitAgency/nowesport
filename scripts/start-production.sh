@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -eu
+
+SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+cd "$SCRIPT_DIR/.."
+
+node ./node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3001
