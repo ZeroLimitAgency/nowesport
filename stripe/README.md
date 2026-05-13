@@ -1,20 +1,31 @@
 # Stripe + Supabase
 
-## Modèle retenu
+## Modele retenu
 
 - `Supabase` pilote le contenu du site et l'affichage produit
-- `Stripe` pilote le paiement réel et les prix
+- `Stripe` pilote le paiement reel et les prix
 - le lien entre les deux se fait via :
   - `products.stripe_product_id`
   - `products.stripe_price_id`
 
-## Étapes à faire dans Stripe
+## Etat cible
 
-1. Créer le produit dans Stripe
-2. Créer le prix associé dans Stripe
+Le flux de reference doit rester :
+
+- GitHub pour le code
+- Vercel pour l'execution
+- Supabase pour les donnees
+- Stripe pour le paiement
+
+Aucun fichier local ne doit etre necessaire au fonctionnement du checkout en production.
+
+## Etapes a faire dans Stripe
+
+1. Creer le produit dans Stripe
+2. Creer le prix associe dans Stripe
 3. Copier le `price_id` Stripe
-4. Le coller dans `public.products.stripe_price_id` côté Supabase
-5. Facultatif mais recommandé : copier aussi le `product_id` Stripe dans `public.products.stripe_product_id`
+4. Le coller dans `public.products.stripe_price_id` cote Supabase
+5. Facultatif mais recommande : copier aussi le `product_id` Stripe dans `public.products.stripe_product_id`
 
 ## Exemple SQL
 
@@ -26,32 +37,39 @@ set
 where slug = 'maillot-crystal-2026';
 ```
 
-## Webhook Stripe à créer
+## Webhook Stripe a creer
 
-Créer un endpoint Stripe pointant vers :
+Creer un endpoint Stripe pointant vers un domaine cloud actif du projet :
 
 ```txt
-https://ton-domaine.com/api/stripe/webhook
+https://nowesport.vercel.app/api/stripe/webhook
 ```
 
-Le local reste possible pour test, mais la cible principale devient maintenant le domaine cloud du projet.
-
-Puis récupérer le secret `whsec_...` et le mettre dans les variables d'environnement du projet :
+Puis recuperer le secret `whsec_...` et le mettre dans les variables d'environnement du projet :
 
 ```env
 STRIPE_WEBHOOK_SECRET=whsec_xxxxx
 ```
 
-## Événements déjà gérés
+## Evenements deja geres
 
 - `checkout.session.completed`
 - `checkout.session.async_payment_succeeded`
 - `checkout.session.expired`
 
-## Pages et routes déjà branchées
+## Pages et routes deja branchees
 
-- checkout intégré produit : `/checkout/[slug]`
-- création session embedded : `/api/checkout/embedded-session`
+- checkout integre produit : `/checkout/[slug]`
+- creation session embedded : `/api/checkout/embedded-session`
 - webhook Stripe : `/api/stripe/webhook`
 - fallback hosted checkout : `/api/checkout/session`
-- déploiement recommandé : GitHub → Vercel
+- deploiement recommande : GitHub -> Vercel
+
+## Checklist avant validation complete
+
+1. Creer au moins un produit et un prix dans Stripe
+2. Renseigner `stripe_price_id` dans Supabase pour le produit correspondant
+3. Verifier les variables Vercel Stripe et Supabase
+4. Declarer le webhook Stripe sur le domaine Vercel actif
+5. Realiser un achat test complet jusqu'a l'ecriture dans `orders` et `order_items`
+6. Ne considerer la prod Stripe comme validee qu'apres ce test de bout en bout
