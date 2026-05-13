@@ -18,7 +18,7 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
     Math.max(totalCents - subtotalCents - (session.total_details?.amount_tax ?? 0), 0);
   const taxCents = session.total_details?.amount_tax ?? 0;
   const customerEmail =
-    session.customer_details?.email ?? session.customer_email ?? "client@nowesport.local";
+    session.customer_details?.email ?? session.customer_email ?? "client@nowesport.invalid";
   const supabaseUserId =
     typeof session.metadata?.supabase_user_id === "string"
       ? session.metadata.supabase_user_id
@@ -82,7 +82,7 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
       .single();
 
     if (error || !data) {
-      throw error ?? new Error("Impossible de créer la commande Stripe.");
+      throw error ?? new Error("Impossible de creer la commande Stripe.");
     }
 
     orderId = data.id;
