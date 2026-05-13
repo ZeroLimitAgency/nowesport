@@ -6,7 +6,7 @@ function getStripeSecretKey() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
 
   if (!secretKey) {
-    throw new Error("La clé secrète Stripe est manquante.");
+    throw new Error("La cle secrete Stripe est manquante.");
   }
 
   return secretKey;
@@ -50,5 +50,5 @@ export function getSiteUrlFromRequest(request?: Request) {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  return "http://127.0.0.1:3001";
+  return "https://nowesport.vercel.app";
 }
