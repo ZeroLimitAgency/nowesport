@@ -1,6 +1,6 @@
 # NOW eSport
 
-Frontend Next.js pour NOW eSport, pensé pour un fonctionnement autonome côté GitHub, Vercel, Supabase et Stripe.
+Frontend Next.js pour NOW eSport, pense pour un fonctionnement autonome cote GitHub, Vercel, Supabase et Stripe.
 
 ## Stack
 
@@ -9,27 +9,31 @@ Frontend Next.js pour NOW eSport, pensé pour un fonctionnement autonome côté 
 - `Supabase` pour l'auth, la base et les contenus
 - `Stripe` pour le paiement
 - `GitHub Actions` pour la CI
-- `Vercel` pour le déploiement
+- `Vercel` pour le deploiement
 
-## Philosophie de déploiement
+## Philosophie de deploiement
 
-Le projet est désormais préparé pour :
+Le projet est prepare pour :
 
 - un repo GitHub comme source principale
 - une CI automatique via GitHub Actions
-- un déploiement GitHub → Vercel
-- une exécution autonome sans dépendre d'un PC local
+- un deploiement GitHub -> Vercel
+- une execution autonome sans dependre d'un PC local
+- des medias relies par URL publique, jamais par chemin local
 
 ## Variables d'environnement
 
-Copier [`.env.example`](</D:\St0ckage\OneDrive\Documents\GitHub\nowesport\.env.example>) vers `.env.local` en local, puis reporter les mêmes variables dans :
+Le fichier de reference est [`.env.example`](./.env.example).
 
-- `GitHub Secrets / Variables` si besoin de workflows avancés
+Source de verite recommandee :
+
 - `Vercel Project Settings > Environment Variables`
+- `GitHub Secrets / Variables` seulement si un workflow en a besoin
 
 Variables attendues :
 
 - `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_HERO_VIDEO_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -45,7 +49,7 @@ npm run lint
 npm run build
 ```
 
-Commande de vérification complète :
+Commande de verification complete :
 
 ```bash
 npm run check
@@ -53,34 +57,35 @@ npm run check
 
 ## CI GitHub
 
-Le workflow [ci.yml](</D:\St0ckage\OneDrive\Documents\GitHub\nowesport\.github\workflows\ci.yml>) exécute automatiquement :
+Le workflow [ci.yml](./.github/workflows/ci.yml) execute automatiquement :
 
 - installation
 - lint
 - build
 
-à chaque `push` et `pull_request`.
+A chaque `push` et `pull_request`.
 
 ## Vercel
 
 Le projet est compatible avec Vercel sans script custom.
 
-À configurer dans Vercel :
+A configurer dans Vercel :
 
 1. importer le repo GitHub
-2. définir les variables d'environnement
-3. connecter Supabase et Stripe côté domaine réel
-4. créer le webhook Stripe vers `/api/stripe/webhook`
+2. definir les variables d'environnement
+3. connecter Supabase et Stripe cote domaine reel
+4. creer le webhook Stripe vers `/api/stripe/webhook`
+5. brancher la video hero via `NEXT_PUBLIC_HERO_VIDEO_URL` avec une URL publique
 
 ## Stripe
 
 La documentation de raccord Stripe/Supabase est ici :
 
-- [stripe/README.md](</D:\St0ckage\OneDrive\Documents\GitHub\nowesport\stripe\README.md>)
+- [stripe/README.md](./stripe/README.md)
 
 ## Supabase
 
-Le schéma de base est ici :
+Le schema de base est ici :
 
-- [supabase/schema.sql](</D:\St0ckage\OneDrive\Documents\GitHub\nowesport\supabase\schema.sql>)
-- [supabase/README.md](</D:\St0ckage\OneDrive\Documents\GitHub\nowesport\supabase\README.md>)
+- [supabase/schema.sql](./supabase/schema.sql)
+- [supabase/README.md](./supabase/README.md)
