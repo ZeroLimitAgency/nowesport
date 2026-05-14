@@ -53,7 +53,7 @@ export function HomeHero() {
       {hasVideo ? (
         heroMedia.videoEmbedSrc ? (
           <iframe
-            className="absolute inset-0 h-full w-full scale-125 object-cover"
+            className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover"
             src={heroMedia.videoEmbedSrc}
             title="Vidéo de présentation NOW eSport"
             allow="autoplay; encrypted-media; picture-in-picture"
@@ -110,7 +110,18 @@ export function HomeHero() {
 
         {hasVideo && heroMedia.videoSrc ? (
           <div className="pointer-events-auto absolute bottom-6 right-5 z-10 sm:bottom-8 sm:right-8">
-            <HeroVolumeControl videoId="home-hero-video" />
+            {heroMedia.videoSrc ? (
+              <HeroVolumeControl videoId="home-hero-video" />
+            ) : heroMedia.videoHref ? (
+              <a
+                href={heroMedia.videoHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full border border-white/20 bg-black/45 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/85 backdrop-blur transition hover:border-white/35 hover:text-white"
+              >
+                Activer le son
+              </a>
+            ) : null}
           </div>
         ) : null}
       </div>
