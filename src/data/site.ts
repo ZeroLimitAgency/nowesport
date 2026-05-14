@@ -390,7 +390,13 @@ export const footerLegalLinks = legalPages.map((item) => ({
   href: `/legal/${item.slug}`,
 }));
 
-export const footerSocials = ["Instagram", "YouTube", "TikTok", "X", "Discord"];
+export const footerSocials = [
+  { label: "Instagram", href: "https://instagram.com/noww_esport" },
+  { label: "YouTube", href: "#" },
+  { label: "TikTok", href: "https://tiktok.com/@noww_esport" },
+  { label: "X", href: "https://x.com/noww_esport" },
+  { label: "Discord", href: "https://discord.gg/Etn3sSbvJc" },
+];
 
 export function getProductBySlug(slug: string) {
   return collectionItems.find((item) => item.slug === slug);

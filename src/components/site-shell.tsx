@@ -233,8 +233,14 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
             <div className="flex flex-wrap items-center gap-5">
               {footerSocials.map((item) => (
-                <a key={item} href="#" className="transition hover:text-white/70">
-                  {item}
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition hover:text-white/70"
+                >
+                  {item.label}
                 </a>
               ))}
             </div>
