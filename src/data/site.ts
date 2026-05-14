@@ -24,7 +24,7 @@ export const heroMedia = {
   helper:
     "Quand tu voudras, on branchera ici ta vraie vidéo locale ou un média hébergé.",
   videoHref: "https://www.youtube.com/watch?v=F7VLXWSbRoE",
-  videoSrc: "/assets/now-academy.mp4",
+  videoEmbedSrc: "https://www.youtube.com/embed/F7VLXWSbRoE?autoplay=1&mute=1&controls=0&loop=1&playlist=F7VLXWSbRoE&modestbranding=1&rel=0",
 };
 
 export const homeHighlights = [
