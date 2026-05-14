@@ -38,7 +38,7 @@ export function PageIntro({
 }
 
 export function HomeHero() {
-  const hasVideo = Boolean(heroMedia.videoSrc);
+  const hasVideo = Boolean(heroMedia.videoSrc || heroMedia.videoEmbedSrc);
 
   return (
     <section className="relative h-[calc(100vh-6.75rem)] min-h-[42rem] overflow-hidden">
@@ -51,16 +51,26 @@ export function HomeHero() {
       />
 
       {hasVideo ? (
-        <video
-          id="home-hero-video"
-          autoPlay
-          className="absolute inset-0 h-full w-full object-cover"
-          loop
-          muted
-          playsInline
-        >
-          <source src={heroMedia.videoSrc} type="video/mp4" />
-        </video>
+        heroMedia.videoEmbedSrc ? (
+          <iframe
+            className="absolute inset-0 h-full w-full scale-125 object-cover"
+            src={heroMedia.videoEmbedSrc}
+            title="Vidéo de présentation NOW eSport"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        ) : (
+          <video
+            id="home-hero-video"
+            autoPlay
+            className="absolute inset-0 h-full w-full object-cover"
+            loop
+            muted
+            playsInline
+          >
+            <source src={heroMedia.videoSrc} type="video/mp4" />
+          </video>
+        )
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(240,129,191,0.22),transparent_18%),linear-gradient(135deg,#21141b_0%,#0a0a0d_38%,#131722_100%)]" />
       )}
@@ -98,7 +108,7 @@ export function HomeHero() {
           </div>
         </div>
 
-        {hasVideo ? (
+        {hasVideo && heroMedia.videoSrc ? (
           <div className="pointer-events-auto absolute bottom-6 right-5 z-10 sm:bottom-8 sm:right-8">
             <HeroVolumeControl videoId="home-hero-video" />
           </div>
