@@ -38,7 +38,7 @@ export function PageIntro({
 }
 
 export function HomeHero() {
-  const hasVideo = Boolean(heroMedia.videoSrc);
+  const hasVideo = Boolean(heroMedia.videoSrc || heroMedia.videoEmbedSrc);
 
   return (
     <section className="relative h-[calc(100vh-6.75rem)] min-h-[42rem] overflow-hidden">
@@ -51,16 +51,26 @@ export function HomeHero() {
       />
 
       {hasVideo ? (
-        <video
-          id="home-hero-video"
-          autoPlay
-          className="absolute inset-0 h-full w-full object-cover"
-          loop
-          muted
-          playsInline
-        >
-          <source src={heroMedia.videoSrc} type="video/mp4" />
-        </video>
+        heroMedia.videoEmbedSrc ? (
+          <iframe
+            className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover"
+            src={heroMedia.videoEmbedSrc}
+            title="Vidéo de présentation NOW eSport"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        ) : (
+          <video
+            id="home-hero-video"
+            autoPlay
+            className="absolute inset-0 h-full w-full object-cover"
+            loop
+            muted
+            playsInline
+          >
+            <source src={heroMedia.videoSrc} type="video/mp4" />
+          </video>
+        )
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(240,129,191,0.22),transparent_18%),linear-gradient(135deg,#21141b_0%,#0a0a0d_38%,#131722_100%)]" />
       )}
@@ -100,7 +110,18 @@ export function HomeHero() {
 
         {hasVideo ? (
           <div className="pointer-events-auto absolute bottom-6 right-5 z-10 sm:bottom-8 sm:right-8">
-            <HeroVolumeControl videoId="home-hero-video" />
+            {heroMedia.videoSrc ? (
+              <HeroVolumeControl videoId="home-hero-video" />
+            ) : heroMedia.videoHref ? (
+              <a
+                href={heroMedia.videoHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full border border-white/40 bg-black/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.12)] backdrop-blur transition hover:border-white/70"
+              >
+                Activer le son
+              </a>
+            ) : null}
           </div>
         ) : null}
       </div>
@@ -123,9 +144,9 @@ export function HomeHighlights() {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-accent-soft)]">
             Bloc éditorial
           </p>
-          <h3 className="mt-4 text-2xl font-black uppercase tracking-[-0.04em] text-white">
+          <h2 className="mt-4 text-2xl font-black uppercase tracking-[-0.04em] text-white">
             {item.title}
-          </h3>
+          </h2>
           <p className="mt-4 text-sm leading-6 text-white/58">{item.description}</p>
         </article>
       ))}
@@ -491,7 +512,7 @@ export function NewsShowcase() {
           <a
             key={card.title}
             href={card.href}
-            className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[#46212e] transition duration-300 hover:-translate-y-1"
+            className="overflow-hidden rounded-[1.8rem] border border-white/12 bg-[#2f1720] transition duration-300 hover:-translate-y-1"
           >
             <div
               className={`flex h-56 items-end p-5 ${
@@ -509,9 +530,9 @@ export function NewsShowcase() {
             <div className="space-y-4 px-5 py-5">
               <h3 className="text-2xl font-bold leading-tight text-white">{card.title}</h3>
               <p className="text-sm leading-6 text-white/55">{card.excerpt}</p>
-              <div className="flex items-center justify-between text-sm text-white/40">
+              <div className="flex items-center justify-between text-sm text-white/70">
                 <span>{card.date}</span>
-                <span className="rounded-full border border-white/10 px-3 py-2">
+                <span className="rounded-full border border-white/30 px-3 py-2 text-white/85">
                   Voir sur X
                 </span>
               </div>
