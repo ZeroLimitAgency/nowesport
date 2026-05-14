@@ -337,7 +337,7 @@ export function NewsShowcaseSection({ cards }: { cards: NewsCard[] }) {
           <a
             key={`${card.title}-${index}`}
             href={card.href}
-            className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[#46212e] transition duration-300 hover:-translate-y-1"
+            className="overflow-hidden rounded-[1.8rem] border border-white/12 bg-[#2f1720] transition duration-300 hover:-translate-y-1"
           >
             <div
               className={`flex h-56 items-end p-5 ${
@@ -355,9 +355,9 @@ export function NewsShowcaseSection({ cards }: { cards: NewsCard[] }) {
             <div className="space-y-4 px-5 py-5">
               <h3 className="text-2xl font-bold leading-tight text-white">{card.title}</h3>
               <p className="text-sm leading-6 text-white/55">{card.excerpt}</p>
-              <div className="flex items-center justify-between text-sm text-white/40">
+              <div className="flex items-center justify-between text-sm text-white/70">
                 <span>{card.date}</span>
-                <span className="rounded-full border border-white/10 px-3 py-2">
+                <span className="rounded-full border border-white/30 px-3 py-2 text-white/85">
                   Voir sur X
                 </span>
               </div>
