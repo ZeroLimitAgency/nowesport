@@ -108,7 +108,7 @@ export function HomeHero() {
           </div>
         </div>
 
-        {hasVideo ? (
+        {hasVideo && heroMedia.videoSrc ? (
           <div className="pointer-events-auto absolute bottom-6 right-5 z-10 sm:bottom-8 sm:right-8">
             {heroMedia.videoSrc ? (
               <HeroVolumeControl videoId="home-hero-video" />
