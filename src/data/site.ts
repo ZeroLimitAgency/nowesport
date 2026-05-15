@@ -18,11 +18,11 @@ export const heroMedia = {
   badge: "Direction artistique Crystal",
   title: "Une entrée plein écran, nette et vivante",
   description:
-    "La page d'accueil démarre par un hero pleine hauteur pensé pour recevoir ta vraie vidéo, avec une lecture immersive, une barre du haut minimale et un habillage rose bonbon, noir et blanc.",
+    "La page d'accueil s'ouvre sur un hero pleine hauteur, avec une lecture immersive et une direction visuelle rose bonbon, noire et blanche.",
   primaryCta: "Découvrir la boutique",
   secondaryCta: "Voir les équipes",
   helper:
-    "Quand tu voudras, on branchera ici ta vraie vidéo locale ou un média hébergé.",
+    "Vidéo immersive en arrière-plan, pensée pour poser l'identité NOW dès l'arrivée sur le site.",
   videoHref: "https://www.youtube.com/watch?v=F7VLXWSbRoE",
   videoSrc: "",
   videoEmbedSrc: "https://www.youtube.com/embed/F7VLXWSbRoE?autoplay=1&mute=1&controls=0&loop=1&playlist=F7VLXWSbRoE&modestbranding=1&rel=0",
@@ -53,9 +53,9 @@ export const collectionItems = [
     category: "Collection Crystal",
     price: "49,99 EUR",
     description:
-      "Pièce centrale du drop, pensée pour accueillir tailles, flocage, numéro et variantes plus tard.",
+      "Pièce centrale du drop, disponible avec tailles, flocage, numéro et variantes.",
     intro:
-      "Le maillot Crystal 2026 est la pièce la plus mise en avant de la boutique. Cette page sert de base pour la future vraie fiche produit.",
+      "Le maillot Crystal 2026 est la pièce phare de la boutique, présentée avec ses informations essentielles et ses options.",
     details: [
       "Déclinaison principale de la collection Crystal.",
       "Zone prévue pour les visuels, les tailles et les variantes.",
@@ -89,7 +89,7 @@ export const collectionItems = [
     details: [
       "Pièce lifestyle plus légère.",
       "Parfaite pour les shootings, contenus et activations.",
-      "Peut évoluer plus tard avec plusieurs coloris ou visuels.",
+      "Proposé en plusieurs coloris et visuels selon les collections.",
     ],
   },
   {
@@ -104,7 +104,7 @@ export const collectionItems = [
     details: [
       "Base noire signature.",
       "Pensée pour le staff, la communauté et les activations.",
-      "Peut accueillir logos, éditions limitées et futures variantes.",
+      "Disponible avec logos, éditions limitées et variantes de collection.",
     ],
   },
 ];
@@ -120,7 +120,7 @@ export const shopCollections = [
     name: "Personnalisation",
     label: "Options produit",
     description:
-      "Tailles, flocage, numéro, pseudo et variantes disponibles depuis une future fiche produit administrable.",
+      "Tailles, flocage, numéro, pseudo et variantes disponibles sur chaque fiche produit.",
   },
   {
     name: "Éditorial boutique",
@@ -166,7 +166,7 @@ export const games = [
     subtitle: "Nouveau chapitre",
     visual: "cs2",
     description:
-      "La section Counter-Strike 2 sert de base de travail pour le développement de cette branche du site.",
+      "La section Counter-Strike 2 présente l'équipe, son encadrement et ses actualités dédiées.",
     rosters: [
       {
         name: "Encadrement",
@@ -180,11 +180,11 @@ export const games = [
     subtitle: "Scène dédiée",
     visual: "rocket",
     description:
-      "La page Rocket League est prête pour accueillir un roster, des visuels et des informations plus détaillées ensuite.",
+      "La page Rocket League présente le roster, les visuels clés et les informations de la section.",
     rosters: [
       {
         name: "Section Rocket League",
-        members: ["Roster à compléter depuis le back-office"],
+        members: ["Roster officiel NOW Rocket League"],
       },
     ],
   },
@@ -194,11 +194,11 @@ export const games = [
     subtitle: "Pôle académique",
     visual: "valorant",
     description:
-      "La section Valorant sert de base structurée pour ajouter plus tard une équipe, un encadrement et des contenus dédiés.",
+      "La section Valorant met en avant l'équipe, l'encadrement et les contenus dédiés à la scène académique.",
     rosters: [
       {
         name: "Section Valorant",
-        members: ["Roster à compléter depuis le back-office"],
+        members: ["Roster officiel NOW Valorant"],
       },
     ],
   },
@@ -236,7 +236,7 @@ export const partners = [
     name: "BreakDay",
     role: "Merch",
     description:
-      "Partenaire lié à la partie textile, à l'image de marque et aux futures collaborations merch.",
+      "Partenaire lié à la partie textile, à l'image de marque et aux collaborations merch.",
     href: "#",
   },
 ];
@@ -353,7 +353,7 @@ export const legalPages = [
     title: "Conditions générales de vente",
     kicker: "Informations légales",
     intro:
-      "Cette page détaillera le cadre contractuel des ventes réalisées sur le site, du panier jusqu'à la livraison et au service après-vente.",
+      "Cette page présente le cadre contractuel des ventes réalisées sur le site, du panier jusqu'à la livraison et au service après-vente.",
     sections: [
       "Processus de commande, validation et paiement.",
       "Prix, disponibilité, personnalisation et traitement des commandes.",
