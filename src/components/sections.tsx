@@ -42,14 +42,6 @@ export function HomeHero() {
 
   return (
     <section className="relative h-[calc(100vh-6.75rem)] min-h-[42rem] overflow-hidden">
-      <a
-        href={heroMedia.videoHref}
-        target="_blank"
-        rel="noreferrer"
-        aria-label="Ouvrir la vidéo de présentation"
-        className="absolute inset-0 z-[1]"
-      />
-
       {hasVideo ? (
         heroMedia.videoEmbedSrc ? (
           <iframe
@@ -108,7 +100,7 @@ export function HomeHero() {
           </div>
         </div>
 
-        {hasVideo && heroMedia.videoSrc ? (
+        {hasVideo ? (
           <div className="pointer-events-auto absolute bottom-6 right-5 z-10 sm:bottom-8 sm:right-8">
             {heroMedia.videoSrc ? (
               <HeroVolumeControl videoId="home-hero-video" />
@@ -119,7 +111,7 @@ export function HomeHero() {
                 rel="noreferrer"
                 className="inline-flex items-center rounded-full border border-white/40 bg-black/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.12)] backdrop-blur transition hover:border-white/70"
               >
-                Activer le son
+                Voir avec le son
               </a>
             ) : null}
           </div>
