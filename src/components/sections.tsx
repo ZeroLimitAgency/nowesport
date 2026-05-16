@@ -76,7 +76,18 @@ export function HomeHero() {
 
         {hasVideo ? (
           <div className="pointer-events-auto absolute bottom-6 right-5 z-10 sm:bottom-8 sm:right-8">
-            <HeroVolumeControl videoId="home-hero-video" />
+            {heroMedia.videoSrc ? (
+              <HeroVolumeControl videoId="home-hero-video" />
+            ) : heroMedia.videoHref ? (
+              <a
+                href={heroMedia.videoHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center rounded-full border border-white/40 bg-black/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.12)] backdrop-blur transition hover:border-white/70"
+              >
+                Voir avec le son
+              </a>
+            ) : null}
           </div>
         ) : null}
       </div>
