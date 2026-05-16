@@ -38,7 +38,7 @@ export function PageIntro({
 }
 
 export function HomeHero() {
-  const hasVideo = Boolean(heroMedia.videoSrc || heroMedia.videoEmbedSrc);
+  const hasVideo = Boolean(heroMedia.videoSrc);
 
   return (
     <section className="relative h-[calc(100vh-6.75rem)] min-h-[42rem] overflow-hidden">
@@ -62,8 +62,8 @@ export function HomeHero() {
       <div className="pointer-events-none absolute inset-0 hero-grid opacity-30" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.28)_30%,rgba(5,5,5,0.08)_58%,rgba(5,5,5,0.1)_100%)]" />
 
-      <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[92rem] items-end px-5 py-8 sm:px-8 sm:py-10">
-        <div className="pointer-events-auto relative z-10 flex max-w-3xl flex-col gap-6">
+      <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[92rem] items-center justify-center px-5 py-8 sm:px-8 sm:py-10">
+        <div className="pointer-events-auto relative z-10 flex max-w-3xl flex-col items-center gap-6">
           <div className="pointer-events-auto flex flex-col gap-4 sm:flex-row">
             <Link href="/shop" className="primary-cta">
               {heroMedia.primaryCta}
@@ -76,18 +76,7 @@ export function HomeHero() {
 
         {hasVideo ? (
           <div className="pointer-events-auto absolute bottom-6 right-5 z-10 sm:bottom-8 sm:right-8">
-            {heroMedia.videoSrc ? (
-              <HeroVolumeControl videoId="home-hero-video" />
-            ) : heroMedia.videoHref ? (
-              <a
-                href={heroMedia.videoHref}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center rounded-full border border-white/40 bg-black/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white shadow-[0_0_0_1px_rgba(255,255,255,0.12)] backdrop-blur transition hover:border-white/70"
-              >
-                Voir avec le son
-              </a>
-            ) : null}
+            <HeroVolumeControl videoId="home-hero-video" />
           </div>
         ) : null}
       </div>

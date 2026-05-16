@@ -23,9 +23,11 @@ export const heroMedia = {
   secondaryCta: "Voir les équipes",
   helper:
     "Vidéo immersive en arrière-plan, pensée pour poser l'identité NOW dès l'arrivée sur le site.",
-  videoHref: "https://www.youtube.com/watch?v=F7VLXWSbRoE",
-  videoSrc: "",
-  videoEmbedSrc: "https://www.youtube.com/embed/F7VLXWSbRoE?autoplay=1&mute=1&controls=0&loop=1&playlist=F7VLXWSbRoE&modestbranding=1&rel=0",
+  videoHref: "",
+  videoSrc:
+    process.env.NEXT_PUBLIC_HERO_VIDEO_URL ||
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+  videoEmbedSrc: "",
 };
 
 export const homeHighlights = [
