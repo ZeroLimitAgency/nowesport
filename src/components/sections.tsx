@@ -43,26 +43,16 @@ export function HomeHero() {
   return (
     <section className="relative h-[calc(100vh-6.75rem)] min-h-[42rem] overflow-hidden">
       {hasVideo ? (
-        heroMedia.videoEmbedSrc ? (
-          <iframe
-            className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover"
-            src={heroMedia.videoEmbedSrc}
-            title="Vidéo de présentation NOW eSport"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            referrerPolicy="strict-origin-when-cross-origin"
-          />
-        ) : (
-          <video
-            id="home-hero-video"
-            autoPlay
-            className="absolute inset-0 h-full w-full object-cover"
-            loop
-            muted
-            playsInline
-          >
-            <source src={heroMedia.videoSrc} type="video/mp4" />
-          </video>
-        )
+        <video
+          id="home-hero-video"
+          autoPlay
+          className="absolute inset-0 h-full w-full object-cover"
+          loop
+          playsInline
+          preload="auto"
+        >
+          <source src={heroMedia.videoSrc} type="video/mp4" />
+        </video>
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(240,129,191,0.22),transparent_18%),linear-gradient(135deg,#21141b_0%,#0a0a0d_38%,#131722_100%)]" />
       )}
@@ -73,23 +63,7 @@ export function HomeHero() {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.28)_30%,rgba(5,5,5,0.08)_58%,rgba(5,5,5,0.1)_100%)]" />
 
       <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[92rem] items-end px-5 py-8 sm:px-8 sm:py-10">
-        <div className="pointer-events-none relative z-10 flex max-w-3xl flex-col gap-6">
-          <div className="inline-flex w-fit rounded-full border border-[var(--color-accent)]/35 bg-black/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-accent-soft)] backdrop-blur">
-            {heroMedia.badge}
-          </div>
-
-          <div className="space-y-4">
-            <h1 className="max-w-4xl text-5xl font-black uppercase leading-[0.88] tracking-[-0.06em] text-white sm:text-7xl xl:text-[6rem]">
-              {heroMedia.title}
-            </h1>
-            <p className="max-w-2xl text-base leading-7 text-white/72 sm:text-lg">
-              {heroMedia.description}
-            </p>
-            <p className="max-w-2xl text-sm leading-6 text-white/48">
-              {heroMedia.helper}
-            </p>
-          </div>
-
+        <div className="pointer-events-auto relative z-10 flex max-w-3xl flex-col gap-6">
           <div className="pointer-events-auto flex flex-col gap-4 sm:flex-row">
             <Link href="/shop" className="primary-cta">
               {heroMedia.primaryCta}
