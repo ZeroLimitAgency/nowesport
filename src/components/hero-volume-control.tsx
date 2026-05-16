@@ -66,7 +66,7 @@ function VolumeIcon({ muted }: { muted: boolean }) {
 
 export function HeroVolumeControl({ videoId }: { videoId?: string }) {
   const [volume, setVolume] = useState(65);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
 
   useEffect(() => {
     if (!videoId || typeof document === "undefined") {
