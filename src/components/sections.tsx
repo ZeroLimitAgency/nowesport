@@ -41,13 +41,13 @@ export function HomeHero() {
   const hasVideo = Boolean(heroMedia.videoSrc);
 
   return (
-    <section className="relative h-[calc(100vh-6.75rem)] min-h-[42rem] overflow-hidden">
+    <section className="relative h-[calc(100vh-6.75rem)] min-h-[42rem] overflow-hidden bg-black">
       {hasVideo ? (
         <video
           id="home-hero-video"
           autoPlay
           muted
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 z-0 h-full w-full object-cover"
           loop
           playsInline
           preload="auto"
@@ -55,13 +55,12 @@ export function HomeHero() {
           <source src={heroMedia.videoSrc} type="video/mp4" />
         </video>
       ) : (
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(240,129,191,0.22),transparent_18%),linear-gradient(135deg,#21141b_0%,#0a0a0d_38%,#131722_100%)]" />
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,rgba(240,129,191,0.22),transparent_18%),linear-gradient(135deg,#21141b_0%,#0a0a0d_38%,#131722_100%)]" />
       )}
 
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.16)_0%,rgba(0,0,0,0.2)_26%,rgba(0,0,0,0.68)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(233,53,133,0.24),transparent_20%),linear-gradient(120deg,rgba(255,255,255,0.05),transparent_16%,transparent_84%,rgba(255,255,255,0.05))]" />
-      <div className="pointer-events-none absolute inset-0 hero-grid opacity-30" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,5,5,0.72)_0%,rgba(5,5,5,0.28)_30%,rgba(5,5,5,0.08)_58%,rgba(5,5,5,0.1)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(0,0,0,0.15)_0%,rgba(0,0,0,0.25)_62%,rgba(0,0,0,0.68)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 z-[2] bg-[radial-gradient(circle_at_top,rgba(233,53,133,0.14),transparent_28%)]" />
+      <div className="pointer-events-none absolute inset-0 z-[3] hero-grid opacity-15" />
 
       <div className="pointer-events-none relative z-10 mx-auto flex h-full w-full max-w-[92rem] items-center justify-center px-5 py-8 sm:px-8 sm:py-10">
         <div className="pointer-events-auto relative z-10 flex max-w-3xl flex-col items-center gap-6">
