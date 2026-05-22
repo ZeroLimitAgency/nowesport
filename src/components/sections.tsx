@@ -41,7 +41,7 @@ export function HomeHero() {
   const hasVideo = Boolean(heroMedia.videoSrc);
 
   return (
-    <section className="relative h-[calc(100svh-6.75rem)] min-h-[32rem] overflow-hidden bg-black sm:min-h-[42rem]">
+    <section className="relative h-[72svh] min-h-[24rem] overflow-hidden bg-black sm:h-[calc(100svh-6.75rem)] sm:min-h-[42rem]">
       {hasVideo ? (
         <video
           id="home-hero-video"

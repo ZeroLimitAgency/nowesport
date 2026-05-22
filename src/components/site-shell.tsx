@@ -103,7 +103,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-white/8 bg-black/75 backdrop-blur-xl">
-        <div className="mx-auto grid w-full max-w-[92rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-5 py-4 sm:px-8">
+        <div className="mx-auto grid w-full max-w-[92rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-5 py-3 sm:px-8 sm:py-4">
           <Link href="/" className="flex items-center gap-3">
             <span className="logo-mark" aria-hidden="true" />
             <span className="sr-only">NOW eSport</span>
@@ -158,7 +158,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 text-white/80">
+          <div className="flex min-w-[7.75rem] items-center justify-end gap-2 text-white/80">
             <button type="button" className="icon-pill" aria-label="Rechercher">
               <SearchIcon />
             </button>
