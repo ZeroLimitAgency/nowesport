@@ -395,7 +395,7 @@ export const footerLegalLinks = legalPages.map((item) => ({
 
 export const footerSocials = [
   { label: "Instagram", href: "https://instagram.com/noww_esport" },
-  { label: "YouTube", href: "#" },
+  { label: "YouTube", href: "https://youtube.com/@now_esport?si=glCo_IRwSsMpecr9" },
   { label: "TikTok", href: "https://tiktok.com/@noww_esport" },
   { label: "X", href: "https://x.com/noww_esport" },
   { label: "Discord", href: "https://discord.gg/Etn3sSbvJc" },
