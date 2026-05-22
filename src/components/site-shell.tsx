@@ -104,7 +104,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-white/8 bg-black/75 backdrop-blur-xl">
-        <div className="mx-auto grid w-full max-w-[92rem] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-4 sm:px-8">
+        <div className="relative mx-auto grid w-full max-w-[92rem] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-4 sm:px-8">
           <Link href="/" className="flex items-center gap-3">
             <span className="logo-mark" aria-hidden="true" />
             <span className="sr-only">NOW eSport</span>
@@ -126,8 +126,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="flex justify-center xl:hidden">
-            <div className="group relative w-fit pb-3">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 xl:hidden">
+            <div className="group pointer-events-auto relative w-fit pb-3">
               <button
                 type="button"
                 aria-label="Menu"
