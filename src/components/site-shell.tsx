@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import {
   footerLegalLinks,
   footerSocials,
@@ -97,6 +98,7 @@ function ChevronIcon() {
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = navItems.filter((item) => item.href !== pathname);
 
   return (
@@ -129,7 +131,10 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 aria-label="Menu"
-                className="inline-flex min-h-[2.35rem] items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/80"
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-menu"
+                onClick={() => setIsMenuOpen((value) => !value)}
+                className="inline-flex min-h-[2.35rem] items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/80"
               >
                 <MenuIcon />
                 <span>Menu</span>
@@ -138,11 +143,15 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
               <div className="pointer-events-none absolute inset-x-[-0.5rem] top-full h-5 group-hover:pointer-events-auto group-focus-within:pointer-events-auto" />
 
-              <div className="pointer-events-none absolute left-1/2 top-[calc(100%+0.65rem)] z-30 hidden min-w-[15rem] -translate-x-1/2 rounded-[1.4rem] border border-white/10 bg-[#0c0b0e]/96 p-3 shadow-[0_25px_80px_rgba(0,0,0,0.35)] group-hover:block group-hover:pointer-events-auto group-focus-within:block group-focus-within:pointer-events-auto">
+              <div
+                id="mobile-menu"
+                className={`pointer-events-none absolute left-1/2 top-[calc(100%+0.65rem)] z-30 min-w-[15rem] -translate-x-1/2 rounded-[1.4rem] border border-white/10 bg-[#0c0b0e]/96 p-3 shadow-[0_25px_80px_rgba(0,0,0,0.35)] ${isMenuOpen ? "block pointer-events-auto" : "hidden"} group-hover:block group-hover:pointer-events-auto group-focus-within:block group-focus-within:pointer-events-auto`}
+              >
                 {menuItems.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={() => setIsMenuOpen(false)}
                     className="block rounded-xl px-3 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white/68 transition hover:bg-white/[0.04] hover:text-white"
                   >
                     {item.label}
