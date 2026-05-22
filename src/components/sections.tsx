@@ -41,12 +41,13 @@ export function HomeHero() {
   const hasVideo = Boolean(heroMedia.videoSrc);
 
   return (
-    <section className="relative h-[calc(100vh-6.75rem)] min-h-[42rem] overflow-hidden bg-black">
+    <section className="relative h-[calc(100svh-6.75rem)] min-h-[32rem] overflow-hidden bg-black sm:min-h-[42rem]">
       {hasVideo ? (
         <video
           id="home-hero-video"
           autoPlay
           muted
+          defaultMuted
           className="absolute inset-0 z-0 h-full w-full object-cover"
           loop
           playsInline

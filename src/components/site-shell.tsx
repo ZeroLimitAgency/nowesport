@@ -100,11 +100,10 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuItems = navItems.filter((item) => item.href !== pathname);
-
   return (
     <>
       <header className="sticky top-0 z-40 border-b border-white/8 bg-black/75 backdrop-blur-xl">
-        <div className="relative mx-auto grid w-full max-w-[92rem] grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-4 sm:px-8">
+        <div className="mx-auto grid w-full max-w-[92rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-5 py-4 sm:px-8">
           <Link href="/" className="flex items-center gap-3">
             <span className="logo-mark" aria-hidden="true" />
             <span className="sr-only">NOW eSport</span>
@@ -126,26 +125,24 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 xl:hidden">
-            <div className="group pointer-events-auto relative w-fit pb-3">
+          <div className="flex justify-center xl:hidden">
+            <div className="group relative w-fit pb-3">
               <button
                 type="button"
                 aria-label="Menu"
                 aria-expanded={isMenuOpen}
                 aria-controls="mobile-menu"
                 onClick={() => setIsMenuOpen((value) => !value)}
-                className="inline-flex min-h-[2.35rem] items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 text-xs font-semibold uppercase tracking-[0.18em] text-white/80"
+                className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 shadow-[0_12px_35px_rgba(0,0,0,0.35)]"
               >
                 <MenuIcon />
                 <span>Menu</span>
                 <ChevronIcon />
               </button>
 
-              <div className="pointer-events-none absolute inset-x-[-0.5rem] top-full h-5 group-hover:pointer-events-auto group-focus-within:pointer-events-auto" />
-
               <div
                 id="mobile-menu"
-                className={`pointer-events-none absolute left-1/2 top-[calc(100%+0.65rem)] z-30 min-w-[15rem] -translate-x-1/2 rounded-[1.4rem] border border-white/10 bg-[#0c0b0e]/96 p-3 shadow-[0_25px_80px_rgba(0,0,0,0.35)] ${isMenuOpen ? "block pointer-events-auto" : "hidden"} group-hover:block group-hover:pointer-events-auto group-focus-within:block group-focus-within:pointer-events-auto`}
+                className={`absolute left-1/2 top-[calc(100%+0.5rem)] z-30 min-w-[15rem] -translate-x-1/2 rounded-[1.4rem] border border-white/10 bg-[#0c0b0e]/96 p-3 shadow-[0_25px_80px_rgba(0,0,0,0.35)] ${isMenuOpen ? "block" : "hidden"}`}
               >
                 {menuItems.map((item) => (
                   <Link
@@ -161,7 +158,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-white/80">
+          <div className="flex items-center justify-end gap-2 text-white/80">
             <button type="button" className="icon-pill" aria-label="Rechercher">
               <SearchIcon />
             </button>
