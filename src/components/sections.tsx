@@ -47,7 +47,6 @@ export function HomeHero() {
           id="home-hero-video"
           autoPlay
           muted
-          defaultMuted
           className="absolute inset-0 z-0 h-full w-full object-cover"
           loop
           playsInline

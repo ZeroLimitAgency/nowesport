@@ -2,122 +2,44 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import {
-  footerLegalLinks,
-  footerSocials,
-  navItems,
-  promoItems,
-} from "@/data/site";
-
-function SearchIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="m16 16 4 4"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-      <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8" />
-      <path
-        d="M5.5 19c1.4-3 3.567-4.5 6.5-4.5S17.1 16 18.5 19"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
-
-function BagIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-      <path
-        d="M6 9h12l-1 10H7L6 9Z"
-        stroke="currentColor"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M9 9a3 3 0 1 1 6 0"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
-
-function MenuIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-      <path
-        d="M4 7h16"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M4 12h16"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.8"
-      />
-      <path
-        d="M4 17h16"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
-
-function ChevronIcon() {
-  return (
-    <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-      <path
-        d="m7 10 5 5 5-5"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.8"
-      />
-    </svg>
-  );
-}
+import { useEffect, useState } from "react";
+import { footerLegalLinks, footerSocials, navItems, promoItems } from "@/data/site";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuItems = navItems.filter((item) => item.href !== pathname);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isLight, setIsLight] = useState(false);
+  const [language, setLanguage] = useState<"fr" | "en">("fr");
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 48);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = isLight ? "light" : "dark";
+  }, [isLight]);
+
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-white/8 bg-black/75 backdrop-blur-xl">
-        <div className="mx-auto grid w-full max-w-[92rem] grid-cols-[auto_1fr_auto] items-center gap-3 px-5 py-3 sm:px-8 sm:py-4">
+      <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${isScrolled ? "bg-black/95 border-b border-white/10 backdrop-blur-sm" : "bg-white/[0.12] border-b border-white/20 backdrop-blur-2xl"}`}>
+        <div className="mx-auto flex w-full max-w-[92rem] items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link href="/" className="flex items-center gap-3">
             <span className="logo-mark" aria-hidden="true" />
-            <span className="sr-only">NOW eSport</span>
+            <span className="text-xs font-bold uppercase tracking-[0.22em] text-white/85">NOW eSport</span>
           </Link>
 
-          <nav className="hidden items-center justify-center gap-7 text-sm font-semibold uppercase tracking-[0.18em] text-white/68 xl:flex">
+          <nav className="hidden items-center gap-2 rounded-full border border-white/20 bg-black/20 px-2 py-1 lg:flex">
             {navItems.map((item) => {
               const active = pathname === item.href;
-
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`transition hover:text-white ${active ? "text-white" : ""}`}
+                  className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] ${active ? "bg-white text-black" : "text-white/78 hover:text-white"}`}
                 >
                   {item.label}
                 </Link>
@@ -125,129 +47,56 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="flex justify-center xl:hidden">
-            <div className="group relative w-fit pb-3">
-              <button
-                type="button"
-                aria-label="Menu"
-                aria-expanded={isMenuOpen}
-                aria-controls="mobile-menu"
-                onClick={() => setIsMenuOpen((value) => !value)}
-                className="inline-flex min-h-[2.5rem] items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.06] px-5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90 shadow-[0_12px_35px_rgba(0,0,0,0.35)]"
-              >
-                <MenuIcon />
-                <span>Menu</span>
-                <ChevronIcon />
-              </button>
-
-              <div
-                id="mobile-menu"
-                className={`absolute left-1/2 top-[calc(100%+0.5rem)] z-30 min-w-[15rem] -translate-x-1/2 rounded-[1.4rem] border border-white/10 bg-[#0c0b0e]/96 p-3 shadow-[0_25px_80px_rgba(0,0,0,0.35)] ${isMenuOpen ? "block" : "hidden"}`}
-              >
-                {menuItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="block rounded-xl px-3 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-white/68 transition hover:bg-white/[0.04] hover:text-white"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex min-w-[7.75rem] items-center justify-end gap-2 text-white/80">
-            <button type="button" className="icon-pill" aria-label="Rechercher">
-              <SearchIcon />
-            </button>
-            <Link href="/compte" className="icon-pill" aria-label="Profil client">
-              <UserIcon />
-            </Link>
-            <Link href="/shop" className="icon-pill" aria-label="Panier">
-              <BagIcon />
-            </Link>
-          </div>
+          <button type="button" onClick={() => setIsMenuOpen((v) => !v)} className="rounded-full border border-white/20 bg-black/20 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white/85 lg:hidden">Menu</button>
         </div>
 
-        <div className="border-t border-b border-white/6 py-3">
-          <div className="marquee">
-            <div className="marquee-track">
-              {[...promoItems, ...promoItems, ...promoItems].map((item, index) => (
-                <span key={`${item}-${index}`} className="marquee-item">
-                  {item}
-                </span>
-              ))}
-            </div>
+        {isMenuOpen ? (
+          <div className="mx-auto flex w-full max-w-[92rem] flex-wrap gap-2 px-5 pb-4 sm:px-8 lg:hidden">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href} onClick={() => setIsMenuOpen(false)} className="rounded-full border border-white/20 bg-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/80">
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        ) : null}
+
+        <div className={`marquee py-2 ${isScrolled ? "border-t border-white/10" : "border-t border-white/18"}`}>
+          <div className="marquee-track">
+            {[...promoItems, ...promoItems].map((item, index) => (
+              <span key={`${item}-${index}`} className="marquee-item">{item}</span>
+            ))}
           </div>
         </div>
       </header>
 
       {children}
 
-      <footer className="relative z-10 mx-auto w-full max-w-[92rem] bg-[var(--color-bg)] px-5 pb-10 pt-10 sm:px-8">
-        <div className="rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,#120f14_0%,#070708_100%)] px-6 py-7 sm:px-8 sm:py-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
-            <div>
-              <p className="section-kicker">Newsletter</p>
-              <h2 className="section-title">Rejoins notre mailing list</h2>
-              <p className="mt-3 max-w-2xl text-base leading-7 text-white/55">
-                Reçois les nouveaux drops, les prochaines activations et les
-                annonces roster sans dépendre d&apos;une plateforme fermée.
-              </p>
-            </div>
+      <footer className="mx-auto w-full max-w-[92rem] px-5 pb-10 pt-12 sm:px-8">
+        <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,#0f1016_0%,#060608_100%)] p-7 sm:p-9">
+          <h2 className="text-3xl font-black uppercase tracking-[-0.04em] sm:text-5xl">Construisons la prochaine saison.</h2>
+          <p className="mt-4 max-w-2xl text-white/60">Newsletter, drops, calendriers et annonces roster dans un seul flux.</p>
 
-            <form className="flex w-full max-w-xl flex-col gap-3 sm:flex-row">
-              <input
-                type="email"
-                placeholder="Adresse e-mail"
-                className="min-h-14 flex-1 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
-              />
-              <button
-                type="submit"
-                className="min-h-14 rounded-full bg-white px-6 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:scale-[1.01]"
-              >
-                S&apos;inscrire
-              </button>
-            </form>
+          <div className="mt-8 flex flex-wrap gap-3 text-sm">
+            {footerSocials.map((item) => (
+              <a key={item.label} href={item.href} target="_blank" rel="noreferrer" className="rounded-full border border-white/10 px-4 py-2 text-white/68 hover:text-white">{item.label}</a>
+            ))}
           </div>
 
-          <div className="mt-10 flex flex-col gap-6 border-t border-white/8 pt-5 text-sm text-white/38 xl:flex-row xl:items-center xl:justify-between">
-            <p>© 2026 NOW eSport. Commerce électronique conçu sur un front maison.</p>
-
-            <div className="group relative w-fit pb-3">
-              <button
-                type="button"
-                className="rounded-full border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/60 transition hover:border-white/20 hover:text-white"
-              >
-                Conditions générales et politiques
-              </button>
-              <div className="pointer-events-none absolute inset-x-[-0.5rem] bottom-full h-5 group-hover:pointer-events-auto group-focus-within:pointer-events-auto" />
-              <div className="pointer-events-none absolute bottom-[calc(100%+0.65rem)] left-1/2 z-20 hidden min-w-[20rem] -translate-x-1/2 rounded-[1.4rem] border border-white/10 bg-[#0c0b0e]/95 p-3 text-left shadow-[0_25px_80px_rgba(0,0,0,0.35)] group-hover:block group-hover:pointer-events-auto group-focus-within:block group-focus-within:pointer-events-auto">
-                {footerLegalLinks.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="block rounded-xl px-3 py-2 text-sm text-white/62 transition hover:bg-white/[0.04] hover:text-white"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
+          <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-white/10 pt-5 text-sm text-white/45">
+            <button type="button" onClick={() => setIsLight((v) => !v)} className="rounded-full border border-white/15 px-4 py-2 text-white/70 hover:text-white">
+              {isLight ? "Mode sombre" : "Mode clair"}
+            </button>
+            <div className="flex rounded-full border border-white/15 p-1">
+              <button type="button" onClick={() => setLanguage("fr")} className={`rounded-full px-3 py-1.5 ${language === "fr" ? "bg-white text-black" : "text-white/75"}`}>FR</button>
+              <button type="button" onClick={() => setLanguage("en")} className={`rounded-full px-3 py-1.5 ${language === "en" ? "bg-white text-black" : "text-white/75"}`}>EN</button>
             </div>
+          </div>
 
-            <div className="flex flex-wrap items-center gap-5">
-              {footerSocials.map((item) => (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="transition hover:text-white/70"
-                >
-                  {item.label}
-                </a>
+          <div className="mt-6 text-sm text-white/45">
+            <p>© 2026 NOW eSport.</p>
+            <div className="mt-3 flex flex-wrap gap-4">
+              {footerLegalLinks.map((item) => (
+                <Link key={item.href} href={item.href} className="hover:text-white/70">{item.label}</Link>
               ))}
             </div>
           </div>
