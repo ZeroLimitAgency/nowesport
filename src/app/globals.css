@@ -276,3 +276,15 @@ input {
     letter-spacing: 0.14em;
   }
 }
+
+:root[data-theme="light"] {
+  --background: #f2f4f8;
+  --foreground: #101114;
+  --color-bg: #f2f4f8;
+  --color-text: #101114;
+}
+
+:root[data-theme="light"] body {
+  background: linear-gradient(180deg, #f7f8fb 0%, #edf0f5 100%);
+  color: #101114;
+}
