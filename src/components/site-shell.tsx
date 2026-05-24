@@ -68,7 +68,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               <span key={`${item}-${index}`} className="marquee-item">{item}</span>
             ))}
           </div>
-        </div>
+        ) : null}
       </header>
 
       {children}
