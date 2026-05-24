@@ -89,3 +89,5 @@ Le schema de base est ici :
 
 - [supabase/schema.sql](./supabase/schema.sql)
 - [supabase/README.md](./supabase/README.md)
+
+- Redeploy trigger: sync latest shell/hero fixes.
