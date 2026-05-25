@@ -36,12 +36,12 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           isScrolled
-            ? "border-b border-white/10 bg-black"
-            : "border-b border-white/20 bg-white/[0.08] backdrop-blur-2xl"
+            ? isLight ? "border-b border-black/10 bg-white/95" : "border-b border-white/10 bg-black"
+            : isLight ? "border-b border-black/15 bg-white/80 backdrop-blur-2xl" : "border-b border-white/20 bg-white/[0.08] backdrop-blur-2xl"
         }`}
       >
-        <div className="mx-auto flex w-full max-w-[92rem] items-center justify-between px-5 py-5 sm:px-8">
-          <Link href="/" className="flex items-center gap-3 text-white">
+        <div className={`mx-auto flex w-full max-w-[92rem] items-center justify-between px-5 py-5 sm:px-8 ${isLight ? "text-black" : "text-white"}`}>
+          <Link href="/" className={`flex items-center gap-3 ${isLight ? "text-black" : "text-white"}`}>
             <span className="logo-mark" aria-hidden="true" />
             <span className="text-xs font-bold uppercase tracking-[0.28em] text-white/90">
               NOW ESPORT
@@ -56,7 +56,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={`text-sm font-semibold uppercase tracking-[0.16em] transition ${
-                    active ? "text-white" : "text-white/74 hover:text-white"
+                    active ? (isLight ? "text-black" : "text-white") : (isLight ? "text-black/70 hover:text-black" : "text-white/74 hover:text-white")
                   }`}
                 >
                   {item.label}
@@ -68,20 +68,20 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setIsMenuOpen((v) => !v)}
-            className="rounded-full border border-white/20 bg-black/25 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-white lg:hidden"
+            className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] lg:hidden ${isLight ? "border border-black/20 bg-white text-black" : "border border-white/20 bg-black/25 text-white"}`}
           >
             Menu
           </button>
         </div>
 
         {isMenuOpen && (
-          <div className="mx-auto flex w-full max-w-[92rem] flex-wrap gap-4 border-t border-white/10 px-5 pb-4 pt-4 sm:px-8 lg:hidden">
+          <div className={`mx-auto flex w-full max-w-[92rem] flex-wrap gap-4 px-5 pb-4 pt-4 sm:px-8 lg:hidden ${isLight ? "border-t border-black/10" : "border-t border-white/10"}`}>
             {displayNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsMenuOpen(false)}
-                className="text-xs font-semibold uppercase tracking-[0.16em] text-white/82"
+                className={`text-xs font-semibold uppercase tracking-[0.16em] ${isLight ? "text-black/80" : "text-white/82"}`}
               >
                 {item.label}
               </Link>
