@@ -1,3 +1,4 @@
+import Image from "next/image";
 import {
   NewsShowcaseSection,
   PartnersShowcaseSection,
@@ -30,10 +31,10 @@ export default async function Home() {
           loop
           playsInline
           preload="auto"
-          poster="/media/jersey.jpeg"
+          poster="/media/now-academy.mp4"
           className="absolute inset-0 h-full w-full object-cover"
         >
-          <source src={process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "/media/hero.mp4"} type="video/mp4" />
+          <source src={process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "/media/now-academy.mp4"} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.2)_58%,rgba(0,0,0,0.55)_100%)]" />
 
@@ -51,8 +52,15 @@ export default async function Home() {
       </section>
 
       <div className="space-y-4 py-10 sm:py-14">
-        <ShopGridSection items={products} productOptions={productOptions} shopCollections={shopCollections} />
-        <TeamsShowcaseSection gamesData={games} teamBlocks={getTeamSupportBlocks()} />
+        <ShopGridSection
+          items={products}
+          productOptions={productOptions}
+          shopCollections={shopCollections}
+        />
+        <TeamsShowcaseSection
+          gamesData={games}
+          teamBlocks={getTeamSupportBlocks()}
+        />
         <PartnersShowcaseSection partnersData={partners} />
         <NewsShowcaseSection cards={news} />
       </div>
