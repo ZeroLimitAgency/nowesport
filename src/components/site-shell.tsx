@@ -23,6 +23,14 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     document.documentElement.dataset.theme = isLight ? "light" : "dark";
   }, [isLight]);
 
+  const displayNavItems = navItems.map((item) => ({
+    ...item,
+    label:
+      language === "en"
+        ? ({"Accueil":"Home","Boutique":"Shop","Équipes":"Teams","Partenaires":"Partners","Événements":"Events","News":"News"}[item.label] ?? item.label)
+        : item.label,
+  }));
+
   return (
     <>
       <header
@@ -41,7 +49,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <nav className="hidden items-center gap-10 lg:flex">
-            {navItems.map((item) => {
+            {displayNavItems.map((item) => {
               const active = pathname === item.href;
               return (
                 <Link
@@ -68,7 +76,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
         {isMenuOpen && (
           <div className="mx-auto flex w-full max-w-[92rem] flex-wrap gap-4 border-t border-white/10 px-5 pb-4 pt-4 sm:px-8 lg:hidden">
-            {navItems.map((item) => (
+            {displayNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -86,8 +94,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
       <footer className="mx-auto w-full max-w-[92rem] px-5 pb-10 pt-12 sm:px-8">
         <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,#0f1016_0%,#060608_100%)] p-7 sm:p-9">
-          <h2 className="text-3xl font-black uppercase tracking-[-0.04em] sm:text-5xl">Construisons la prochaine saison.</h2>
-          <p className="mt-4 max-w-2xl text-white/60">Newsletter, drops, calendriers et annonces roster dans un seul flux.</p>
+          <h2 className="text-3xl font-black uppercase tracking-[-0.04em] sm:text-5xl">{language === "fr" ? "NOW eSport" : "NOW eSport"}</h2>
+          <p className="mt-4 max-w-2xl text-white/60">{language === "fr" ? "Actus, boutique et équipes." : "News, shop and teams."}</p>
 
           <div className="mt-8 flex flex-wrap gap-3 text-sm">
             {footerSocials.map((item) => (
