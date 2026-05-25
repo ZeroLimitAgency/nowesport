@@ -26,8 +26,8 @@ export default async function Home() {
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <section className="relative min-h-[100svh] overflow-hidden">
         <Image
-          src="/media/jersey.jpeg"
-          alt="Visuel maillot NOW eSport 2026"
+          src="/media/now-academy.mp4"
+          alt="Trailer NOW Academy"
           fill
           priority
           className="object-cover"
