@@ -4,11 +4,6 @@ import {
   ShopGridSection,
   TeamsShowcaseSection,
 } from "@/components/content-sections";
-import {
-  HomeHero,
-  HomeHighlights,
-  ShopBanner,
-} from "@/components/sections";
 import { productOptions, shopCollections } from "@/data/site";
 import {
   getPublicGames,
@@ -28,21 +23,39 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      <div className="absolute inset-x-0 top-0 -z-10 h-[32rem] bg-[radial-gradient(circle_at_top,#5d1237_0%,rgba(93,18,55,0.14)_32%,transparent_65%)]" />
-      <HomeHero />
-      <HomeHighlights />
-      <ShopBanner />
-      <ShopGridSection
-        items={products}
-        productOptions={productOptions}
-        shopCollections={shopCollections}
-      />
-      <TeamsShowcaseSection
-        gamesData={games}
-        teamBlocks={getTeamSupportBlocks()}
-      />
-      <PartnersShowcaseSection partnersData={partners} />
-      <NewsShowcaseSection cards={news} />
+      <section className="relative min-h-[100svh] overflow-hidden">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/media/jersey.jpeg"
+          className="absolute inset-0 h-full w-full object-cover"
+        >
+          <source src={process.env.NEXT_PUBLIC_HERO_VIDEO_URL || "/media/hero.mp4"} type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.2)_58%,rgba(0,0,0,0.55)_100%)]" />
+
+        <div className="absolute bottom-7 left-5 z-10 flex items-center gap-8 sm:bottom-10 sm:left-8">
+          {[
+            "GENESIS",
+            "leo express",
+            "tp-link",
+          ].map((sponsor) => (
+            <span key={sponsor} className="text-xl font-semibold tracking-wide text-white/88 sm:text-3xl">
+              {sponsor}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <div className="space-y-4 py-10 sm:py-14">
+        <ShopGridSection items={products} productOptions={productOptions} shopCollections={shopCollections} />
+        <TeamsShowcaseSection gamesData={games} teamBlocks={getTeamSupportBlocks()} />
+        <PartnersShowcaseSection partnersData={partners} />
+        <NewsShowcaseSection cards={news} />
+      </div>
     </main>
   );
 }

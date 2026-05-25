@@ -116,19 +116,19 @@ export const shopCollections = [
     name: "Collection Crystal",
     label: "Drop principal",
     description:
-      "La collection mise en avant dans le thème exporté, centrée sur le maillot 2026 et sa lecture premium.",
+      "Maillot officiel et déclinaisons.",
   },
   {
     name: "Personnalisation",
     label: "Options produit",
     description:
-      "Tailles, flocage, numéro, pseudo et variantes disponibles sur chaque fiche produit.",
+      "Tailles, flocage et options.",
   },
   {
     name: "Éditorial boutique",
     label: "Mise en avant",
     description:
-      "Une bannière forte, un call to action clair, puis des cartes de produits et de collections faciles à mettre à jour.",
+      "Sélection boutique.",
   },
 ];
 
@@ -210,12 +210,12 @@ export const teamSupportBlocks = [
   {
     title: "NOW Team",
     description:
-      "Le pôle staff regroupe la direction, le management, la production et l'encadrement des différentes sections.",
+      "Direction, management et staff.",
   },
   {
     title: "Legends",
     description:
-      "Cette page archive les profils marquants passés par la structure, avec la même logique de cartes et de rosters.",
+      "Anciens joueurs et moments marquants.",
   },
 ];
 
