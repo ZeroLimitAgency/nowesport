@@ -48,8 +48,15 @@ export default async function Home() {
       </section>
 
       <div className="space-y-4 py-10 sm:py-14">
-        <ShopGridSection items={products} productOptions={productOptions} shopCollections={shopCollections} />
-        <TeamsShowcaseSection gamesData={games} teamBlocks={getTeamSupportBlocks()} />
+        <ShopGridSection
+          items={products}
+          productOptions={productOptions}
+          shopCollections={shopCollections}
+        />
+        <TeamsShowcaseSection
+          gamesData={games}
+          teamBlocks={getTeamSupportBlocks()}
+        />
         <PartnersShowcaseSection partnersData={partners} />
         <NewsShowcaseSection cards={news} />
       </div>
