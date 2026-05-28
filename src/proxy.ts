@@ -122,14 +122,6 @@ const maintenanceHtml = `<!doctype html>
         text-transform: uppercase;
       }
 
-      .hint {
-        color: rgba(255, 255, 255, 0.42);
-        font-size: 0.75rem;
-        font-weight: 800;
-        letter-spacing: 0.22em;
-        text-transform: uppercase;
-      }
-
       @media (max-width: 640px) {
         body {
           padding: 4.5rem 1rem;
@@ -155,7 +147,6 @@ const maintenanceHtml = `<!doctype html>
       </p>
       <div class="actions">
         <a href="${discordTicketUrl}" target="_blank" rel="noreferrer">Nous contacter</a>
-        <span class="hint">Ouvrir un ticket Discord</span>
       </div>
     </main>
   </body>

@@ -36,9 +36,6 @@ export default function MaintenancePage() {
           >
             Nous contacter
           </a>
-          <span className="text-xs font-bold uppercase tracking-[0.22em] text-white/42">
-            Ouvrir un ticket Discord
-          </span>
         </div>
       </section>
     </main>
