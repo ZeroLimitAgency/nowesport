@@ -173,7 +173,7 @@ export async function POST(request: Request) {
         await createAdminClient()
           .from("orders")
           .update({
-            status: "cancelled",
+            status: "refunded",
             payment_status: "failed",
           })
           .eq("stripe_checkout_session_id", session.id);

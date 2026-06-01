@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-type AuthMode = "login" | "signup";
+type AuthMode = "login" | "signup" | "reset";
 type OAuthProvider = "google" | "apple";
 
 function ProviderButton({
@@ -30,15 +30,21 @@ function ProviderButton({
 export function AuthPanel({
   userEmail,
   hasUser,
+  nextPath = "/compte",
 }: {
   userEmail?: string;
   hasUser: boolean;
+  nextPath?: string;
 }) {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  function authCallback(origin: string) {
+    return `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
+  }
 
   async function handleOAuth(provider: OAuthProvider) {
     setIsLoading(true);
@@ -50,7 +56,7 @@ export function AuthPanel({
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${origin}/auth/callback?next=/compte`,
+          redirectTo: authCallback(origin),
         },
       });
 
@@ -74,6 +80,20 @@ export function AuthPanel({
 
     try {
       const supabase = createClient();
+      const origin = window.location.origin;
+
+      if (mode === "reset") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${origin}/auth/callback?next=/auth/update-password`,
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        setMessage("E-mail de réinitialisation envoyé si le compte existe.");
+        return;
+      }
 
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({
@@ -85,16 +105,15 @@ export function AuthPanel({
           throw error;
         }
 
-        window.location.reload();
+        window.location.href = nextPath;
         return;
       }
 
-      const origin = window.location.origin;
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${origin}/auth/callback?next=/compte`,
+          emailRedirectTo: authCallback(origin),
         },
       });
 
@@ -127,7 +146,7 @@ export function AuthPanel({
         throw error;
       }
 
-      window.location.reload();
+      window.location.href = "/login";
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Impossible de se déconnecter.",
@@ -144,8 +163,8 @@ export function AuthPanel({
         </p>
         <p className="mt-4 text-lg text-white/82">{userEmail}</p>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/58">
-          La connexion Supabase est active. On pourra maintenant brancher
-          l&apos;espace client, les commandes et ensuite Stripe sur cette base.
+          Ta session Supabase est active pour l&apos;espace client, le panier et
+          le suivi de commandes.
         </p>
         <button
           type="button"
@@ -170,8 +189,8 @@ export function AuthPanel({
           Connexion ou inscription
         </h2>
         <p className="mt-3 max-w-xl text-sm leading-6 text-white/58">
-          Tu peux te connecter avec ton adresse e-mail, ou créer un compte avec
-          e-mail, Google ou Apple selon les providers activés dans Supabase.
+          Connecte-toi avec ton adresse e-mail, crée un compte, ou utilise les
+          providers activés dans Supabase.
         </p>
 
         <div className="mt-6 grid gap-3">
@@ -186,37 +205,28 @@ export function AuthPanel({
             disabled={isLoading}
           />
         </div>
-
-        <p className="mt-5 text-sm leading-6 text-white/42">
-          Si Google ou Apple ne répondent pas encore, il faudra simplement les
-          activer dans le dashboard Supabase avant qu&apos;ils fonctionnent.
-        </p>
       </div>
 
       <div className="rounded-[1.6rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-6">
         <div className="flex flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => setMode("login")}
-            className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
-              mode === "login"
-                ? "bg-white text-black"
-                : "border border-white/10 bg-white/[0.03] text-white/70"
-            }`}
-          >
-            Se connecter
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("signup")}
-            className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
-              mode === "signup"
-                ? "bg-white text-black"
-                : "border border-white/10 bg-white/[0.03] text-white/70"
-            }`}
-          >
-            Pas de compte ? S&apos;inscrire
-          </button>
+          {[
+            ["login", "Se connecter"],
+            ["signup", "S'inscrire"],
+            ["reset", "Mot de passe oublié"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setMode(value as AuthMode)}
+              className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
+                mode === value
+                  ? "bg-white text-black"
+                  : "border border-white/10 bg-white/[0.03] text-white/70"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
@@ -228,20 +238,25 @@ export function AuthPanel({
             placeholder="Adresse e-mail"
             className="min-h-14 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
           />
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Mot de passe"
-            className="min-h-14 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
-          />
+          {mode !== "reset" ? (
+            <input
+              type="password"
+              required
+              minLength={8}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Mot de passe"
+              className="min-h-14 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
+            />
+          ) : null}
           <button type="submit" disabled={isLoading} className="primary-cta w-fit">
             {isLoading
               ? "Chargement..."
               : mode === "login"
                 ? "Se connecter"
-                : "Créer mon compte"}
+                : mode === "signup"
+                  ? "Créer mon compte"
+                  : "Envoyer le lien"}
           </button>
         </form>
 
