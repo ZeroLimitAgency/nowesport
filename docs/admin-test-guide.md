@@ -27,9 +27,18 @@ where email = 'admin@nowesport.org';
 3. Ouvre `/admin`.
 4. Un utilisateur non-admin doit être renvoyé vers `/compte`.
 
-## 3. Activer la preview pendant la maintenance
+## 3. Tester maintenance, accès admin et preview
 
-### Depuis un compte admin
+### Connexion admin depuis la maintenance
+
+1. Active la maintenance via `/admin/settings` ou `NEXT_PUBLIC_MAINTENANCE_MODE=on` si la table `site_settings` n'est pas disponible.
+2. Ouvre `/` sans session : la page maintenance doit s'afficher.
+3. Clique sur `Connexion admin` : le lien doit ouvrir `/login?next=/`.
+4. Connecte-toi avec un profil `role = 'admin'` : tu dois revenir sur `/` et voir le vrai site malgré la maintenance.
+5. Ouvre `/admin/settings` pour désactiver la maintenance si besoin.
+6. Recommence avec un utilisateur non-admin : il doit rester bloqué sur la page maintenance après la redirection vers `/`.
+
+### Preview cookie existante
 
 1. Connecte-toi avec un profil `role = 'admin'`.
 2. Ouvre `/api/admin/preview?next=/`.
