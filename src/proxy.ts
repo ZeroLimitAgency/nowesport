@@ -1,6 +1,9 @@
 import type { NextRequest } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { updateSession } from "@/lib/supabase/middleware";
 
 const discordTicketUrl = "https://discord.gg/K5AxWfD7tc";
+const previewCookieName = "now-preview";
 
 const maintenanceHtml = `<!doctype html>
 <html lang="fr">
@@ -157,7 +160,66 @@ const sharedHeaders = {
   "X-Robots-Tag": "noindex, nofollow",
 };
 
-export function proxy(request: NextRequest) {
+const publicDuringMaintenance = [
+  "/api",
+  "/auth/callback",
+  "/login",
+  "/admin/preview",
+  "/maintenance",
+  "/favicon.ico",
+];
+
+function isPublicDuringMaintenance(pathname: string) {
+  return publicDuringMaintenance.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
+function isStaticAsset(pathname: string) {
+  return pathname.startsWith("/_next/") || pathname.startsWith("/media/");
+}
+
+async function isMaintenanceEnabled() {
+  if (
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  ) {
+    try {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+        { auth: { persistSession: false } },
+      );
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "maintenance_mode")
+        .maybeSingle();
+
+      if (typeof data?.value === "boolean") {
+        return data.value;
+      }
+    } catch {
+      // fallback env below
+    }
+  }
+
+  return process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== "off";
+}
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const hasPreview = request.cookies.get(previewCookieName)?.value === "1";
+
+  if (
+    !(await isMaintenanceEnabled()) ||
+    hasPreview ||
+    isPublicDuringMaintenance(pathname) ||
+    isStaticAsset(pathname)
+  ) {
+    return updateSession(request);
+  }
+
   if (request.method === "HEAD") {
     return new Response(null, {
       status: 503,

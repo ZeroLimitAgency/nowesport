@@ -1,10 +1,11 @@
 export const navItems = [
   { label: "Accueil", href: "/" },
   { label: "Boutique", href: "/shop" },
-  { label: "Équipes", href: "/teams" },
+  { label: "Roster", href: "/roster" },
   { label: "Partenaires", href: "/partners" },
   { label: "Événements", href: "/events" },
-  { label: "News", href: "/news" },
+  { label: "Panier", href: "/cart" },
+  { label: "Compte", href: "/compte" },
 ];
 
 export const promoItems = [
@@ -168,7 +169,7 @@ export const games = [
     subtitle: "Nouveau chapitre",
     visual: "cs2",
     description:
-      "La section Counter-Strike 2 présente l'équipe, son encadrement et ses actualités dédiées.",
+      "La section Counter-Strike 2 présente l'équipe, son encadrement et ses contenus dédiés.",
     rosters: [
       {
         name: "Encadrement",
@@ -262,33 +263,6 @@ export const events = [
   },
 ];
 
-export const newsCards = [
-  {
-    title: "Major 1 : gros heat pour Chrisc",
-    excerpt:
-      "Le premier gros temps fort compétitif du moment, avec une mise en avant plus nette du joueur sur la scène.",
-    tag: "Compétition",
-    date: "17/04/2026",
-    href: "#",
-  },
-  {
-    title: "Le projet CS2 continue, plus net que jamais",
-    excerpt:
-      "La structure poursuit son travail sur Counter-Strike 2 avec une direction plus claire et plus ambitieuse.",
-    tag: "Roster",
-    date: "13/04/2026",
-    href: "#",
-  },
-  {
-    title: "Le roster académique est officiellement révélé",
-    excerpt:
-      "Une nouvelle vague de profils rejoint l'écosystème NOW pour préparer la suite dans un cadre plus construit.",
-    tag: "Académie",
-    date: "19/03/2026",
-    href: "#",
-  },
-];
-
 export const legalPages = [
   {
     slug: "politique-de-confidentialite",
@@ -297,7 +271,7 @@ export const legalPages = [
     intro:
       "Cette page présentera la manière dont les données personnelles sont collectées, traitées, stockées et protégées sur le site.",
     sections: [
-      "Données collectées : formulaire de contact, création de compte, commande, newsletter et navigation.",
+      "Données collectées : formulaire de contact, création de compte, commande, communications consenties et navigation.",
       "Finalités : gestion des commandes, relation client, sécurité, amélioration du service et communications liées au site.",
       "Droits : accès, rectification, suppression, limitation, opposition et portabilité selon le cadre légal applicable.",
     ],
