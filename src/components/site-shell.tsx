@@ -27,7 +27,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     ...item,
     label:
       language === "en"
-        ? ({"Accueil":"Home","Boutique":"Shop","Équipes":"Teams","Partenaires":"Partners","Événements":"Events","News":"News"}[item.label] ?? item.label)
+        ? ({"Accueil":"Home","Boutique":"Shop","Roster":"Roster","Partenaires":"Partners","Événements":"Events","Panier":"Cart","Compte":"Account"}[item.label] ?? item.label)
         : item.label,
   }));
 
@@ -95,7 +95,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <footer className="mx-auto w-full max-w-[92rem] px-5 pb-10 pt-12 sm:px-8">
         <div className="rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,#0f1016_0%,#060608_100%)] p-7 sm:p-9">
           <h2 className="text-3xl font-black uppercase tracking-[-0.04em] sm:text-5xl">{language === "fr" ? "NOW eSport" : "NOW eSport"}</h2>
-          <p className="mt-4 max-w-2xl text-white/60">{language === "fr" ? "Actus, boutique et équipes." : "News, shop and teams."}</p>
+          <p className="mt-4 max-w-2xl text-white/60">{language === "fr" ? "Boutique, roster et événements." : "Shop, roster and events."}</p>
 
           <div className="mt-8 flex flex-wrap gap-3 text-sm">
             {footerSocials.map((item) => (

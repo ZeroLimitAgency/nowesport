@@ -3,7 +3,6 @@ import {
   collectionItems,
   events,
   games,
-  newsCards,
   partners,
   teamSupportBlocks,
   getGameBySlug,
@@ -19,7 +18,6 @@ export type ProductCard = (typeof collectionItems)[number] & {
 export type GameCard = (typeof games)[number];
 export type PartnerCard = (typeof partners)[number];
 export type EventCard = (typeof events)[number];
-export type NewsCard = (typeof newsCards)[number];
 export type TeamSupportBlock = (typeof teamSupportBlocks)[number];
 
 function formatPrice(priceCents: number, currency = "EUR") {
@@ -91,8 +89,17 @@ export async function getPublicProductBySlug(
       .eq("is_public", true)
       .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
       return getProductBySlug(slug) ?? null;
+    }
+
+    if (!data) {
+      const { count } = await supabase
+        .from("products")
+        .select("id", { count: "exact", head: true })
+        .eq("is_public", true);
+
+      return count ? null : getProductBySlug(slug) ?? null;
     }
 
     const { data: variants } = await supabase
@@ -262,43 +269,6 @@ export async function getPublicEvents(): Promise<EventCard[]> {
     });
   } catch {
     return events;
-  }
-}
-
-export async function getPublicNews(): Promise<NewsCard[]> {
-  noStore();
-
-  if (!hasSupabaseEnv()) {
-    return newsCards;
-  }
-
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("news")
-      .select("title, excerpt, tag, external_url, published_at")
-      .eq("is_public", true)
-      .order("published_at", { ascending: false });
-
-    if (error || !data?.length) {
-      return newsCards;
-    }
-
-    return data.map((item, index) => {
-      const fallback = newsCards[index % newsCards.length];
-
-      return {
-        title: item.title,
-        excerpt: item.excerpt ?? fallback.excerpt,
-        tag: item.tag ?? fallback.tag,
-        href: item.external_url ?? fallback.href,
-        date: item.published_at
-          ? new Date(item.published_at).toLocaleDateString("fr-FR")
-          : fallback.date,
-      };
-    });
-  } catch {
-    return newsCards;
   }
 }
 

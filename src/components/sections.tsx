@@ -6,7 +6,6 @@ import {
   games,
   heroMedia,
   homeHighlights,
-  newsCards,
   partners,
   productOptions,
   shopCollections,
@@ -68,7 +67,7 @@ export function HomeHero() {
             <Link href="/shop" className="primary-cta">
               {heroMedia.primaryCta}
             </Link>
-            <Link href="/teams" className="secondary-cta">
+            <Link href="/roster" className="secondary-cta">
               {heroMedia.secondaryCta}
             </Link>
           </div>
@@ -263,7 +262,7 @@ export function TeamsShowcase() {
         {games.map((game) => (
           <Link
             key={game.game}
-            href={`/teams/${game.slug}`}
+            href={`/roster/${game.slug}`}
             className="group overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#17151b_0%,#0b0b0d_100%)] transition duration-300 hover:-translate-y-1 hover:border-[var(--color-accent)]/30"
           >
             <div
@@ -295,7 +294,7 @@ export function TeamsShowcase() {
         {games.map((game) => (
           <Link
             key={`${game.game}-detail`}
-            href={`/teams/${game.slug}`}
+            href={`/roster/${game.slug}`}
             className="rounded-[1.6rem] border border-white/8 bg-[linear-gradient(180deg,#121216_0%,#09090b_100%)] p-5 transition duration-300 hover:-translate-y-1 hover:border-[var(--color-accent)]/30"
           >
             <div className="flex items-start justify-between gap-4">
@@ -443,56 +442,6 @@ export function EventsTimeline() {
               </div>
             </div>
           </article>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-export function NewsShowcase() {
-  return (
-    <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
-      <div className="mb-8 flex items-end justify-between gap-6">
-        <div>
-          <p className="section-kicker">News</p>
-          <h2 className="section-title">Dernières actus et annonces</h2>
-        </div>
-        <Link href="/news" className="section-link">
-          Toutes les news
-        </Link>
-      </div>
-
-      <div className="grid gap-5 lg:grid-cols-3">
-        {newsCards.map((card, index) => (
-          <a
-            key={card.title}
-            href={card.href}
-            className="overflow-hidden rounded-[1.8rem] border border-white/12 bg-[#2f1720] transition duration-300 hover:-translate-y-1"
-          >
-            <div
-              className={`flex h-56 items-end p-5 ${
-                index === 0
-                  ? "bg-[linear-gradient(180deg,rgba(255,130,193,0.95),rgba(153,29,82,0.65))]"
-                  : index === 1
-                    ? "bg-[linear-gradient(180deg,rgba(70,155,247,0.92),rgba(27,63,98,0.55))]"
-                    : "bg-[linear-gradient(180deg,rgba(48,48,58,0.2),rgba(24,24,29,0.92))]"
-              }`}
-            >
-              <span className="rounded-full border border-white/20 bg-black/20 px-3 py-2 text-xs font-semibold uppercase tracking-[0.26em] text-white/80">
-                {card.tag}
-              </span>
-            </div>
-            <div className="space-y-4 px-5 py-5">
-              <h3 className="text-2xl font-bold leading-tight text-white">{card.title}</h3>
-              <p className="text-sm leading-6 text-white/55">{card.excerpt}</p>
-              <div className="flex items-center justify-between text-sm text-white/70">
-                <span>{card.date}</span>
-                <span className="rounded-full border border-white/30 px-3 py-2 text-white/85">
-                  Voir sur X
-                </span>
-              </div>
-            </div>
-          </a>
         ))}
       </div>
     </section>

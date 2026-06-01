@@ -7,13 +7,11 @@ create extension if not exists "pgcrypto";
 
 create type public.app_role as enum ('admin', 'customer');
 create type public.order_status as enum (
-  'draft',
-  'pending_payment',
+  'pending',
   'paid',
   'processing',
   'shipped',
   'completed',
-  'cancelled',
   'refunded'
 );
 
@@ -24,6 +22,10 @@ create type public.payment_status as enum (
   'refunded',
   'partially_refunded'
 );
+
+create type public.product_type as enum ('physical', 'digital');
+create type public.cart_status as enum ('active', 'converted', 'abandoned');
+create type public.setting_value_type as enum ('boolean', 'string', 'json');
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -39,11 +41,14 @@ create table public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   role public.app_role not null default 'customer',
   email text unique,
+  username text unique,
   full_name text,
   avatar_url text,
   phone text,
+  birthdate date,
   country text,
   city text,
+  marketing_opt_in boolean not null default false,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -119,28 +124,14 @@ create table public.events (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
-create table public.news (
-  id uuid primary key default gen_random_uuid(),
-  slug text not null unique,
-  title text not null,
-  excerpt text,
-  content text,
-  tag text,
-  image_url text,
-  video_url text,
-  external_url text,
-  published_at timestamptz,
-  is_public boolean not null default true,
-  sort_order integer not null default 0,
-  created_at timestamptz not null default timezone('utc', now()),
-  updated_at timestamptz not null default timezone('utc', now())
-);
-
 create table public.products (
   id uuid primary key default gen_random_uuid(),
   slug text not null unique,
   name text not null,
   category text,
+  product_type public.product_type not null default 'physical',
+  fulfillment_type text,
+  requires_shipping boolean not null default true,
   description text,
   short_description text,
   price_cents integer not null check (price_cents >= 0),
@@ -153,6 +144,7 @@ create table public.products (
   stripe_product_id text unique,
   stripe_price_id text unique,
   sort_order integer not null default 0,
+  metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -173,11 +165,37 @@ create table public.product_variants (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+create table public.carts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles(id) on delete cascade,
+  guest_token text,
+  status public.cart_status not null default 'active',
+  currency text not null default 'EUR',
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
+  constraint carts_owner_check check (user_id is not null or guest_token is not null)
+);
+
+create table public.cart_items (
+  id uuid primary key default gen_random_uuid(),
+  cart_id uuid not null references public.carts(id) on delete cascade,
+  product_id uuid not null references public.products(id) on delete cascade,
+  product_variant_id uuid references public.product_variants(id) on delete set null,
+  quantity integer not null default 1 check (quantity > 0),
+  unit_price_cents integer not null check (unit_price_cents >= 0),
+  custom_name text,
+  custom_number text,
+  flocking text,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
+  unique (cart_id, product_id, product_variant_id, custom_name, custom_number, flocking)
+);
+
 create table public.orders (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references public.profiles(id) on delete set null,
   email text not null,
-  status public.order_status not null default 'pending_payment',
+  status public.order_status not null default 'pending',
   payment_status public.payment_status not null default 'unpaid',
   currency text not null default 'EUR',
   subtotal_cents integer not null default 0 check (subtotal_cents >= 0),
@@ -215,12 +233,52 @@ create table public.order_items (
   updated_at timestamptz not null default timezone('utc', now())
 );
 
+create table public.order_status_events (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  status public.order_status not null,
+  message text,
+  created_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create table public.inventory_movements (
+  id uuid primary key default gen_random_uuid(),
+  product_variant_id uuid not null references public.product_variants(id) on delete cascade,
+  quantity_delta integer not null,
+  reason text not null,
+  order_id uuid references public.orders(id) on delete set null,
+  created_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create table public.site_settings (
+  key text primary key,
+  value jsonb not null,
+  value_type public.setting_value_type not null default 'string',
+  label text,
+  is_public boolean not null default false,
+  updated_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+insert into public.site_settings (key, value, value_type, label, is_public)
+values
+  ('maintenance_mode', 'true'::jsonb, 'boolean', 'Maintenance publique', true),
+  ('maintenance_message', '"Nous préparons la nouvelle version du site."'::jsonb, 'string', 'Message maintenance', true)
+on conflict (key) do nothing;
+
 create index idx_rosters_game_id on public.rosters(game_id);
 create index idx_roster_members_roster_id on public.roster_members(roster_id);
 create index idx_product_variants_product_id on public.product_variants(product_id);
+create index idx_carts_user_id on public.carts(user_id);
+create index idx_cart_items_cart_id on public.cart_items(cart_id);
 create index idx_order_items_order_id on public.order_items(order_id);
 create index idx_orders_user_id on public.orders(user_id);
 create index idx_orders_status on public.orders(status);
+create index idx_order_status_events_order_id on public.order_status_events(order_id);
+create index idx_inventory_movements_variant_id on public.inventory_movements(product_variant_id);
 
 create trigger profiles_set_updated_at
 before update on public.profiles
@@ -246,9 +304,6 @@ create trigger events_set_updated_at
 before update on public.events
 for each row execute function public.set_updated_at();
 
-create trigger news_set_updated_at
-before update on public.news
-for each row execute function public.set_updated_at();
 
 create trigger products_set_updated_at
 before update on public.products
@@ -256,6 +311,14 @@ for each row execute function public.set_updated_at();
 
 create trigger product_variants_set_updated_at
 before update on public.product_variants
+for each row execute function public.set_updated_at();
+
+create trigger carts_set_updated_at
+before update on public.carts
+for each row execute function public.set_updated_at();
+
+create trigger cart_items_set_updated_at
+before update on public.cart_items
 for each row execute function public.set_updated_at();
 
 create trigger orders_set_updated_at
@@ -266,6 +329,10 @@ create trigger order_items_set_updated_at
 before update on public.order_items
 for each row execute function public.set_updated_at();
 
+create trigger site_settings_set_updated_at
+before update on public.site_settings
+for each row execute function public.set_updated_at();
+
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
@@ -273,16 +340,28 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name, avatar_url)
+  insert into public.profiles (id, email, username, full_name, avatar_url)
   values (
     new.id,
     new.email,
+    case
+      when nullif(new.raw_user_meta_data ->> 'username', '') is not null
+        and not exists (
+          select 1
+          from public.profiles
+          where username = nullif(new.raw_user_meta_data ->> 'username', '')
+            and id <> new.id
+        )
+      then nullif(new.raw_user_meta_data ->> 'username', '')
+      else null
+    end,
     coalesce(new.raw_user_meta_data ->> 'full_name', new.raw_user_meta_data ->> 'name'),
     new.raw_user_meta_data ->> 'avatar_url'
   )
   on conflict (id) do update
   set
     email = excluded.email,
+    username = coalesce(excluded.username, public.profiles.username),
     full_name = coalesce(excluded.full_name, public.profiles.full_name),
     avatar_url = coalesce(excluded.avatar_url, public.profiles.avatar_url),
     updated_at = timezone('utc', now());
@@ -317,11 +396,15 @@ alter table public.rosters enable row level security;
 alter table public.roster_members enable row level security;
 alter table public.partners enable row level security;
 alter table public.events enable row level security;
-alter table public.news enable row level security;
 alter table public.products enable row level security;
 alter table public.product_variants enable row level security;
+alter table public.carts enable row level security;
+alter table public.cart_items enable row level security;
 alter table public.orders enable row level security;
 alter table public.order_items enable row level security;
+alter table public.order_status_events enable row level security;
+alter table public.inventory_movements enable row level security;
+alter table public.site_settings enable row level security;
 
 create policy "profiles_select_own_or_admin"
 on public.profiles
@@ -394,16 +477,6 @@ on public.events
 for select
 using (is_public = true);
 
-create policy "admins_manage_news"
-on public.news
-for all
-using (public.is_admin())
-with check (public.is_admin());
-
-create policy "public_read_news"
-on public.news
-for select
-using (is_public = true);
 
 create policy "admins_manage_products"
 on public.products
@@ -425,7 +498,51 @@ with check (public.is_admin());
 create policy "public_read_product_variants"
 on public.product_variants
 for select
-using (is_active = true);
+using (
+  is_active = true
+  and exists (
+    select 1
+    from public.products
+    where public.products.id = product_variants.product_id
+      and public.products.is_public = true
+  )
+);
+
+create policy "admins_manage_carts"
+on public.carts
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "users_manage_own_carts"
+on public.carts
+for all
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "admins_manage_cart_items"
+on public.cart_items
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "users_manage_own_cart_items"
+on public.cart_items
+for all
+using (
+  exists (
+    select 1 from public.carts
+    where public.carts.id = cart_items.cart_id
+      and public.carts.user_id = auth.uid()
+  )
+)
+with check (
+  exists (
+    select 1 from public.carts
+    where public.carts.id = cart_items.cart_id
+      and public.carts.user_id = auth.uid()
+  )
+);
 
 create policy "admins_manage_orders"
 on public.orders
@@ -483,5 +600,43 @@ with check (
       )
   )
 );
+
+create policy "admins_manage_order_status_events"
+on public.order_status_events
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "users_read_own_order_status_events"
+on public.order_status_events
+for select
+using (
+  exists (
+    select 1
+    from public.orders
+    where public.orders.id = order_status_events.order_id
+      and (
+        public.orders.user_id = auth.uid()
+        or lower(public.orders.email) = lower(auth.email())
+      )
+  )
+);
+
+create policy "admins_manage_inventory_movements"
+on public.inventory_movements
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "admins_manage_site_settings"
+on public.site_settings
+for all
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "public_read_public_site_settings"
+on public.site_settings
+for select
+using (is_public = true);
 
 commit;

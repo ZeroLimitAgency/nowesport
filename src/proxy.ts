@@ -1,6 +1,10 @@
-import type { NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { NextResponse, type NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
 const discordTicketUrl = "https://discord.gg/K5AxWfD7tc";
+const previewCookieName = "now-preview";
 
 const maintenanceHtml = `<!doctype html>
 <html lang="fr">
@@ -15,7 +19,19 @@ const maintenanceHtml = `<!doctype html>
         --accent: #e93585;
         --accent-soft: #ff8ec0;
         --bg: #050505;
+        --card: rgba(0, 0, 0, 0.55);
+        --border: rgba(255, 255, 255, 0.1);
+        --muted: rgba(255, 255, 255, 0.68);
         --text: #f5f3f7;
+      }
+
+      html[data-theme="light"] {
+        color-scheme: light;
+        --bg: #fbf7fb;
+        --card: rgba(255, 255, 255, 0.82);
+        --border: rgba(18, 18, 24, 0.1);
+        --muted: rgba(18, 18, 24, 0.68);
+        --text: #151018;
       }
 
       * {
@@ -57,9 +73,9 @@ const maintenanceHtml = `<!doctype html>
         position: relative;
         z-index: 1;
         width: min(100%, 56rem);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--border);
         border-radius: 2.5rem;
-        background: rgba(0, 0, 0, 0.55);
+        background: var(--card);
         box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
         backdrop-filter: blur(24px);
         padding: clamp(2rem, 6vw, 4.5rem);
@@ -68,7 +84,7 @@ const maintenanceHtml = `<!doctype html>
 
       .eyebrow {
         display: inline-flex;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid var(--border);
         border-radius: 999px;
         background: rgba(255, 255, 255, 0.06);
         color: var(--accent-soft);
@@ -91,7 +107,7 @@ const maintenanceHtml = `<!doctype html>
       p {
         max-width: 42rem;
         margin: 1.5rem auto 0;
-        color: rgba(255, 255, 255, 0.68);
+        color: var(--muted);
         font-size: clamp(1rem, 2vw, 1.125rem);
         line-height: 1.75;
       }
@@ -105,7 +121,8 @@ const maintenanceHtml = `<!doctype html>
         margin-top: 2.25rem;
       }
 
-      a {
+      a,
+      button {
         display: inline-flex;
         min-height: 3.5rem;
         align-items: center;
@@ -122,6 +139,22 @@ const maintenanceHtml = `<!doctype html>
         text-transform: uppercase;
       }
 
+      button {
+        cursor: pointer;
+      }
+
+      .secondary,
+      .utility-actions button {
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: none;
+        color: var(--text);
+      }
+
+      .utility-actions {
+        margin-top: 1rem;
+      }
+
       @media (max-width: 640px) {
         body {
           padding: 4.5rem 1rem;
@@ -131,7 +164,8 @@ const maintenanceHtml = `<!doctype html>
           border-radius: 2rem;
         }
 
-        a {
+        a,
+        button {
           width: 100%;
         }
       }
@@ -140,15 +174,55 @@ const maintenanceHtml = `<!doctype html>
   <body>
     <main aria-labelledby="maintenance-title">
       <span class="eyebrow">NOW eSport</span>
-      <h1 id="maintenance-title">Site en maintenance</h1>
-      <p>
+      <h1 id="maintenance-title" data-copy="title">Site en maintenance</h1>
+      <p data-copy="body">
         Nous préparons la nouvelle version du site. Il sera bientôt disponible avec toutes les pages finales.
         Merci pour votre patience.
       </p>
       <div class="actions">
-        <a href="${discordTicketUrl}" target="_blank" rel="noreferrer">Nous contacter</a>
+        <a href="/login?next=/" data-copy="login">Connexion admin</a>
+        <a class="secondary" href="${discordTicketUrl}" target="_blank" rel="noreferrer" data-copy="contact">Nous contacter</a>
+      </div>
+      <div class="actions utility-actions" aria-label="Préférences d'affichage">
+        <button type="button" data-action="lang" aria-label="Changer la langue">FR / EN</button>
+        <button type="button" data-action="theme" aria-label="Changer le thème">Clair / sombre</button>
       </div>
     </main>
+    <script>
+      const copies = {
+        fr: {
+          title: "Site en maintenance",
+          body: "Nous préparons la nouvelle version du site. Les administrateurs peuvent se connecter pour prévisualiser le site.",
+          login: "Connexion admin",
+          contact: "Nous contacter",
+          theme: "Clair / sombre"
+        },
+        en: {
+          title: "Site under maintenance",
+          body: "We are preparing the new site. Administrators can sign in to preview the website.",
+          login: "Admin login",
+          contact: "Contact us",
+          theme: "Light / dark"
+        }
+      };
+      let lang = "fr";
+      let theme = "dark";
+      const setLang = (nextLang) => {
+        lang = nextLang;
+        document.documentElement.lang = lang;
+        document.querySelectorAll("[data-copy]").forEach((node) => {
+          const key = node.getAttribute("data-copy");
+          node.textContent = copies[lang][key];
+        });
+        document.querySelector("[data-action='theme']").textContent = copies[lang].theme;
+      };
+      const setTheme = (nextTheme) => {
+        theme = nextTheme;
+        document.documentElement.dataset.theme = theme;
+      };
+      document.querySelector("[data-action='lang']").addEventListener("click", () => setLang(lang === "fr" ? "en" : "fr"));
+      document.querySelector("[data-action='theme']").addEventListener("click", () => setTheme(theme === "dark" ? "light" : "dark"));
+    </script>
   </body>
 </html>`;
 
@@ -157,7 +231,135 @@ const sharedHeaders = {
   "X-Robots-Tag": "noindex, nofollow",
 };
 
-export function proxy(request: NextRequest) {
+const publicDuringMaintenance = [
+  "/api",
+  "/auth/callback",
+  "/login",
+  "/admin/preview",
+  "/maintenance",
+  "/favicon.ico",
+];
+
+function isPublicDuringMaintenance(pathname: string) {
+  return publicDuringMaintenance.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
+function isStaticAsset(pathname: string) {
+  return pathname.startsWith("/_next/") || pathname.startsWith("/media/");
+}
+
+async function isMaintenanceEnabled() {
+  if (
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  ) {
+    try {
+      const supabase = createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+        { auth: { persistSession: false } },
+      );
+      const { data } = await supabase
+        .from("site_settings")
+        .select("value")
+        .eq("key", "maintenance_mode")
+        .maybeSingle();
+
+      if (typeof data?.value === "boolean") {
+        return data.value;
+      }
+    } catch {
+      // fallback env below
+    }
+  }
+
+  return process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== "off";
+}
+
+async function getAdminBypassResponse(request: NextRequest) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+  ) {
+    return null;
+  }
+
+  const hasSupabaseCookie = request.cookies
+    .getAll()
+    .some((cookie) => cookie.name.startsWith("sb-"));
+
+  if (!hasSupabaseCookie) {
+    return null;
+  }
+
+  let response = NextResponse.next({ request });
+
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value),
+            );
+
+            response = NextResponse.next({ request });
+
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options),
+            );
+          },
+        },
+      },
+    );
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return null;
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    return profile?.role === "admin" ? response : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const hasPreview = request.cookies.get(previewCookieName)?.value === "1";
+  const maintenanceEnabled = await isMaintenanceEnabled();
+
+  if (
+    !maintenanceEnabled ||
+    hasPreview ||
+    isPublicDuringMaintenance(pathname) ||
+    isStaticAsset(pathname)
+  ) {
+    return updateSession(request);
+  }
+
+  const adminResponse = await getAdminBypassResponse(request);
+
+  if (adminResponse) {
+    return adminResponse;
+  }
+
   if (request.method === "HEAD") {
     return new Response(null, {
       status: 503,
