@@ -77,8 +77,8 @@ Statuts `orders.status` : `pending`, `paid`, `processing`, `shipped`, `completed
 
 1. Nettoyer le schéma (`news` retiré) et ajouter les tables structurantes : profil enrichi, panier, settings, stock, statuts de commande.
 2. Finaliser auth : inscription, connexion, déconnexion, reset password, session server, protection routes privées.
-3. Remplacer les vues profil/compte par des lectures/updates Supabase avec fallback non public en cas d'environnement manquant.
+3. Vérifier les vues profil/compte contre Supabase réel sans fallback public.
 4. Brancher panier local + persistance Supabase utilisateur, puis préparer checkout Stripe multi-lignes.
 5. Créer l'admin `/admin` et ses sections : dashboard, produits, commandes, utilisateurs, événements, partenaires, paramètres.
 6. Piloter la maintenance via `/admin/settings` et `site_settings`, avec fallback env pour les environnements non configurés.
-7. Remplacer les données fallback par les tables réelles dès que les seeds Supabase sont en place.
+7. Maintenir les lectures publiques sur les tables Supabase réelles et suivre les derniers contenus statiques dans le rapport readiness.

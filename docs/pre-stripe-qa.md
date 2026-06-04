@@ -3,14 +3,14 @@
 ## 1. Parcours visiteur
 
 - Maintenance : le proxy sert la maintenance aux visiteurs publics tant que `site_settings.maintenance_mode` vaut `true` ou que le fallback env reste actif.
-- Preview admin : `/api/admin/preview` accepte maintenant un admin réel (`profiles.role = 'admin'`) ou un e-mail autorisé par `ADMIN_PREVIEW_EMAILS`, en plus du token `PREVIEW_SECRET`.
+- Preview admin : `/api/admin/preview` accepte un admin réel (`profiles.role = 'admin'`) ou le token explicite `PREVIEW_SECRET`.
 - Clear preview : `/api/admin/preview/clear` supprime le cookie `now-preview`.
 - Navigation publique : boutique, roster, events et partenaires restent accessibles en preview ou maintenance désactivée.
 - News : aucune route, donnée ou lien actif dans `src`/`supabase`.
 
 ## 2. Parcours auth
 
-- Signup, login, logout, reset password et update password sont centralisés dans `AuthPanel` et `/auth/update-password`.
+- Login, logout, reset password et update password sont centralisés dans `AuthPanel` et `/auth/update-password`.
 - `/compte` et `/profile` passent par `requireUser()`.
 - `/profil` et `/account` redirigent vers les routes protégées canoniques.
 - UX sans Supabase : `/login` affiche un message clair, les routes privées ne crashent pas.
@@ -18,8 +18,8 @@
 ## 3. Parcours boutique et panier
 
 - Le catalogue public lit Supabase quand des produits publics existent.
-- Le fallback mock reste utilisé uniquement en absence de données publiques ou en absence de configuration Supabase.
-- Correction appliquée : une fiche produit non trouvée dans Supabase ne retombe plus sur un mock si des produits publics réels existent déjà, ce qui évite de masquer un produit privé ou supprimé.
+- Les fallbacks mock produits/événements/partenaires/rosters ont été retirés des lectures publiques Supabase ; une absence de données réelles doit rester visible.
+- Correction appliquée : une fiche produit non trouvée dans Supabase ne retombe plus sur un mock local ; un produit privé, supprimé ou absent renvoie 404.
 - Les variantes publiques sont protégées par RLS et le stock est affiché dans le panier.
 - Correction appliquée : le panier tolère un stockage local corrompu, affiche un état vide et plafonne l'incrément au stock disponible quand il existe.
 - Suppression panier : décrémenter à 0 retire la ligne.
@@ -57,8 +57,8 @@
 
 ## Bugs trouvés et corrections appliquées
 
-1. Preview admin dépendait uniquement de `ADMIN_PREVIEW_EMAILS` ou `PREVIEW_SECRET`; correction pour accepter aussi `profiles.role = 'admin'`.
-2. Fiche produit publique pouvait retomber sur un mock quand Supabase était configuré mais que le slug n'était pas public ; correction pour ne fallback que si aucun produit public réel n'existe.
+1. Preview admin dépend maintenant de `profiles.role = 'admin'` ou du token explicite `PREVIEW_SECRET`.
+2. Fiche produit publique ne retombe plus sur un mock local : un slug absent/non public renvoie 404.
 3. Panier local pouvait crasher si `localStorage` contenait un JSON invalide ; correction avec reset automatique.
 4. Quantités panier non plafonnées au stock ; correction avec plafonnement si stock connu.
 5. Statut commande admin non validé côté server action ; correction avec liste blanche des statuts autorisés.

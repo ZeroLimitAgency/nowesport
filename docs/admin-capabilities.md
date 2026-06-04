@@ -7,7 +7,7 @@
 - Suppression de produits depuis `/admin/products`.
 - Publication/dépublication via action dédiée.
 - Création, édition et suppression de variantes avec SKU, taille, couleur, stock, prix optionnel, prix Stripe et statut actif.
-- Fallback catalogue local visible uniquement si Supabase ne renvoie aucun produit réel.
+- Catalogue public alimenté par Supabase uniquement ; si aucun produit public n’existe, la boutique doit rester vide jusqu’à création admin.
 
 ## Commandes
 

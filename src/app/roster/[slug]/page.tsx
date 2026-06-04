@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
-import { games } from "@/data/site";
 import { getPublicGameBySlug } from "@/lib/content";
 
 export function generateStaticParams() {
-  return games.map((item) => ({ slug: item.slug }));
+  return [];
 }
 
 function visualClass(visual: string) {

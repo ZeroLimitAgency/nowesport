@@ -276,24 +276,3 @@ input {
     letter-spacing: 0.14em;
   }
 }
-
-:root[data-theme="light"] {
-  --background: #f2f4f8;
-  --foreground: #101114;
-  --color-bg: #f2f4f8;
-  --color-text: #101114;
-}
-
-:root[data-theme="light"] body {
-  background: linear-gradient(180deg, #f7f8fb 0%, #edf0f5 100%);
-  color: #101114;
-}
-
-:root[data-theme="light"] body {
-  background: #f4f6fa;
-  color: #101114;
-}
-:root[data-theme="light"] .section-kicker { color: #b03b77; }
-:root[data-theme="light"] .section-title { color: #101114; }
-:root[data-theme="light"] [class*="bg-[linear-gradient(180deg,#121216"] { background: #ffffff !important; }
-:root[data-theme="light"] [class*="text-white/"] { color: rgba(16,17,20,0.75) !important; }
