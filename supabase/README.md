@@ -7,26 +7,34 @@ Ouvre le dashboard Supabase, puis :
 1. va dans `SQL Editor`
 2. crée une nouvelle requête
 3. colle le contenu de `supabase/schema.sql`
-4. exécute le script
+4. exécute le script sur un projet Supabase frais
+5. exécute ensuite `supabase/verify.sql` pour vérifier les tables, policies, triggers et settings requis
 
 ## 2. Donner le rôle admin
 
-Après ta première connexion, ton profil sera créé automatiquement dans `public.profiles`.
+Après ta première connexion, ton profil est créé automatiquement dans `public.profiles` par le trigger `handle_new_user()`.
 
 Pour te passer admin :
 
 ```sql
 update public.profiles
 set role = 'admin'
-where email = 'ton-email@exemple.com';
+where lower(email) = lower('ton-email@exemple.com');
 ```
+
+Déconnecte-toi/reconnecte-toi ensuite, puis ouvre `/admin` ou `/api/admin/preview?next=/`.
 
 ## 3. Ce que fait ce schéma
 
 - crée les tables profils, produits, variantes, commandes et contenus
 - crée les tables équipes, rosters et membres
 - active les politiques `RLS`
-- crée automatiquement un profil à la création d'un utilisateur Supabase
-- réserve les écritures complètes aux admins
+- crée automatiquement un profil à la création ou mise à jour d'un utilisateur Supabase
+- réserve les écritures complètes aux admins via `public.profiles.role = 'admin'`
 - laisse les contenus publics en lecture
 - laisse chaque client consulter ses propres commandes
+- initialise `site_settings.maintenance_mode` pour piloter la maintenance
+
+## 4. Checklist de déploiement
+
+La checklist complète est dans `docs/supabase-deployment-checklist.md`.

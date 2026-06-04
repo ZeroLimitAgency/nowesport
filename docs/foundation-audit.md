@@ -32,13 +32,13 @@ Correction appliquée : la policy publique des variantes produit vérifie le pro
 - Par défaut, le proxy sert la maintenance si `site_settings.maintenance_mode` vaut `true` ou si le fallback `NEXT_PUBLIC_MAINTENANCE_MODE` n'est pas `off`.
 - Les visiteurs publics voient la maintenance.
 - Le cookie `now-preview=1` contourne la maintenance.
-- `/api/admin/preview` pose le cookie après token `PREVIEW_SECRET` valide ou e-mail admin autorisé.
+- `/api/admin/preview` pose le cookie après token `PREVIEW_SECRET` valide ou compte Supabase avec `profiles.role = 'admin'`.
 - `/api/admin/preview/clear` supprime le cookie.
 - Les routes `/api`, `/auth/callback`, `/login`, `/admin/preview`, `/maintenance`, `/favicon.ico`, `/_next/*` et `/media/*` restent accessibles pour auth, API et assets.
 
 ## Auth flow
 
-- Signup : `AuthPanel` utilise `supabase.auth.signUp()` avec callback sécurisé vers la destination demandée.
+- Login : `AuthPanel` utilise uniquement email/password et le reset password ; la création de comptes passe par Supabase Auth/admin selon la procédure de déploiement.
 - Login : `signInWithPassword()` puis redirection vers `nextPath` validé côté page login.
 - Logout : `signOut()` puis retour `/login`.
 - Reset password : `resetPasswordForEmail()` redirige vers `/auth/update-password`.
@@ -51,7 +51,7 @@ Correction appliquée : l'inscription ne force plus un pseudo dérivé de l'e-ma
 
 - `/login` affiche un message de configuration manquante.
 - Les routes privées client redirigent vers `/login` plutôt que de crasher.
-- Les pages catalogue/panier utilisent un fallback local contrôlé.
+- Les pages catalogue/panier lisent les produits Supabase publics ; les anciens mocks locaux ne doivent plus masquer une base vide.
 - L'admin n'est pas accessible sans session Supabase admin.
 
 ## Absence de news active

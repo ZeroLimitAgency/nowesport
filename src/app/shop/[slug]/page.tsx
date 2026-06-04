@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { CheckoutButton } from "@/components/checkout-button";
-import { collectionItems, productOptions } from "@/data/site";
+import { productOptions } from "@/data/site";
 import { getPublicProductBySlug } from "@/lib/content";
 
 export function generateStaticParams() {
-  return collectionItems.map((item) => ({ slug: item.slug }));
+  return [];
 }
 
 export default async function ProductPage({
