@@ -88,6 +88,9 @@ La documentation de raccord Stripe/Supabase est ici :
 Le schema de base est ici :
 
 - [supabase/schema.sql](./supabase/schema.sql)
+- [supabase/verify.sql](./supabase/verify.sql)
 - [supabase/README.md](./supabase/README.md)
+- [docs/supabase-deployment-checklist.md](./docs/supabase-deployment-checklist.md)
+- [docs/supabase-operational-readiness.md](./docs/supabase-operational-readiness.md)
 
 - Redeploy trigger: sync latest shell/hero fixes.

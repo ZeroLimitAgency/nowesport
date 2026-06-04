@@ -87,7 +87,7 @@ where email = 'admin@nowesport.org';
 ## 8. Variables d'environnement à vérifier
 
 - Supabase : `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-- Preview : `PREVIEW_SECRET`, optionnellement `ADMIN_PREVIEW_EMAILS`.
+- Preview : `profiles.role = 'admin'`, optionnellement `PREVIEW_SECRET` pour une session de preview explicite.
 - Maintenance : `NEXT_PUBLIC_MAINTENANCE_MODE` en fallback si `site_settings` n'est pas disponible.
 - Stripe placeholder : `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`.
 - Site URL : `NEXT_PUBLIC_SITE_URL`.

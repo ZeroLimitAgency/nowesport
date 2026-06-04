@@ -1,17 +1,21 @@
 import { unstable_noStore as noStore } from "next/cache";
 import {
-  collectionItems,
   events,
   games,
   partners,
   teamSupportBlocks,
-  getGameBySlug,
-  getProductBySlug,
 } from "@/data/site";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
-export type ProductCard = (typeof collectionItems)[number] & {
+export type ProductCard = {
+  slug: string;
+  name: string;
+  category: string;
+  price: string;
+  description: string;
+  intro: string;
+  details: string[];
   stripePriceId?: string | null;
   stripeProductId?: string | null;
 };
@@ -27,46 +31,42 @@ function formatPrice(priceCents: number, currency = "EUR") {
   }).format(priceCents / 100);
 }
 
+function emptyWhenSupabaseUnavailable<T>() {
+  return [] as T[];
+}
+
 export async function getPublicProducts(): Promise<ProductCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return collectionItems;
+    return emptyWhenSupabaseUnavailable<ProductCard>();
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("products")
-      .select(
-        "slug, name, category, description, short_description, price_cents, currency, stripe_product_id, stripe_price_id",
-      )
-      .eq("is_public", true)
-      .order("sort_order", { ascending: true });
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(
+      "slug, name, category, description, short_description, price_cents, currency, stripe_product_id, stripe_price_id",
+    )
+    .eq("is_public", true)
+    .order("sort_order", { ascending: true });
 
-    if (error || !data?.length) {
-      return collectionItems;
-    }
-
-    return data.map((item, index) => {
-      const fallback = collectionItems[index % collectionItems.length];
-
-      return {
-        ...fallback,
-        slug: item.slug,
-        name: item.name,
-        category: item.category ?? fallback.category,
-        price: formatPrice(item.price_cents, item.currency ?? "EUR"),
-        description:
-          item.short_description ?? item.description ?? fallback.description,
-        intro: item.description ?? fallback.intro,
-        stripePriceId: item.stripe_price_id,
-        stripeProductId: item.stripe_product_id,
-      };
-    });
-  } catch {
-    return collectionItems;
+  if (error) {
+    throw new Error(`Lecture produits Supabase impossible : ${error.message}`);
   }
+
+  return (data ?? []).map((item) => ({
+    slug: item.slug,
+    name: item.name,
+    category: item.category ?? "Collection",
+    price: formatPrice(item.price_cents, item.currency ?? "EUR"),
+    description: item.short_description ?? item.description ?? "",
+    intro: item.description ?? item.short_description ?? "",
+    details: [item.description, item.short_description]
+      .filter((detail): detail is string => Boolean(detail)),
+    stripePriceId: item.stripe_price_id,
+    stripeProductId: item.stripe_product_id,
+  }));
 }
 
 export async function getPublicProductBySlug(
@@ -75,201 +75,173 @@ export async function getPublicProductBySlug(
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return getProductBySlug(slug) ?? null;
+    return null;
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("products")
-      .select(
-        "id, slug, name, category, description, short_description, price_cents, currency, allow_custom_name, allow_custom_number, allow_flocking, stripe_product_id, stripe_price_id",
-      )
-      .eq("slug", slug)
-      .eq("is_public", true)
-      .maybeSingle();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("products")
+    .select(
+      "id, slug, name, category, description, short_description, price_cents, currency, allow_custom_name, allow_custom_number, allow_flocking, stripe_product_id, stripe_price_id",
+    )
+    .eq("slug", slug)
+    .eq("is_public", true)
+    .maybeSingle();
 
-    if (error) {
-      return getProductBySlug(slug) ?? null;
-    }
-
-    if (!data) {
-      const { count } = await supabase
-        .from("products")
-        .select("id", { count: "exact", head: true })
-        .eq("is_public", true);
-
-      return count ? null : getProductBySlug(slug) ?? null;
-    }
-
-    const { data: variants } = await supabase
-      .from("product_variants")
-      .select("name, size, color")
-      .eq("product_id", data.id)
-      .eq("is_active", true)
-      .order("sort_order", { ascending: true });
-
-    const fallback = getProductBySlug(slug) ?? collectionItems[0];
-    const details = [
-      data.description ?? fallback.details[0],
-      data.allow_custom_name ? "Personnalisation du nom activée." : null,
-      data.allow_custom_number ? "Personnalisation du numéro activée." : null,
-      data.allow_flocking ? "Flocage activé pour ce produit." : null,
-      ...(variants?.length
-        ? variants.map((variant) =>
-            [variant.name, variant.size, variant.color].filter(Boolean).join(" · "),
-          )
-        : fallback.details),
-    ].filter((item): item is string => Boolean(item));
-
-    return {
-      ...fallback,
-      slug: data.slug,
-      name: data.name,
-      category: data.category ?? fallback.category,
-      price: formatPrice(data.price_cents, data.currency ?? "EUR"),
-      description: data.short_description ?? data.description ?? fallback.description,
-      intro: data.description ?? fallback.intro,
-      details: Array.from(new Set(details)).slice(0, 6),
-      stripePriceId: data.stripe_price_id,
-      stripeProductId: data.stripe_product_id,
-    };
-  } catch {
-    return getProductBySlug(slug) ?? null;
+  if (error) {
+    throw new Error(`Lecture produit Supabase impossible : ${error.message}`);
   }
+
+  if (!data) {
+    return null;
+  }
+
+  const { data: variants, error: variantsError } = await supabase
+    .from("product_variants")
+    .select("name, size, color")
+    .eq("product_id", data.id)
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+
+  if (variantsError) {
+    throw new Error(`Lecture variantes Supabase impossible : ${variantsError.message}`);
+  }
+
+  const details = [
+    data.description,
+    data.short_description,
+    data.allow_custom_name ? "Personnalisation du nom activée." : null,
+    data.allow_custom_number ? "Personnalisation du numéro activée." : null,
+    data.allow_flocking ? "Flocage activé pour ce produit." : null,
+    ...(variants?.length
+      ? variants.map((variant) =>
+          [variant.name, variant.size, variant.color].filter(Boolean).join(" · "),
+        )
+      : []),
+  ].filter((item): item is string => Boolean(item));
+
+  return {
+    slug: data.slug,
+    name: data.name,
+    category: data.category ?? "Collection",
+    price: formatPrice(data.price_cents, data.currency ?? "EUR"),
+    description: data.short_description ?? data.description ?? "",
+    intro: data.description ?? data.short_description ?? "",
+    details: Array.from(new Set(details)).slice(0, 6),
+    stripePriceId: data.stripe_price_id,
+    stripeProductId: data.stripe_product_id,
+  };
 }
 
 export async function getPublicGames(): Promise<GameCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return games;
+    return emptyWhenSupabaseUnavailable<GameCard>();
   }
 
-  try {
-    const supabase = await createClient();
-    const [{ data: gamesData, error: gamesError }, { data: rostersData }, { data: membersData }] =
-      await Promise.all([
-        supabase
-          .from("games")
-          .select("id, slug, name, subtitle, description, visual")
-          .eq("is_public", true)
-          .order("sort_order", { ascending: true }),
-        supabase
-          .from("rosters")
-          .select("id, game_id, name, category")
-          .eq("is_public", true)
-          .order("sort_order", { ascending: true }),
-        supabase
-          .from("roster_members")
-          .select("roster_id, display_name")
-          .eq("is_public", true)
-          .order("sort_order", { ascending: true }),
-      ]);
+  const supabase = await createClient();
+  const [{ data: gamesData, error: gamesError }, { data: rostersData, error: rostersError }, { data: membersData, error: membersError }] =
+    await Promise.all([
+      supabase
+        .from("games")
+        .select("id, slug, name, subtitle, description, visual")
+        .eq("is_public", true)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("rosters")
+        .select("id, game_id, name, category")
+        .eq("is_public", true)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("roster_members")
+        .select("roster_id, display_name")
+        .eq("is_public", true)
+        .order("sort_order", { ascending: true }),
+    ]);
 
-    if (gamesError || !gamesData?.length) {
-      return games;
-    }
-
-    return gamesData.map((game, index) => {
-      const fallback = games[index % games.length];
-      const rosters = (rostersData ?? [])
-        .filter((roster) => roster.game_id === game.id)
-        .map((roster) => ({
-          name: roster.name,
-          members: (membersData ?? [])
-            .filter((member) => member.roster_id === roster.id)
-            .map((member) => member.display_name),
-        }))
-        .filter((roster) => roster.members.length > 0);
-
-      return {
-        ...fallback,
-        slug: game.slug,
-        game: game.name,
-        subtitle: game.subtitle ?? fallback.subtitle,
-        description: game.description ?? fallback.description,
-        visual: game.visual ?? fallback.visual,
-        rosters: rosters.length ? rosters : fallback.rosters,
-      };
-    });
-  } catch {
-    return games;
+  const error = gamesError ?? rostersError ?? membersError;
+  if (error) {
+    throw new Error(`Lecture rosters Supabase impossible : ${error.message}`);
   }
+
+  return (gamesData ?? []).map((game) => {
+    const rosters = (rostersData ?? [])
+      .filter((roster) => roster.game_id === game.id)
+      .map((roster) => ({
+        name: roster.name,
+        members: (membersData ?? [])
+          .filter((member) => member.roster_id === roster.id)
+          .map((member) => member.display_name),
+      }));
+
+    return {
+      slug: game.slug,
+      game: game.name,
+      subtitle: game.subtitle ?? "Roster",
+      description: game.description ?? "",
+      visual: game.visual ?? "now",
+      rosters,
+    };
+  });
 }
 
 export async function getPublicGameBySlug(slug: string): Promise<GameCard | null> {
   const gamesData = await getPublicGames();
-  return gamesData.find((item) => item.slug === slug) ?? getGameBySlug(slug) ?? null;
+  return gamesData.find((item) => item.slug === slug) ?? null;
 }
 
 export async function getPublicPartners(): Promise<PartnerCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return partners;
+    return emptyWhenSupabaseUnavailable<PartnerCard>();
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("partners")
-      .select("name, role_label, description, external_url")
-      .eq("is_public", true)
-      .order("sort_order", { ascending: true });
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("partners")
+    .select("name, role_label, description, external_url")
+    .eq("is_public", true)
+    .order("sort_order", { ascending: true });
 
-    if (error || !data?.length) {
-      return partners;
-    }
-
-    return data.map((item, index) => {
-      const fallback = partners[index % partners.length];
-
-      return {
-        name: item.name,
-        role: item.role_label ?? fallback.role,
-        description: item.description ?? fallback.description,
-        href: item.external_url ?? fallback.href,
-      };
-    });
-  } catch {
-    return partners;
+  if (error) {
+    throw new Error(`Lecture partenaires Supabase impossible : ${error.message}`);
   }
+
+  return (data ?? []).map((item) => ({
+    name: item.name,
+    role: item.role_label ?? "Partenaire",
+    description: item.description ?? "",
+    href: item.external_url ?? "#",
+  }));
 }
 
 export async function getPublicEvents(): Promise<EventCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return events;
+    return emptyWhenSupabaseUnavailable<EventCard>();
   }
 
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("events")
-      .select("title, event_date, location, description")
-      .eq("is_public", true)
-      .order("event_date", { ascending: false });
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("events")
+    .select("title, event_date, location, description")
+    .eq("is_public", true)
+    .order("event_date", { ascending: false });
 
-    if (error || !data?.length) {
-      return events;
-    }
-
-    return data.map((item, index) => {
-      const fallback = events[index % events.length];
-
-      return {
-        title: item.title,
-        date: new Date(item.event_date).toLocaleDateString("fr-FR"),
-        location: item.location ?? fallback.location,
-        description: item.description ?? fallback.description,
-        tone: index % 2 === 0 ? "studio" : "sunset",
-      };
-    });
-  } catch {
-    return events;
+  if (error) {
+    throw new Error(`Lecture événements Supabase impossible : ${error.message}`);
   }
+
+  return (data ?? []).map((item, index) => ({
+    title: item.title,
+    date: new Date(item.event_date).toLocaleDateString("fr-FR"),
+    location: item.location ?? "",
+    description: item.description ?? "",
+    tone: index % 2 === 0 ? "studio" : "sunset",
+  }));
 }
 
 export function getTeamSupportBlocks(): TeamSupportBlock[] {

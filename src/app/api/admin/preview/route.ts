@@ -12,13 +12,6 @@ function safeNext(request: NextRequest) {
   return next;
 }
 
-function allowedAdminEmails() {
-  return (process.env.ADMIN_PREVIEW_EMAILS ?? "")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-}
-
 async function canPreview(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("token");
   const secret = process.env.PREVIEW_SECRET;
@@ -50,8 +43,7 @@ async function canPreview(request: NextRequest) {
     return true;
   }
 
-  const admins = allowedAdminEmails();
-  return Boolean(user.email && admins.includes(user.email.toLowerCase()));
+  return false;
 }
 
 export async function GET(request: NextRequest) {

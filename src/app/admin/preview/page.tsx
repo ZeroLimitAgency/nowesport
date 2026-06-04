@@ -15,7 +15,7 @@ export default function AdminPreviewPage() {
             Accès par compte admin
           </p>
           <p className="mt-4 text-sm leading-6 text-white/58">
-            Connecte-toi avec un e-mail listé dans ADMIN_PREVIEW_EMAILS, puis ouvre l&apos;activation preview. La route valide la session Supabase côté serveur.
+            Connecte-toi avec un compte dont public.profiles.role vaut admin, puis ouvre l&apos;activation preview. La route valide la session Supabase côté serveur.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Link href="/login" className="secondary-cta">

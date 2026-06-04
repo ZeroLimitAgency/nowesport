@@ -7,7 +7,6 @@ import {
 } from "@/app/admin/actions";
 import { AdminShell } from "@/components/admin-shell";
 import { requireAdmin } from "@/lib/auth";
-import { getFallbackCatalog } from "@/lib/commerce";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -130,8 +129,6 @@ function VariantForm({ productId, variant }: { productId: string; variant?: Admi
 export default async function AdminProductsPage() {
   await requireAdmin();
   const { products, isConfigured } = await getAdminProducts();
-  const fallback = getFallbackCatalog();
-
   return (
     <AdminShell>
       <div className="grid gap-6">
@@ -146,7 +143,7 @@ export default async function AdminProductsPage() {
         {!products.length ? (
           <section className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5">
             <p className="text-sm leading-6 text-white/58">
-              Aucun produit Supabase pour le moment. La boutique publique utilise encore le fallback local : {fallback.length} produits prêts à migrer.
+              Aucun produit Supabase pour le moment. Crée le premier produit ici pour alimenter la boutique publique.
             </p>
           </section>
         ) : null}

@@ -25,15 +25,6 @@ const maintenanceHtml = `<!doctype html>
         --text: #f5f3f7;
       }
 
-      html[data-theme="light"] {
-        color-scheme: light;
-        --bg: #fbf7fb;
-        --card: rgba(255, 255, 255, 0.82);
-        --border: rgba(18, 18, 24, 0.1);
-        --muted: rgba(18, 18, 24, 0.68);
-        --text: #151018;
-      }
-
       * {
         box-sizing: border-box;
       }
@@ -143,7 +134,6 @@ const maintenanceHtml = `<!doctype html>
         cursor: pointer;
       }
 
-      .secondary,
       .utility-actions button {
         border: 1px solid var(--border);
         background: rgba(255, 255, 255, 0.08);
@@ -153,6 +143,24 @@ const maintenanceHtml = `<!doctype html>
 
       .utility-actions {
         margin-top: 1rem;
+      }
+
+      .admin-login {
+        position: fixed;
+        right: 1rem;
+        bottom: 1rem;
+        min-height: auto;
+        border: 1px solid var(--border);
+        background: rgba(0, 0, 0, 0.32);
+        box-shadow: none;
+        color: rgba(255, 255, 255, 0.45);
+        font-size: 0.62rem;
+        letter-spacing: 0.18em;
+        padding: 0.7rem 0.85rem;
+      }
+
+      .admin-login:hover {
+        color: rgba(255, 255, 255, 0.75);
       }
 
       @media (max-width: 640px) {
@@ -168,6 +176,10 @@ const maintenanceHtml = `<!doctype html>
         button {
           width: 100%;
         }
+
+        .admin-login {
+          width: auto;
+        }
       }
     </style>
   </head>
@@ -180,13 +192,12 @@ const maintenanceHtml = `<!doctype html>
         Merci pour votre patience.
       </p>
       <div class="actions">
-        <a href="/login?next=/" data-copy="login">Connexion admin</a>
-        <a class="secondary" href="${discordTicketUrl}" target="_blank" rel="noreferrer" data-copy="contact">Nous contacter</a>
+        <a href="${discordTicketUrl}" target="_blank" rel="noreferrer" data-copy="contact">Nous contacter</a>
       </div>
       <div class="actions utility-actions" aria-label="Préférences d'affichage">
         <button type="button" data-action="lang" aria-label="Changer la langue">FR / EN</button>
-        <button type="button" data-action="theme" aria-label="Changer le thème">Clair / sombre</button>
       </div>
+      <a class="admin-login" href="/login?next=/" data-copy="login">Connexion admin</a>
     </main>
     <script>
       const copies = {
@@ -194,19 +205,16 @@ const maintenanceHtml = `<!doctype html>
           title: "Site en maintenance",
           body: "Nous préparons la nouvelle version du site. Les administrateurs peuvent se connecter pour prévisualiser le site.",
           login: "Connexion admin",
-          contact: "Nous contacter",
-          theme: "Clair / sombre"
+          contact: "Nous contacter"
         },
         en: {
           title: "Site under maintenance",
           body: "We are preparing the new site. Administrators can sign in to preview the website.",
           login: "Admin login",
-          contact: "Contact us",
-          theme: "Light / dark"
+          contact: "Contact us"
         }
       };
       let lang = "fr";
-      let theme = "dark";
       const setLang = (nextLang) => {
         lang = nextLang;
         document.documentElement.lang = lang;
@@ -214,14 +222,8 @@ const maintenanceHtml = `<!doctype html>
           const key = node.getAttribute("data-copy");
           node.textContent = copies[lang][key];
         });
-        document.querySelector("[data-action='theme']").textContent = copies[lang].theme;
-      };
-      const setTheme = (nextTheme) => {
-        theme = nextTheme;
-        document.documentElement.dataset.theme = theme;
       };
       document.querySelector("[data-action='lang']").addEventListener("click", () => setLang(lang === "fr" ? "en" : "fr"));
-      document.querySelector("[data-action='theme']").addEventListener("click", () => setTheme(theme === "dark" ? "light" : "dark"));
     </script>
   </body>
 </html>`;

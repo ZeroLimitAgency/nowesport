@@ -19,7 +19,7 @@ export default async function AdminSettingsPage() {
           Mode maintenance public
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-white/58">
-          Cette option pilote la maintenance via Supabase. La variable d&apos;environnement reste un fallback si la table settings n&apos;est pas disponible.
+          Cette option pilote la maintenance via Supabase. Vérifie la table site_settings dans le checklist de déploiement avant la mise en production.
         </p>
         <label className="mt-6 flex items-center gap-3 text-sm font-semibold text-white/72">
           <input type="checkbox" name="maintenance_mode" defaultChecked={maintenanceEnabled} className="h-5 w-5 accent-pink-500" />
