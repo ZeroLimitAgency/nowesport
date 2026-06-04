@@ -8,7 +8,8 @@ Ouvre le dashboard Supabase, puis :
 2. crée une nouvelle requête
 3. colle le contenu de `supabase/schema.sql`
 4. exécute le script sur un projet Supabase frais
-5. exécute ensuite `supabase/verify.sql` pour vérifier les tables, policies, triggers et settings requis
+5. si Supabase répond qu'un objet existe déjà (`type ... already exists`, `relation ... already exists`, etc.), utilise la dernière version du fichier : elle est idempotente pour les types, tables, index, triggers et policies, puis relance le script complet
+6. exécute ensuite `supabase/verify.sql` pour vérifier les enums, tables, policies, triggers et settings requis
 
 ## 2. Donner le rôle admin
 

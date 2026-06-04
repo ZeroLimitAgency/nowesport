@@ -3,6 +3,18 @@
 
 begin;
 
+
+-- Required enum types.
+select n.nspname as enum_schema, t.typname as enum_name
+from pg_type t
+join pg_namespace n on n.oid = t.typnamespace
+where n.nspname = 'public'
+  and t.typname in (
+    'app_role', 'order_status', 'payment_status', 'product_type',
+    'cart_status', 'setting_value_type'
+  )
+order by t.typname;
+
 -- Required tables.
 select table_name
 from information_schema.tables
@@ -37,6 +49,19 @@ do $$
 declare
   missing_count integer;
 begin
+  select 6 - count(*) into missing_count
+  from pg_type t
+  join pg_namespace n on n.oid = t.typnamespace
+  where n.nspname = 'public'
+    and t.typname in (
+      'app_role', 'order_status', 'payment_status', 'product_type',
+      'cart_status', 'setting_value_type'
+    );
+
+  if missing_count <> 0 then
+    raise exception 'Supabase schema verification failed: % required enum types are missing', missing_count;
+  end if;
+
   select 15 - count(*) into missing_count
   from information_schema.tables
   where table_schema = 'public'
