@@ -3,29 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-type AuthMode = "login" | "signup" | "reset";
-type OAuthProvider = "google" | "apple";
-
-function ProviderButton({
-  label,
-  onClick,
-  disabled,
-}: {
-  label: string;
-  onClick: () => void;
-  disabled: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="flex min-h-14 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm font-semibold text-white/82 transition hover:border-white/20 hover:bg-white/[0.05] disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {label}
-    </button>
-  );
-}
+type AuthMode = "login" | "reset";
 
 export function AuthPanel({
   userEmail,
@@ -41,37 +19,6 @@ export function AuthPanel({
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  function authCallback(origin: string) {
-    return `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`;
-  }
-
-  async function handleOAuth(provider: OAuthProvider) {
-    setIsLoading(true);
-    setMessage("");
-
-    try {
-      const supabase = createClient();
-      const origin = window.location.origin;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: authCallback(origin),
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-    } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Impossible de lancer la connexion sociale.",
-      );
-      setIsLoading(false);
-    }
-  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -109,22 +56,6 @@ export function AuthPanel({
         return;
       }
 
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: authCallback(origin),
-        },
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      setMessage(
-        "Inscription lancée. Vérifie ta boîte mail pour confirmer ton compte.",
-      );
-      setPassword("");
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "Impossible de continuer.",
@@ -180,88 +111,61 @@ export function AuthPanel({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[0.72fr_1fr]">
-      <div className="rounded-[1.6rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-6">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--color-accent-soft)]">
-          Accès client
+    <div className="mx-auto w-full max-w-xl rounded-[2rem] border border-white/10 bg-[linear-gradient(180deg,rgba(19,18,24,0.96)_0%,rgba(8,8,10,0.98)_100%)] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.45)] sm:p-8">
+      <div className="text-center">
+        <p className="text-xs font-black uppercase tracking-[0.28em] text-[var(--color-accent-soft)]">
+          Accès sécurisé
         </p>
-        <h2 className="mt-4 text-3xl font-black uppercase tracking-[-0.04em] text-white">
-          Connexion ou inscription
+        <h2 className="mt-4 text-3xl font-black uppercase leading-none tracking-[-0.05em] text-white sm:text-5xl">
+          {mode === "reset" ? "Réinitialiser" : "Connexion"}
         </h2>
-        <p className="mt-3 max-w-xl text-sm leading-6 text-white/58">
-          Connecte-toi avec ton adresse e-mail, crée un compte, ou utilise les
-          providers activés dans Supabase.
+        <p className="mx-auto mt-4 max-w-md text-sm leading-6 text-white/58">
+          {mode === "reset"
+            ? "Indique ton adresse e-mail pour recevoir un lien de réinitialisation."
+            : "Connecte-toi avec ton adresse e-mail et ton mot de passe pour accéder à ton espace client ou admin."}
         </p>
-
-        <div className="mt-6 grid gap-3">
-          <ProviderButton
-            label="Continuer avec Google"
-            onClick={() => handleOAuth("google")}
-            disabled={isLoading}
-          />
-          <ProviderButton
-            label="Continuer avec Apple"
-            onClick={() => handleOAuth("apple")}
-            disabled={isLoading}
-          />
-        </div>
       </div>
 
-      <div className="rounded-[1.6rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-6">
-        <div className="flex flex-wrap gap-3">
-          {[
-            ["login", "Se connecter"],
-            ["signup", "S'inscrire"],
-            ["reset", "Mot de passe oublié"],
-          ].map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setMode(value as AuthMode)}
-              className={`rounded-full px-5 py-3 text-sm font-semibold transition ${
-                mode === value
-                  ? "bg-white text-black"
-                  : "border border-white/10 bg-white/[0.03] text-white/70"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+      <form onSubmit={handleSubmit} className="mt-8 grid gap-4">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Adresse e-mail"
+          className="min-h-14 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
+        />
+        {mode === "login" ? (
           <input
-            type="email"
+            type="password"
             required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="Adresse e-mail"
+            minLength={8}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            placeholder="Mot de passe"
             className="min-h-14 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
           />
-          {mode !== "reset" ? (
-            <input
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Mot de passe"
-              className="min-h-14 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
-            />
-          ) : null}
-          <button type="submit" disabled={isLoading} className="primary-cta w-fit">
+        ) : null}
+
+        <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+          <button type="submit" disabled={isLoading} className="primary-cta w-full sm:w-auto">
             {isLoading
               ? "Chargement..."
               : mode === "login"
                 ? "Se connecter"
-                : mode === "signup"
-                  ? "Créer mon compte"
-                  : "Envoyer le lien"}
+                : "Envoyer le lien"}
           </button>
-        </form>
+          <button
+            type="button"
+            onClick={() => setMode(mode === "login" ? "reset" : "login")}
+            className="min-h-12 rounded-full border border-white/10 bg-white/[0.03] px-5 text-sm font-bold text-white/82 hover:border-white/20 hover:text-white"
+          >
+            {mode === "login" ? "Mot de passe oublié ?" : "Retour connexion"}
+          </button>
+        </div>
+      </form>
 
-        {message ? <p className="mt-4 text-sm text-white/58">{message}</p> : null}
-      </div>
+      {message ? <p className="mt-5 text-center text-sm text-white/58">{message}</p> : null}
     </div>
   );
 }
