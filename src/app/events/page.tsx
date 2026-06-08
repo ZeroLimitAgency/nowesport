@@ -1,17 +1,16 @@
 import { EventsTimelineSection } from "@/components/content-sections";
 import { PageIntro } from "@/components/sections";
+import { getCurrentLocale, getSiteCmsContent } from "@/lib/cms";
 import { getPublicEvents } from "@/lib/content";
 
 export default async function EventsPage() {
-  const events = await getPublicEvents();
+  const locale = await getCurrentLocale();
+  const [events, cms] = await Promise.all([getPublicEvents(), getSiteCmsContent(locale)]);
+  const intro = cms.blocks["events.intro"];
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      <PageIntro
-        kicker="Événements"
-        title="Timeline d'événements et d'activations"
-        description="La page événements reprend la logique timeline avec points reliés, grande image associée, titre, date et description, dans l'esprit du visuel de référence."
-      />
+      <PageIntro kicker={intro.eyebrow ?? "Events"} title={intro.title} description={intro.body} />
       <EventsTimelineSection eventsData={events} />
     </main>
   );

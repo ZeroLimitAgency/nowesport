@@ -7,6 +7,7 @@ const adminLinks = [
   { label: "Utilisateurs", href: "/admin/users" },
   { label: "Événements", href: "/admin/events" },
   { label: "Partenaires", href: "/admin/partners" },
+  { label: "Contenu", href: "/admin/content" },
   { label: "Paramètres", href: "/admin/settings" },
 ];
 

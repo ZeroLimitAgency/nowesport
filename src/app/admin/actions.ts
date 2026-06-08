@@ -38,6 +38,54 @@ function adminError(scope: string, error: { message?: string } | null) {
 
 const orderStatuses = new Set(["pending", "paid", "processing", "shipped", "completed", "refunded"]);
 
+const cmsLocales = new Set(["fr", "en"]);
+const navigationPlacements = new Set(["header", "footer_legal"]);
+
+function requiredCmsLocale(formData: FormData) {
+  const locale = requiredText(formData, "locale", "Langue");
+  if (!cmsLocales.has(locale)) {
+    throw new Error("Langue CMS invalide. Choisis FR ou EN.");
+  }
+  return locale;
+}
+
+function requiredNavigationPlacement(formData: FormData) {
+  const placement = requiredText(formData, "placement", "Emplacement");
+  if (!navigationPlacements.has(placement)) {
+    throw new Error("Emplacement de navigation invalide. Choisis Header ou Footer légal.");
+  }
+  return placement;
+}
+
+function optionalUrl(formData: FormData, key: string, label: string, options: { allowRelative?: boolean } = {}) {
+  const value = nullableText(formData, key);
+  if (!value) return null;
+
+  const isRelative = value.startsWith("/") && !value.startsWith("//");
+  if (options.allowRelative && isRelative) {
+    return value;
+  }
+
+  try {
+    const url = new URL(value);
+    if (url.protocol === "http:" || url.protocol === "https:" || url.protocol === "mailto:") {
+      return value;
+    }
+  } catch {
+    // handled below with a readable admin error
+  }
+
+  throw new Error(`${label} doit être une URL valide${options.allowRelative ? " ou un chemin interne commençant par /" : ""}.`);
+}
+
+function requiredUrl(formData: FormData, key: string, label: string, options: { allowRelative?: boolean } = {}) {
+  const value = optionalUrl(formData, key, label, options);
+  if (!value) {
+    throw new Error(`${label} est obligatoire.`);
+  }
+  return value;
+}
+
 function intValue(formData: FormData, key: string, fallback = 0) {
   const raw = text(formData, key);
   const value = Number.parseInt(raw, 10);
@@ -284,4 +332,126 @@ export async function deletePartner(formData: FormData) {
 
   revalidatePath("/admin/partners");
   revalidatePath("/partners");
+}
+
+function jsonValue(formData: FormData, key: string) {
+  const raw = text(formData, key);
+  if (!raw) return {};
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw) as unknown;
+  } catch {
+    throw new Error("Le champ JSON est invalide. Vérifie les guillemets, virgules et accolades.");
+  }
+
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Le champ JSON doit être un objet, par exemple {\"sections\":[\"Texte\"]}.");
+  }
+
+  return parsed as Record<string, unknown>;
+}
+
+export async function saveSiteContentBlock(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const payload = {
+    locale: requiredCmsLocale(formData),
+    area: requiredText(formData, "area", "Zone"),
+    block_key: requiredText(formData, "block_key", "Clé"),
+    title: requiredText(formData, "title", "Titre"),
+    body: nullableText(formData, "body"),
+    eyebrow: nullableText(formData, "eyebrow"),
+    cta_label: nullableText(formData, "cta_label"),
+    cta_href: optionalUrl(formData, "cta_href", "Lien CTA", { allowRelative: true }),
+    secondary_cta_label: nullableText(formData, "secondary_cta_label"),
+    secondary_cta_href: optionalUrl(formData, "secondary_cta_href", "Lien CTA secondaire", { allowRelative: true }),
+    media_url: optionalUrl(formData, "media_url", "URL média", { allowRelative: true }),
+    metadata: jsonValue(formData, "metadata"),
+    is_active: formData.get("is_active") === "on",
+    sort_order: intValue(formData, "sort_order"),
+  };
+
+  const { error } = await supabase
+    .from("site_content_blocks")
+    .upsert(payload, { onConflict: "locale,area,block_key" });
+
+  if (error) {
+    throw adminError("Contenu du site", error);
+  }
+
+  revalidatePath("/admin/content");
+  revalidatePath("/", "layout");
+}
+
+export async function saveSiteNavigationItem(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const id = nullableText(formData, "id");
+  const payload = {
+    locale: requiredCmsLocale(formData),
+    placement: requiredNavigationPlacement(formData),
+    label: requiredText(formData, "label", "Libellé"),
+    href: requiredUrl(formData, "href", "Lien", { allowRelative: true }),
+    is_active: formData.get("is_active") === "on",
+    sort_order: intValue(formData, "sort_order"),
+  };
+
+  const query = id
+    ? supabase.from("site_navigation").update(payload).eq("id", id)
+    : supabase.from("site_navigation").insert(payload);
+  const { error } = await query;
+
+  if (error) {
+    throw adminError("Navigation", error);
+  }
+
+  revalidatePath("/admin/content");
+  revalidatePath("/", "layout");
+}
+
+export async function deleteSiteNavigationItem(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const { error } = await supabase.from("site_navigation").delete().eq("id", text(formData, "id"));
+
+  if (error) {
+    throw adminError("Suppression navigation", error);
+  }
+
+  revalidatePath("/admin/content");
+  revalidatePath("/", "layout");
+}
+
+export async function saveSiteSocialLink(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const id = nullableText(formData, "id");
+  const payload = {
+    platform: requiredText(formData, "platform", "Plateforme"),
+    label: requiredText(formData, "label", "Libellé"),
+    href: requiredUrl(formData, "href", "Lien réseau social"),
+    is_active: formData.get("is_active") === "on",
+    sort_order: intValue(formData, "sort_order"),
+  };
+
+  const query = id
+    ? supabase.from("site_social_links").update(payload).eq("id", id)
+    : supabase.from("site_social_links").insert(payload);
+  const { error } = await query;
+
+  if (error) {
+    throw adminError("Réseaux sociaux", error);
+  }
+
+  revalidatePath("/admin/content");
+  revalidatePath("/", "layout");
+}
+
+export async function deleteSiteSocialLink(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const { error } = await supabase.from("site_social_links").delete().eq("id", text(formData, "id"));
+
+  if (error) {
+    throw adminError("Suppression réseau social", error);
+  }
+
+  revalidatePath("/admin/content");
+  revalidatePath("/", "layout");
 }

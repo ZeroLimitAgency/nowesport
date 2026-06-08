@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SiteShell } from "@/components/site-shell";
+import { getCurrentLocale, getSiteCmsContent } from "@/lib/cms";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,15 +12,18 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://nowesport.org"),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getCurrentLocale();
+  const cms = await getSiteCmsContent(locale);
+
   return (
-    <html lang="fr" data-theme="dark" className="h-full antialiased">
+    <html lang={locale} data-theme="dark" className="h-full antialiased">
       <body className="min-h-full flex flex-col font-sans">
-        <SiteShell>{children}</SiteShell>
+        <SiteShell cms={cms}>{children}</SiteShell>
       </body>
     </html>
   );
