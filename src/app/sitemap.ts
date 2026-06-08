@@ -1,20 +1,24 @@
 import type { MetadataRoute } from "next";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { legalPages } from "@/data/site";
+import { getOptionalSupabasePublicEnv } from "@/lib/supabase/env";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://nowesport.org";
 
 async function getSupabasePublicRoutes() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseEnv = getOptionalSupabasePublicEnv();
 
-  if (!url || !key) {
+  if (!supabaseEnv) {
     return [];
   }
 
-  const supabase = createSupabaseClient(url, key, {
-    auth: { persistSession: false },
-  });
+  const supabase = createSupabaseClient(
+    supabaseEnv.url,
+    supabaseEnv.publishableKey,
+    {
+      auth: { persistSession: false },
+    },
+  );
 
   const [{ data: products }, { data: games }] = await Promise.all([
     supabase.from("products").select("slug").eq("is_public", true),
@@ -22,8 +26,8 @@ async function getSupabasePublicRoutes() {
   ]);
 
   return [
-    ...((products ?? []).map((item) => `/shop/${item.slug}`)),
-    ...((games ?? []).map((item) => `/roster/${item.slug}`)),
+    ...(products ?? []).map((item) => `/shop/${item.slug}`),
+    ...(games ?? []).map((item) => `/roster/${item.slug}`),
   ];
 }
 

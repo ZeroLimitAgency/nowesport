@@ -19,18 +19,20 @@ This checklist is the source of truth for connecting NOW eSport to a fresh Supab
 
 Add these variables to Vercel, local `.env.local`, and any preview environment that should use the same Supabase backend.
 
-| Variable | Required | Scope | Purpose |
-| --- | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | Yes | browser/server | Canonical site URL used by metadata, sitemap, and auth redirects. |
-| `NEXT_PUBLIC_HERO_VIDEO_URL` | No | browser/server | Optional hosted hero video override. |
-| `NEXT_PUBLIC_MAINTENANCE_MODE` | Yes | server/proxy fallback | Keep `on` until `site_settings.maintenance_mode` is verified; set `off` only for non-maintenance fallback behavior. |
-| `PREVIEW_SECRET` | Optional | server | Emergency preview-token access to `/api/admin/preview?token=...&next=/`; normal preview uses Supabase admin role. |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | browser/server/proxy | Supabase project URL. |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | browser/server/proxy | Supabase publishable/anon key for browser auth, RLS reads, and server session clients. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes for server-side writes outside user RLS | server only | Supabase service-role key. Keep server-only. Required by existing server integrations that bypass user RLS. |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Placeholder only | browser | Keep test placeholder until Stripe milestone. |
-| `STRIPE_SECRET_KEY` | Placeholder only | server | Keep test placeholder until Stripe milestone. |
-| `STRIPE_WEBHOOK_SECRET` | Placeholder only | server | Keep test placeholder until Stripe milestone. |
+| Variable                               | Required                                    | Scope                 | Purpose                                                                                                             |
+| -------------------------------------- | ------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SITE_URL`                 | Yes                                         | browser/server        | Canonical site URL used by metadata, sitemap, and auth redirects.                                                   |
+| `NEXT_PUBLIC_HERO_VIDEO_URL`           | No                                          | browser/server        | Optional hosted hero video override.                                                                                |
+| `NEXT_PUBLIC_MAINTENANCE_MODE`         | Yes                                         | server/proxy fallback | Keep `on` until `site_settings.maintenance_mode` is verified; set `off` only for non-maintenance fallback behavior. |
+| `PREVIEW_SECRET`                       | Optional                                    | server                | Emergency preview-token access to `/api/admin/preview?token=...&next=/`; normal preview uses Supabase admin role.   |
+| `NEXT_PUBLIC_SUPABASE_URL`             | Yes                                         | browser/server/proxy  | Supabase project URL.                                                                                               |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes                                         | browser/server/proxy  | Supabase publishable/anon key for browser auth, RLS reads, and server session clients.                              |
+| `SUPABASE_SERVICE_ROLE_KEY`            | Yes for server-side writes outside user RLS | server only           | Supabase service-role key. Keep server-only. Required by existing server integrations that bypass user RLS.         |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`   | Placeholder only                            | browser               | Keep test placeholder until Stripe milestone.                                                                       |
+| `STRIPE_SECRET_KEY`                    | Placeholder only                            | server                | Keep test placeholder until Stripe milestone.                                                                       |
+| `STRIPE_WEBHOOK_SECRET`                | Placeholder only                            | server                | Keep test placeholder until Stripe milestone.                                                                       |
+
+Supabase key naming source of truth: use only `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for the public browser/server/proxy key. Do not add duplicate aliases such as `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_ANON_KEY`, or `SUPABASE_PUBLISHABLE_KEY`; this codebase does not read them.
 
 Removed: `ADMIN_PREVIEW_EMAILS`. Admin preview is now determined by `public.profiles.role = 'admin'`.
 

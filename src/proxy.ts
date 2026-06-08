@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
+import { getOptionalSupabasePublicEnv } from "@/lib/supabase/env";
 
 const discordTicketUrl = "https://discord.gg/K5AxWfD7tc";
 const previewCookieName = "now-preview";
@@ -253,14 +254,13 @@ function isStaticAsset(pathname: string) {
 }
 
 async function isMaintenanceEnabled() {
-  if (
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  ) {
+  const supabaseEnv = getOptionalSupabasePublicEnv();
+
+  if (supabaseEnv) {
     try {
       const supabase = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+        supabaseEnv.url,
+        supabaseEnv.publishableKey,
         { auth: { persistSession: false } },
       );
       const { data } = await supabase
@@ -281,10 +281,9 @@ async function isMaintenanceEnabled() {
 }
 
 async function getAdminBypassResponse(request: NextRequest) {
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  ) {
+  const supabaseEnv = getOptionalSupabasePublicEnv();
+
+  if (!supabaseEnv) {
     return null;
   }
 
@@ -300,8 +299,8 @@ async function getAdminBypassResponse(request: NextRequest) {
 
   try {
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+      supabaseEnv.url,
+      supabaseEnv.publishableKey,
       {
         cookies: {
           getAll() {
