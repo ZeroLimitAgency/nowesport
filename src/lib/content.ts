@@ -18,6 +18,16 @@ export type ProductCard = {
   details: string[];
   stripePriceId?: string | null;
   stripeProductId?: string | null;
+  productType?: "physical" | "digital";
+  requiresShipping?: boolean;
+  variants?: Array<{
+    id: string;
+    name: string;
+    size?: string | null;
+    color?: string | null;
+    stock: number;
+    stripePriceId?: string | null;
+  }>;
 };
 export type GameCard = (typeof games)[number];
 export type PartnerCard = (typeof partners)[number];
@@ -82,7 +92,7 @@ export async function getPublicProductBySlug(
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, slug, name, category, description, short_description, price_cents, currency, allow_custom_name, allow_custom_number, allow_flocking, stripe_product_id, stripe_price_id",
+      "id, slug, name, category, description, short_description, price_cents, currency, product_type, requires_shipping, allow_custom_name, allow_custom_number, allow_flocking, stripe_product_id, stripe_price_id",
     )
     .eq("slug", slug)
     .eq("is_public", true)
@@ -98,7 +108,7 @@ export async function getPublicProductBySlug(
 
   const { data: variants, error: variantsError } = await supabase
     .from("product_variants")
-    .select("name, size, color")
+    .select("id, name, size, color, stock_quantity, stripe_price_id")
     .eq("product_id", data.id)
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
@@ -130,6 +140,16 @@ export async function getPublicProductBySlug(
     details: Array.from(new Set(details)).slice(0, 6),
     stripePriceId: data.stripe_price_id,
     stripeProductId: data.stripe_product_id,
+    productType: data.product_type === "digital" ? "digital" : "physical",
+    requiresShipping: data.requires_shipping ?? data.product_type !== "digital",
+    variants: (variants ?? []).map((variant) => ({
+      id: variant.id,
+      name: variant.name,
+      size: variant.size,
+      color: variant.color,
+      stock: variant.stock_quantity ?? 0,
+      stripePriceId: variant.stripe_price_id,
+    })),
   };
 }
 

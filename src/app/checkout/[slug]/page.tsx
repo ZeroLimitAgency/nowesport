@@ -5,10 +5,14 @@ import { getPublicProductBySlug } from "@/lib/content";
 
 export default async function CheckoutProductPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ variant?: string; quantity?: string }>;
 }) {
   const { slug } = await params;
+  const { variant, quantity: rawQuantity } = await searchParams;
+  const quantity = Math.max(1, Math.min(Number.parseInt(rawQuantity ?? "1", 10) || 1, 25));
   const product = await getPublicProductBySlug(slug);
 
   if (!product) {
@@ -59,10 +63,12 @@ export default async function CheckoutProductPage({
           </aside>
 
           <section>
-            {product.stripePriceId ? (
+            {product.stripePriceId || product.variants?.some((item) => item.stripePriceId) ? (
               <EmbeddedCheckoutExperience
                 slug={product.slug}
                 productName={product.name}
+                variantId={variant ?? null}
+                quantity={quantity}
               />
             ) : (
               <div className="rounded-[2rem] border border-white/8 bg-[linear-gradient(145deg,#171219_0%,#09090b_100%)] p-6">

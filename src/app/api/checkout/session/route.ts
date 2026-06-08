@@ -1,64 +1,52 @@
 import { NextResponse } from "next/server";
+import { encodeCheckoutItemsMetadata, resolveCheckoutLines } from "@/lib/checkout";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrlFromRequest, getStripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { slug?: string };
-    const slug = body.slug?.trim();
+    const body = (await request.json()) as {
+      slug?: string;
+      variantId?: string | null;
+      quantity?: number;
+      items?: Array<{ slug?: string; variantId?: string | null; quantity?: number }>;
+    };
+    const requestedItems = Array.isArray(body.items) && body.items.length
+      ? body.items.map((item) => ({
+          slug: item.slug ?? "",
+          variantId: item.variantId,
+          quantity: item.quantity,
+        }))
+      : [{ slug: body.slug ?? "", variantId: body.variantId, quantity: body.quantity }];
 
-    if (!slug) {
-      return NextResponse.json(
-        { error: "Produit introuvable pour le checkout." },
-        { status: 400 },
-      );
-    }
-
+    const lines = await resolveCheckoutLines(requestedItems);
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: product, error } = await supabase
-      .from("products")
-      .select("id, slug, name, stripe_price_id")
-      .eq("slug", slug)
-      .eq("is_public", true)
-      .maybeSingle();
-
-    if (error || !product) {
-      return NextResponse.json(
-        { error: "Ce produit n'existe pas dans la base publique." },
-        { status: 404 },
-      );
-    }
-
-    if (!product.stripe_price_id) {
-      return NextResponse.json(
-        {
-          error:
-            "Ce produit n'est pas encore relié à un prix Stripe. Ajoute son stripe_price_id dans Supabase.",
-        },
-        { status: 400 },
-      );
-    }
-
     const stripe = getStripe();
     const siteUrl = getSiteUrlFromRequest(request);
+    const needsShipping = lines.some((item) => item.requiresShipping);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      line_items: [
-        {
-          price: product.stripe_price_id,
-          quantity: 1,
-        },
-      ],
+      line_items: lines.map((item) => ({
+        price: item.stripePriceId,
+        quantity: item.quantity,
+      })),
+      customer_creation: "always",
+      phone_number_collection: { enabled: needsShipping },
+      ...(needsShipping
+        ? { shipping_address_collection: { allowed_countries: ["FR", "BE", "CH", "LU", "MC"] } }
+        : {}),
       success_url: `${siteUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/checkout/cancel`,
-      client_reference_id: product.id,
+      client_reference_id: lines[0].productId,
       metadata: {
-        product_id: product.id,
-        product_slug: product.slug,
+        product_id: lines[0].productId,
+        product_slug: lines[0].productSlug,
+        checkout_items: encodeCheckoutItemsMetadata(lines),
+        ...(user?.id ? { supabase_user_id: user.id } : {}),
       },
       ...(user?.email ? { customer_email: user.email } : {}),
     });

@@ -15,9 +15,13 @@ const stripePromise = loadStripe(
 export function EmbeddedCheckoutExperience({
   slug,
   productName,
+  variantId,
+  quantity,
 }: {
   slug: string;
   productName: string;
+  variantId?: string | null;
+  quantity: number;
 }) {
   const [completed, setCompleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +35,7 @@ export function EmbeddedCheckoutExperience({
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ slug }),
+            body: JSON.stringify({ slug, variantId, quantity }),
           });
 
           const payload = (await response.json()) as {
@@ -61,7 +65,7 @@ export function EmbeddedCheckoutExperience({
         setCompleted(true);
       },
     }),
-    [slug],
+    [slug, variantId, quantity],
   );
 
   if (completed) {
@@ -72,7 +76,7 @@ export function EmbeddedCheckoutExperience({
           Merci pour ta commande
         </h2>
         <p className="mt-4 max-w-2xl text-base leading-7 text-white/60">
-          Le paiement du produit {productName} a bien été validé. Le webhook
+          Le paiement du produit {productName} est termine. Le webhook
           Stripe va maintenant créer ou mettre à jour la commande dans ton
           espace client.
         </p>

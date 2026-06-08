@@ -1,7 +1,64 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
+import { parseCheckoutItemsMetadata } from "@/lib/checkout";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getStripe } from "@/lib/stripe";
+
+async function decrementVariantStock({
+  admin,
+  variantId,
+  quantity,
+  orderId,
+}: {
+  admin: ReturnType<typeof createAdminClient>;
+  variantId: string;
+  quantity: number;
+  orderId: string;
+}) {
+  const { data: variant, error: readError } = await admin
+    .from("product_variants")
+    .select("stock_quantity")
+    .eq("id", variantId)
+    .maybeSingle();
+
+  if (readError) {
+    throw readError;
+  }
+
+  const currentStock = variant?.stock_quantity ?? 0;
+  const nextStock = currentStock - quantity;
+
+  if (nextStock < 0) {
+    throw new Error("Stock insuffisant pour finaliser la commande Stripe.");
+  }
+
+  const { data: updatedVariant, error: updateError } = await admin
+    .from("product_variants")
+    .update({ stock_quantity: nextStock })
+    .eq("id", variantId)
+    .gte("stock_quantity", quantity)
+    .select("id")
+    .maybeSingle();
+
+  if (updateError) {
+    throw updateError;
+  }
+
+  if (!updatedVariant) {
+    throw new Error("Stock insuffisant pour finaliser la commande Stripe.");
+  }
+
+  const { error: movementError } = await admin.from("inventory_movements").insert({
+    product_variant_id: variantId,
+    quantity_delta: -quantity,
+    reason: "stripe_checkout_paid",
+    order_id: orderId,
+  });
+
+  if (movementError) {
+    throw movementError;
+  }
+}
 
 async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
   const stripe = getStripe();
@@ -10,6 +67,7 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
     limit: 100,
     expand: ["data.price.product"],
   });
+  const metadataLines = parseCheckoutItemsMetadata(session.metadata?.checkout_items);
 
   const subtotalCents = session.amount_subtotal ?? 0;
   const totalCents = session.amount_total ?? 0;
@@ -17,8 +75,12 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
     session.total_details?.amount_shipping ??
     Math.max(totalCents - subtotalCents - (session.total_details?.amount_tax ?? 0), 0);
   const taxCents = session.total_details?.amount_tax ?? 0;
-  const customerEmail =
-    session.customer_details?.email ?? session.customer_email ?? "client@nowesport.invalid";
+  const customerEmail = session.customer_details?.email ?? session.customer_email;
+
+  if (!customerEmail) {
+    throw new Error("Stripe n'a pas renvoye d'e-mail client pour la commande.");
+  }
+
   const supabaseUserId =
     typeof session.metadata?.supabase_user_id === "string"
       ? session.metadata.supabase_user_id
@@ -46,6 +108,9 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
       typeof session.payment_intent === "string"
         ? session.payment_intent
         : session.payment_intent?.id ?? null,
+    notes: supabaseUserId
+      ? null
+      : "Commande invitee rattachee par e-mail client Stripe.",
   };
 
   const { data: existingOrder } = await admin
@@ -55,7 +120,6 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
     .maybeSingle();
 
   let orderId = existingOrder?.id as string | undefined;
-
   if (orderId) {
     const { error } = await admin
       .from("orders")
@@ -89,12 +153,25 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
   }
 
   const lineItemPayloads = await Promise.all(
-    lineItems.data.map(async (item) => {
+    lineItems.data.map(async (item, index) => {
       const stripePriceId =
         typeof item.price === "string" ? item.price : item.price?.id ?? null;
-      let productId: string | null = null;
+      const metadataLine = metadataLines[index] ?? metadataLines.find((line) => line.stripe_price_id === stripePriceId);
+      let productId: string | null = metadataLine?.product_id ?? null;
+      let variantId: string | null = metadataLine?.variant_id ?? null;
 
-      if (stripePriceId) {
+      if (!variantId && stripePriceId) {
+        const { data: variant } = await admin
+          .from("product_variants")
+          .select("id, product_id")
+          .eq("stripe_price_id", stripePriceId)
+          .maybeSingle();
+
+        variantId = variant?.id ?? null;
+        productId = productId ?? variant?.product_id ?? null;
+      }
+
+      if (!productId && stripePriceId) {
         const { data: product } = await admin
           .from("products")
           .select("id")
@@ -107,10 +184,10 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
       return {
         order_id: orderId!,
         product_id: productId,
-        product_variant_id: null,
-        product_name: item.description,
-        variant_name: null,
-        quantity: item.quantity ?? 1,
+        product_variant_id: variantId,
+        product_name: metadataLine?.product_name || item.description || "Produit NOW eSport",
+        variant_name: metadataLine?.variant_name ?? null,
+        quantity: item.quantity ?? metadataLine?.quantity ?? 1,
         unit_price_cents: item.amount_subtotal && item.quantity
           ? Math.round(item.amount_subtotal / item.quantity)
           : 0,
@@ -118,17 +195,57 @@ async function upsertOrderFromSession(session: Stripe.Checkout.Session) {
         custom_name: null,
         custom_number: null,
         flocking: null,
+        product_type: metadataLine?.product_type,
       };
     }),
   );
 
   if (lineItemPayloads.length) {
-    const { error } = await admin.from("order_items").insert(lineItemPayloads);
+    const { error } = await admin.from("order_items").insert(
+      lineItemPayloads.map((item) => ({
+        order_id: item.order_id,
+        product_id: item.product_id,
+        product_variant_id: item.product_variant_id,
+        product_name: item.product_name,
+        variant_name: item.variant_name,
+        quantity: item.quantity,
+        unit_price_cents: item.unit_price_cents,
+        total_price_cents: item.total_price_cents,
+        custom_name: item.custom_name,
+        custom_number: item.custom_number,
+        flocking: item.flocking,
+      })),
+    );
 
     if (error) {
       throw error;
     }
   }
+
+  await Promise.all(
+    lineItemPayloads
+      .filter((item) => item.product_type !== "digital" && item.product_variant_id)
+      .map(async (item) => {
+        const { data: existingMovement } = await admin
+          .from("inventory_movements")
+          .select("id")
+          .eq("order_id", orderId!)
+          .eq("product_variant_id", item.product_variant_id!)
+          .eq("reason", "stripe_checkout_paid")
+          .maybeSingle();
+
+        if (existingMovement) {
+          return;
+        }
+
+        await decrementVariantStock({
+          admin,
+          variantId: item.product_variant_id!,
+          quantity: item.quantity,
+          orderId: orderId!,
+        });
+      }),
+  );
 }
 
 export async function POST(request: Request) {
@@ -173,7 +290,7 @@ export async function POST(request: Request) {
         await createAdminClient()
           .from("orders")
           .update({
-            status: "refunded",
+            status: "pending",
             payment_status: "failed",
           })
           .eq("stripe_checkout_session_id", session.id);

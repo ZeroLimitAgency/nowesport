@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
+import { encodeCheckoutItemsMetadata, resolveCheckoutLines } from "@/lib/checkout";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrlFromRequest, getStripe } from "@/lib/stripe";
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { slug?: string };
+    const body = (await request.json()) as {
+      slug?: string;
+      variantId?: string | null;
+      quantity?: number;
+    };
     const slug = body.slug?.trim();
 
     if (!slug) {
@@ -14,51 +19,38 @@ export async function POST(request: Request) {
       );
     }
 
+    const lines = await resolveCheckoutLines([
+      { slug, variantId: body.variantId, quantity: body.quantity },
+    ]);
+    const line = lines[0];
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: product, error } = await supabase
-      .from("products")
-      .select("id, slug, name, stripe_price_id")
-      .eq("slug", slug)
-      .eq("is_public", true)
-      .maybeSingle();
-
-    if (error || !product) {
-      return NextResponse.json(
-        { error: "Ce produit n'existe pas dans la base publique." },
-        { status: 404 },
-      );
-    }
-
-    if (!product.stripe_price_id) {
-      return NextResponse.json(
-        {
-          error:
-            "Ce produit n'est pas encore relié à un prix Stripe. Ajoute son stripe_price_id dans Supabase.",
-        },
-        { status: 400 },
-      );
-    }
-
     const stripe = getStripe();
     const siteUrl = getSiteUrlFromRequest(request);
+    const needsShipping = lines.some((item) => item.requiresShipping);
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       ui_mode: "embedded" as never,
       redirect_on_completion: "never" as never,
-      line_items: [
-        {
-          price: product.stripe_price_id,
-          quantity: 1,
-        },
-      ],
-      client_reference_id: product.id,
+      line_items: lines.map((item) => ({
+        price: item.stripePriceId,
+        quantity: item.quantity,
+      })),
+      customer_creation: "always",
+      phone_number_collection: { enabled: needsShipping },
+      ...(needsShipping
+        ? { shipping_address_collection: { allowed_countries: ["FR", "BE", "CH", "LU", "MC"] } }
+        : {}),
+      client_reference_id: line.productId,
       metadata: {
-        product_id: product.id,
-        product_slug: product.slug,
+        product_id: line.productId,
+        product_slug: line.productSlug,
+        variant_id: line.variantId ?? "",
+        quantity: String(line.quantity),
+        checkout_items: encodeCheckoutItemsMetadata(lines),
         ...(user?.id ? { supabase_user_id: user.id } : {}),
       },
       ...(user?.email ? { customer_email: user.email } : {}),

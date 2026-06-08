@@ -23,8 +23,8 @@ Add these variables to Vercel, local `.env.local`, and any preview environment t
 | -------------------------------------- | ------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`                 | Yes                                         | browser/server        | Canonical site URL used by metadata, sitemap, and auth redirects.                                                   |
 | `NEXT_PUBLIC_HERO_VIDEO_URL`           | No                                          | browser/server        | Optional hosted hero video override.                                                                                |
-| `NEXT_PUBLIC_MAINTENANCE_MODE`         | Yes                                         | server/proxy fallback | Keep `on` until `site_settings.maintenance_mode` is verified; set `off` only for non-maintenance fallback behavior. |
-| `PREVIEW_SECRET`                       | Optional                                    | server                | Emergency preview-token access to `/api/admin/preview?token=...&next=/`; normal preview uses Supabase admin role.   |
+| `NEXT_PUBLIC_MAINTENANCE_MODE`         | Yes                                         | server/proxy fallback | Fallback only if Supabase `site_settings.maintenance_mode` cannot be read. Use `off` for publication after Supabase maintenance is verified false. |
+| `PREVIEW_SECRET`                       | Optional                                    | server                | Emergency preview-token access to `/api/admin/preview?token=...&next=/`; generate a long random value or leave empty. |
 | `NEXT_PUBLIC_SUPABASE_URL`             | Yes                                         | browser/server/proxy  | Supabase project URL.                                                                                               |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes                                         | browser/server/proxy  | Supabase publishable/anon key for browser auth, RLS reads, and server session clients.                              |
 | `SUPABASE_SERVICE_ROLE_KEY`            | Yes for server-side writes outside user RLS | server only           | Supabase service-role key. Keep server-only. Required by existing server integrations that bypass user RLS.         |
@@ -95,7 +95,7 @@ Run these checks with an admin account after schema installation.
 
 ### Orders
 
-Do not work on Stripe yet. For this milestone, verify table/RLS/admin persistence without enabling live checkout:
+For Supabase-only validation, verify table/RLS/admin persistence even before enabling live checkout:
 
 1. Create a test order in SQL Editor or with a controlled server-side script using `orders` and `order_items`.
 2. Open `/admin/orders`; the order must appear.
@@ -103,10 +103,20 @@ Do not work on Stripe yet. For this milestone, verify table/RLS/admin persistenc
 4. Change status from `/admin/orders`; a row must be inserted into `order_status_events`.
 5. Sign in as the customer email/user and open `/compte`; only that user’s orders should be visible.
 
-## 6. Maintenance and preview
+## 6. Maintenance, preview and publication
 
-1. Keep `site_settings.maintenance_mode = true` until launch.
-2. Public visitors should receive maintenance.
+1. Keep `site_settings.maintenance_mode = true` until launch. Supabase `site_settings` is the source of truth when it is reachable.
+2. Public visitors should receive maintenance while `site_settings.maintenance_mode = true`.
 3. Admins with `profiles.role = 'admin'` should be able to activate `/api/admin/preview?next=/`.
 4. `/api/admin/preview/clear` should remove the preview cookie.
-5. Set `maintenance_mode` to `false` from `/admin/settings` only when the site is ready for public traffic.
+5. For publication, set `site_settings.maintenance_mode = false` from `/admin/settings` or SQL.
+6. Set `NEXT_PUBLIC_MAINTENANCE_MODE=off` in production after Supabase maintenance is verified false. This env is only the fallback if Supabase cannot be read.
+7. Check `/robots.txt`: if the site is publicly accessible, it must allow `/` and include `/sitemap.xml`; it must disallow `/` only while maintenance is effectively active.
+8. Generate a production `PREVIEW_SECRET` only if emergency token preview is needed; otherwise leave it empty and rely on Supabase admin role preview.
+
+## 7. Guest orders
+
+- Stripe Checkout must collect a customer e-mail for every order.
+- If a user is signed in, `supabase_user_id` is stored in Stripe metadata and the order is attached to `orders.user_id`.
+- If the user is not signed in, the order is stored with `user_id = null` and remains visible to a later signed-in account only when the Supabase Auth e-mail matches `orders.email` through RLS.
+- This means guest order lookup is e-mail based; support requests should always ask for the Stripe payment e-mail.
