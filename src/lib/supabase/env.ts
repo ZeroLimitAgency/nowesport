@@ -1,28 +1,45 @@
-export function hasSupabaseEnv() {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  );
+export type SupabasePublicEnv = {
+  url: string;
+  publishableKey: string;
+};
+
+export type SupabaseServiceEnv = {
+  url: string;
+  serviceRoleKey: string;
+};
+
+export function getOptionalSupabasePublicEnv(): SupabasePublicEnv | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!url || !publishableKey) {
+    return null;
+  }
+
+  return { url, publishableKey };
 }
 
-export function getSupabaseBrowserEnv() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+export function hasSupabaseEnv() {
+  return Boolean(getOptionalSupabasePublicEnv());
+}
 
-  if (!url || !key) {
+export function getSupabasePublicEnv(): SupabasePublicEnv {
+  const env = getOptionalSupabasePublicEnv();
+
+  if (!env) {
     throw new Error("Variables Supabase publiques manquantes.");
   }
 
-  return { url, key };
+  return env;
 }
 
-export function getSupabaseServiceEnv() {
+export function getSupabaseServiceEnv(): SupabaseServiceEnv {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!url || !key) {
+  if (!url || !serviceRoleKey) {
     throw new Error("Variables Supabase serveur manquantes.");
   }
 
-  return { url, key };
+  return { url, serviceRoleKey };
 }
