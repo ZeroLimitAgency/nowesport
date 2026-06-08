@@ -19,6 +19,7 @@ export type CatalogProduct = {
     color?: string | null;
     stock: number;
     priceCents?: number | null;
+    stripePriceId?: string | null;
   }>;
 };
 
@@ -37,7 +38,7 @@ export async function getCatalogProducts(): Promise<CatalogProduct[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("id, slug, name, category, description, short_description, product_type, price_cents, currency, product_variants(id, name, size, color, stock_quantity, price_cents, is_active)")
+    .select("id, slug, name, category, description, short_description, product_type, price_cents, currency, product_variants(id, name, size, color, stock_quantity, price_cents, stripe_price_id, is_active)")
     .eq("is_public", true)
     .order("sort_order", { ascending: true });
 
@@ -72,6 +73,7 @@ export async function getCatalogProducts(): Promise<CatalogProduct[]> {
         color: variant.color,
         stock: variant.stock_quantity ?? 0,
         priceCents: variant.price_cents,
+        stripePriceId: variant.stripe_price_id,
       })),
     };
   });

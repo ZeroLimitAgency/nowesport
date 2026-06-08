@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { CheckoutButton } from "@/components/checkout-button";
+import { ProductCheckoutControls } from "@/components/product-checkout-controls";
 import { productOptions } from "@/data/site";
 import { getPublicProductBySlug } from "@/lib/content";
 
@@ -70,16 +70,7 @@ export default async function ProductPage({
               ))}
             </div>
 
-            <CheckoutButton
-              slug={product.slug}
-              disabled={!product.stripePriceId}
-            />
-            {!product.stripePriceId ? (
-              <p className="mt-3 text-sm leading-6 text-white/46">
-                Ce produit n&apos;est pas encore relié à Stripe. Ajoute son
-                `stripe_price_id` dans Supabase pour activer le paiement.
-              </p>
-            ) : null}
+            <ProductCheckoutControls product={product} />
           </div>
         </div>
       </section>

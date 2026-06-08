@@ -41,6 +41,20 @@ Variables attendues :
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 
+
+## Publication publique
+
+La source de vérité du mode maintenance est `public.site_settings.maintenance_mode` dans Supabase lorsque Supabase est joignable. `NEXT_PUBLIC_MAINTENANCE_MODE` ne sert que de fallback de sécurité si Supabase ne répond pas.
+
+Avant d'ouvrir le site au public :
+
+1. vérifier que Supabase est configuré et que `site_settings.maintenance_mode = false` ;
+2. mettre `NEXT_PUBLIC_MAINTENANCE_MODE=off` pour éviter qu'un fallback environnement ne bloque `robots.txt` ou le proxy ;
+3. vérifier `https://<domaine>/robots.txt` : il doit autoriser `/` et déclarer le sitemap ;
+4. vérifier `https://<domaine>/sitemap.xml` ;
+5. réaliser un achat Stripe test complet, webhook inclus, avant de basculer sur les clés live ;
+6. générer des secrets de production uniques (`PREVIEW_SECRET`, clés Supabase, clés Stripe) et ne jamais reprendre les exemples du dépôt.
+
 ## Commandes
 
 ```bash

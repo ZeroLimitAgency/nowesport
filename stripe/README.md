@@ -7,6 +7,7 @@
 - le lien entre les deux se fait via :
   - `products.stripe_product_id`
   - `products.stripe_price_id`
+  - `product_variants.stripe_price_id` quand une variante a son propre prix Stripe
 
 ## Etat cible
 
@@ -24,8 +25,9 @@ Aucun fichier local ne doit etre necessaire au fonctionnement du checkout en pro
 1. Creer le produit dans Stripe
 2. Creer le prix associe dans Stripe
 3. Copier le `price_id` Stripe
-4. Le coller dans `public.products.stripe_price_id` cote Supabase
+4. Le coller dans `public.products.stripe_price_id` cote Supabase, ou dans `public.product_variants.stripe_price_id` si le prix est propre a une variante
 5. Facultatif mais recommande : copier aussi le `product_id` Stripe dans `public.products.stripe_product_id`
+6. Pour les produits physiques avec variantes, verifier qu'une variante active est selectionnable et en stock avant paiement
 
 ## Exemple SQL
 
@@ -59,10 +61,10 @@ STRIPE_WEBHOOK_SECRET=whsec_xxxxx
 
 ## Pages et routes deja branchees
 
-- checkout integre produit : `/checkout/[slug]`
+- checkout integre produit : `/checkout/[slug]` avec variante et quantite quand necessaire
 - creation session embedded : `/api/checkout/embedded-session`
-- webhook Stripe : `/api/stripe/webhook`
-- fallback hosted checkout : `/api/checkout/session`
+- webhook Stripe : `/api/stripe/webhook` avec creation commande, lignes et decrement de stock variante physique
+- hosted checkout panier : `/api/checkout/session`
 - deploiement recommande : GitHub -> Vercel
 
 ## Checklist avant validation complete
@@ -73,3 +75,8 @@ STRIPE_WEBHOOK_SECRET=whsec_xxxxx
 4. Declarer le webhook Stripe sur le domaine Vercel actif
 5. Realiser un achat test complet jusqu'a l'ecriture dans `orders` et `order_items`
 6. Ne considerer la prod Stripe comme validee qu'apres ce test de bout en bout
+
+
+## Commandes invitees
+
+Stripe Checkout doit collecter un e-mail client. Si l'utilisateur est connecte, l'ID Supabase est transmis en metadata et la commande est rattachee a `orders.user_id`. Si l'utilisateur n'est pas connecte, la commande est conservee avec `user_id = null` et reste consultable par un compte dont l'e-mail Supabase correspond a l'e-mail Stripe, via les policies RLS.
