@@ -108,29 +108,42 @@ export function HomeHighlights() {
   );
 }
 
-export function ShopBanner() {
+export function ShopBanner({
+  eyebrow = "Boutique",
+  title = "Découvrir notre maillot 2026",
+  description = "Le thème exporté met en avant une bannière très directe autour de la collection Crystal. On garde ici la même logique : une promesse nette, un call to action clair et une entrée rapide vers les produits.",
+  primaryCta = "Acheter maintenant",
+  primaryHref = "/shop",
+  secondaryCta = "Voir la collection Crystal",
+  secondaryHref = "/shop",
+}: {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  primaryCta?: string;
+  primaryHref?: string;
+  secondaryCta?: string;
+  secondaryHref?: string;
+} = {}) {
   return (
     <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
       <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(135deg,#fdf9fb_0%,#ead8e3_20%,#0c0b0d_20%,#09090a_100%)] p-[1px]">
         <div className="grid gap-0 rounded-[calc(2rem-1px)] bg-black lg:grid-cols-[1fr_0.85fr]">
           <div className="px-6 py-8 sm:px-8 sm:py-10">
-            <p className="section-kicker">Boutique</p>
+            <p className="section-kicker">{eyebrow}</p>
             <h2 className="mt-4 text-4xl font-black uppercase leading-[0.92] tracking-[-0.05em] text-white sm:text-6xl">
-              Découvrir notre maillot 2026
+              {title}
             </h2>
             <p className="mt-4 max-w-xl text-base leading-7 text-white/60">
-              Le thème exporté met en avant une bannière très directe autour de
-              la collection Crystal. On garde ici la même logique : une promesse
-              nette, un call to action clair et une entrée rapide vers les
-              produits.
+              {description}
             </p>
             <div className="mt-7 flex flex-col gap-4 sm:flex-row">
-              <button type="button" className="primary-cta">
-                Acheter maintenant
-              </button>
-              <button type="button" className="secondary-cta">
-                Voir la collection Crystal
-              </button>
+              <Link href={primaryHref} className="primary-cta">
+                {primaryCta}
+              </Link>
+              <Link href={secondaryHref} className="secondary-cta">
+                {secondaryCta}
+              </Link>
             </div>
           </div>
 

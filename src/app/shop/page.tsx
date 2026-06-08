@@ -1,19 +1,27 @@
 import { ShopGridSection } from "@/components/content-sections";
 import { PageIntro, ShopBanner } from "@/components/sections";
-import { productOptions, shopCollections } from "@/data/site";
+import { getCurrentLocale, getShopPresentation, getSiteCmsContent } from "@/lib/cms";
 import { getPublicProducts } from "@/lib/content";
 
 export default async function ShopPage() {
-  const products = await getPublicProducts();
+  const locale = await getCurrentLocale();
+  const [products, cms] = await Promise.all([getPublicProducts(), getSiteCmsContent(locale)]);
+  const intro = cms.blocks["shop.intro"];
+  const banner = cms.blocks["shop.banner"];
+  const { productOptions, shopCollections } = getShopPresentation();
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
-      <PageIntro
-        kicker="Boutique"
-        title="Produits, collections et personnalisation"
-        description="La boutique est pensée pour accueillir tes vraies collections, tes médias, tes options de personnalisation, les tailles, le flocage, les prix et les futurs moyens de paiement."
+      <PageIntro kicker={intro.eyebrow ?? "Shop"} title={intro.title} description={intro.body} />
+      <ShopBanner
+        eyebrow={banner.eyebrow}
+        title={banner.title}
+        description={banner.body}
+        primaryCta={banner.ctaLabel}
+        primaryHref={banner.ctaHref}
+        secondaryCta={banner.secondaryCtaLabel}
+        secondaryHref={banner.secondaryCtaHref}
       />
-      <ShopBanner />
       <ShopGridSection
         items={products}
         productOptions={productOptions}

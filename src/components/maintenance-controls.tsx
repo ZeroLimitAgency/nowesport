@@ -1,74 +1,58 @@
 "use client";
 
-import { useState } from "react";
-
-const copy = {
-  fr: {
-    title: "Site en maintenance",
-    body: "Nous préparons la nouvelle version du site. Les administrateurs peuvent se connecter pour prévisualiser le site.",
-    login: "Connexion admin",
-    contact: "Nous contacter",
-  },
-  en: {
-    title: "Site under maintenance",
-    body: "We are preparing the new site. Administrators can sign in to preview the website.",
-    login: "Admin login",
-    contact: "Contact us",
-  },
-} as const;
+import type { CmsBlock, SiteLocale } from "@/lib/cms";
 
 type MaintenanceControlsProps = {
-  contactUrl: string;
+  content: CmsBlock;
+  locale: SiteLocale;
 };
 
-export function MaintenanceControls({ contactUrl }: MaintenanceControlsProps) {
-  const [lang, setLang] = useState<keyof typeof copy>("fr");
-  const currentCopy = copy[lang];
-
+export function MaintenanceControls({ content, locale }: MaintenanceControlsProps) {
   return (
     <section
       className="relative z-10 mx-auto w-full max-w-4xl rounded-[2rem] border border-[rgba(255,255,255,0.1)] bg-[rgba(0,0,0,0.55)] p-7 text-center text-[#f5f3f7] shadow-[0_30px_90px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:rounded-[2.5rem] sm:p-12"
       aria-labelledby="maintenance-title"
     >
       <p className="mx-auto inline-flex rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-black uppercase tracking-[0.28em] text-[#ff8ec0]">
-        NOW eSport
+        {content.eyebrow ?? "NOW eSport"}
       </p>
 
       <h1
         id="maintenance-title"
         className="mt-7 text-5xl font-black uppercase leading-[0.9] tracking-[-0.08em] sm:text-7xl lg:text-8xl"
       >
-        {currentCopy.title}
+        {content.title}
       </h1>
 
       <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/68 sm:text-lg">
-        {currentCopy.body}
+        {content.body}
       </p>
 
       <div className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        {content.ctaHref && content.ctaLabel ? (
+          <a
+            href={content.ctaHref}
+            target="_blank"
+            rel="noreferrer"
+            className="primary-cta w-full sm:w-auto"
+          >
+            {content.ctaLabel}
+          </a>
+        ) : null}
         <a
-          href={contactUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="primary-cta w-full sm:w-auto"
-        >
-          {currentCopy.contact}
-        </a>
-        <button
-          type="button"
-          onClick={() => setLang(lang === "fr" ? "en" : "fr")}
+          href={`/api/language?lang=${locale === "fr" ? "en" : "fr"}&next=/maintenance`}
           className="inline-flex min-h-14 w-full items-center justify-center rounded-full border border-white/10 bg-white/[0.08] px-6 text-xs font-black uppercase tracking-[0.2em] text-white sm:w-auto"
           aria-label="Changer la langue"
         >
           FR / EN
-        </button>
+        </a>
       </div>
 
       <a
-        href="/login?next=/"
+        href={content.secondaryCtaHref ?? "/login?next=/"}
         className="absolute bottom-4 right-4 rounded-full border border-white/10 bg-black/30 px-3 py-2 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/45 hover:border-white/20 hover:text-white/75"
       >
-        {currentCopy.login}
+        {content.secondaryCtaLabel ?? (locale === "fr" ? "Connexion admin" : "Admin login")}
       </a>
     </section>
   );

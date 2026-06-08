@@ -22,8 +22,9 @@ where table_schema = 'public'
   and table_name in (
     'profiles', 'games', 'rosters', 'roster_members', 'partners', 'events',
     'products', 'product_variants', 'carts', 'cart_items', 'orders',
-    'order_items', 'order_status_events', 'inventory_movements', 'site_settings'
-  )
+    'order_items', 'order_status_events', 'inventory_movements', 'site_settings',
+    'site_sections', 'site_content_blocks', 'site_navigation', 'site_social_links', 'site_media'
+    )
 order by table_name;
 
 -- Required RLS policies.
@@ -62,13 +63,14 @@ begin
     raise exception 'Supabase schema verification failed: % required enum types are missing', missing_count;
   end if;
 
-  select 15 - count(*) into missing_count
+  select 20 - count(*) into missing_count
   from information_schema.tables
   where table_schema = 'public'
     and table_name in (
       'profiles', 'games', 'rosters', 'roster_members', 'partners', 'events',
       'products', 'product_variants', 'carts', 'cart_items', 'orders',
-      'order_items', 'order_status_events', 'inventory_movements', 'site_settings'
+      'order_items', 'order_status_events', 'inventory_movements', 'site_settings',
+    'site_sections', 'site_content_blocks', 'site_navigation', 'site_social_links', 'site_media'
     );
 
   if missing_count <> 0 then
@@ -85,6 +87,30 @@ begin
 
   if not exists (select 1 from public.site_settings where key = 'maintenance_mode') then
     raise exception 'Supabase schema verification failed: maintenance_mode seed is missing';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename in ('site_sections', 'site_content_blocks', 'site_navigation', 'site_social_links', 'site_media')
+      and policyname like 'public_read_site_%'
+    group by schemaname
+    having count(*) = 5
+  ) then
+    raise exception 'Supabase schema verification failed: CMS public read policies are missing';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename in ('site_sections', 'site_content_blocks', 'site_navigation', 'site_social_links', 'site_media')
+      and policyname like 'admins_manage_site_%'
+    group by schemaname
+    having count(*) = 5
+  ) then
+    raise exception 'Supabase schema verification failed: CMS admin write policies are missing';
   end if;
 end $$;
 
