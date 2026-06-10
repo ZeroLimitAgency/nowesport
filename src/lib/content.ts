@@ -42,6 +42,8 @@ export type RosterMemberCard = {
   nationality?: string | null;
   bio?: string | null;
   photoUrl?: string | null;
+  rankingPoints?: number | null;
+  prizeEarnings?: number | null;
   socialLinks: Record<string, string>;
 };
 
@@ -53,12 +55,14 @@ export type RosterTeamCard = {
   category?: string | null;
   description: string;
   logoUrl?: string | null;
+  gameIconUrl?: string | null;
   bannerUrl?: string | null;
   members: RosterMemberCard[];
 };
 
 export type GameCard = (typeof games)[number] & {
   logoUrl?: string | null;
+  gameIconUrl?: string | null;
   bannerUrl?: string | null;
   rosters: Array<{
     name: string;
@@ -232,12 +236,12 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
   const [{ data: teamsData, error: teamsError }, { data: membersData, error: membersError }] = await Promise.all([
     supabase
       .from("rosters")
-      .select("id, slug, name, category, description, logo_url, banner_url, sort_order, games(slug, name)")
+      .select("id, slug, name, category, description, logo_url, game_icon_url, banner_url, sort_order, games(slug, name)")
       .eq("is_public", true)
       .order("sort_order", { ascending: true }),
     supabase
       .from("roster_members")
-      .select("roster_id, first_name, last_name, pseudo, display_name, role_type, role_label, nationality, country, bio, photo_url, avatar_url, social_links, social_url, sort_order")
+      .select("roster_id, first_name, last_name, pseudo, display_name, role_type, role_label, nationality, country, bio, photo_url, avatar_url, ranking_points, prize_earnings, social_links, social_url, sort_order")
       .eq("is_public", true)
       .order("sort_order", { ascending: true }),
   ]);
@@ -262,6 +266,8 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
         nationality: member.nationality ?? member.country,
         bio: member.bio,
         photoUrl: member.photo_url ?? member.avatar_url,
+        rankingPoints: member.ranking_points,
+        prizeEarnings: member.prize_earnings,
         socialLinks: normalizeSocialLinks(member.social_links, member.social_url),
       }));
 
@@ -273,6 +279,7 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
       category: team.category,
       description: team.description ?? "",
       logoUrl: team.logo_url,
+      gameIconUrl: team.game_icon_url ?? team.logo_url,
       bannerUrl: team.banner_url,
       members,
     };
@@ -298,6 +305,7 @@ export async function getPublicGames(): Promise<GameCard[]> {
     description: team.description,
     visual: team.gameSlug ?? "now",
     logoUrl: team.logoUrl,
+    gameIconUrl: team.gameIconUrl,
     bannerUrl: team.bannerUrl,
     rosters: [
       {

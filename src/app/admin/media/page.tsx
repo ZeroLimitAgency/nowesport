@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { deleteMedia, uploadMedia } from "@/app/admin/actions";
+import { deleteMedia, uploadMediaFromLibrary } from "@/app/admin/actions";
 import { AdminShell } from "@/components/admin-shell";
 import { MediaCopyButton } from "@/components/media-copy-button";
 import { requireAdmin } from "@/lib/auth";
@@ -86,7 +86,7 @@ export default async function AdminMediaPage({ searchParams }: { searchParams: P
             <p className="section-kicker">Upload</p>
             <h3 className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white">Téléverser dans {mediaBucketLabels[bucket]}</h3>
           </div>
-          <form action={uploadMedia} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+          <form action={uploadMediaFromLibrary} className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
             <input type="hidden" name="bucket" value={bucket} />
             <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">
               Dossier

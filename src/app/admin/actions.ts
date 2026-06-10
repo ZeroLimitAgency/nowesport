@@ -102,6 +102,30 @@ function intValue(formData: FormData, key: string, fallback = 0) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function numberValue(formData: FormData, key: string) {
+  const raw = text(formData, key).replace(/\s+/g, "").replace(",", ".");
+  if (!raw) return null;
+  const value = Number.parseFloat(raw);
+  if (!Number.isFinite(value)) {
+    throw new Error(`${key} doit être un nombre valide.`);
+  }
+  return value;
+}
+
+function slugify(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || `now-${Date.now()}`;
+}
+
+function optionalSlug(formData: FormData, key: string, fallback: string) {
+  const value = nullableText(formData, key);
+  return slugify(value || fallback);
+}
+
 
 function mediaFileError(message: string) {
   return new Error(`Média : ${message}`);
@@ -180,6 +204,13 @@ export async function uploadMedia(formData: FormData) {
   revalidatePath("/admin/events");
   revalidatePath("/admin/content");
   revalidatePath("/", "layout");
+
+  const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(path);
+  return { publicUrl: publicUrlData.publicUrl, path, bucket };
+}
+
+export async function uploadMediaFromLibrary(formData: FormData) {
+  await uploadMedia(formData);
 }
 
 export async function deleteMedia(formData: FormData) {
@@ -374,8 +405,8 @@ export async function saveEvent(formData: FormData) {
   const { supabase } = await getAdminClient();
   const id = nullableText(formData, "id");
   const payload = {
-    slug: requiredText(formData, "slug", "Slug événement"),
     title: requiredText(formData, "title", "Titre événement"),
+    slug: optionalSlug(formData, "slug", text(formData, "title")),
     event_date: requiredText(formData, "event_date", "Date événement"),
     location: nullableText(formData, "location"),
     description: nullableText(formData, "description"),
@@ -604,6 +635,7 @@ function socialLinksValue(formData: FormData) {
     ["twitch", nullableText(formData, "social_twitch")],
     ["youtube", nullableText(formData, "social_youtube")],
     ["tiktok", nullableText(formData, "social_tiktok")],
+    ["liquipedia", nullableText(formData, "social_liquipedia")],
     ["website", nullableText(formData, "social_website")],
   ].filter((entry): entry is [string, string] => Boolean(entry[1]));
 
@@ -626,12 +658,13 @@ export async function saveRosterTeam(formData: FormData) {
   const id = nullableText(formData, "id");
   const payload = {
     game_id: nullableText(formData, "game_id"),
-    slug: requiredText(formData, "slug", "Slug équipe"),
     name: requiredText(formData, "name", "Nom équipe"),
+    slug: optionalSlug(formData, "slug", text(formData, "name")),
     category: nullableText(formData, "category"),
     description: nullableText(formData, "description"),
     logo_url: optionalUrl(formData, "logo_url", "Logo équipe", { allowRelative: true }),
     banner_url: optionalUrl(formData, "banner_url", "Bannière équipe", { allowRelative: true }),
+    game_icon_url: optionalUrl(formData, "game_icon_url", "Logo du jeu", { allowRelative: true }),
     is_public: formData.get("is_public") === "on",
     sort_order: intValue(formData, "sort_order"),
   };
@@ -675,7 +708,7 @@ export async function saveRosterMember(formData: FormData) {
   const primarySocialUrl = Object.values(socialLinks)[0] ?? null;
   const payload = {
     roster_id: rosterId,
-    slug: nullableText(formData, "slug"),
+    slug: optionalSlug(formData, "slug", pseudo),
     first_name: firstName,
     last_name: lastName,
     pseudo,
@@ -688,6 +721,8 @@ export async function saveRosterMember(formData: FormData) {
     bio: nullableText(formData, "bio"),
     photo_url: optionalUrl(formData, "photo_url", "Photo", { allowRelative: true }),
     avatar_url: optionalUrl(formData, "photo_url", "Photo", { allowRelative: true }),
+    ranking_points: intValue(formData, "ranking_points", 0),
+    prize_earnings: numberValue(formData, "prize_earnings"),
     social_links: socialLinks,
     social_url: primarySocialUrl,
     is_public: formData.get("is_public") === "on",
