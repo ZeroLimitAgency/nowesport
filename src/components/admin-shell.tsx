@@ -8,6 +8,7 @@ const adminLinks = [
   { label: "Événements", href: "/admin/events" },
   { label: "Partenaires", href: "/admin/partners" },
   { label: "Contenu", href: "/admin/content" },
+  { label: "Médias", href: "/admin/media" },
   { label: "Paramètres", href: "/admin/settings" },
 ];
 

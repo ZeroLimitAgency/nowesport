@@ -4,6 +4,16 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import {
+  imageMimeTypes,
+  isMediaBucket,
+  maxImageSizeBytes,
+  maxVideoSizeBytes,
+  mediaMimeTypes,
+  sanitizeMediaFilename,
+  sanitizeMediaFolder,
+  videoMimeTypes,
+} from "@/lib/media";
 
 async function getAdminClient() {
   const { isConfigured, user } = await requireAdmin();
@@ -90,6 +100,113 @@ function intValue(formData: FormData, key: string, fallback = 0) {
   const raw = text(formData, key);
   const value = Number.parseInt(raw, 10);
   return Number.isFinite(value) ? value : fallback;
+}
+
+
+function mediaFileError(message: string) {
+  return new Error(`Média : ${message}`);
+}
+
+function fileExtension(filename: string) {
+  return filename.split(".").pop()?.toLowerCase() ?? "";
+}
+
+function validateMediaFile(file: File) {
+  if (!file.size) {
+    throw mediaFileError("choisis un fichier non vide.");
+  }
+
+  const mimeType = file.type;
+  if (!(mediaMimeTypes as readonly string[]).includes(mimeType)) {
+    throw mediaFileError("format refusé. Formats autorisés : png, jpg, jpeg, webp et mp4.");
+  }
+
+  const extension = fileExtension(file.name);
+  const allowedImageExtensions = ["png", "jpg", "jpeg", "webp"];
+  const allowedVideoExtensions = ["mp4"];
+  const isImage = (imageMimeTypes as readonly string[]).includes(mimeType);
+  const isVideo = (videoMimeTypes as readonly string[]).includes(mimeType);
+
+  if (isImage && !allowedImageExtensions.includes(extension)) {
+    throw mediaFileError("extension image refusée. Utilise png, jpg, jpeg ou webp.");
+  }
+
+  if (isVideo && !allowedVideoExtensions.includes(extension)) {
+    throw mediaFileError("extension vidéo refusée. Utilise mp4.");
+  }
+
+  const maxSize = isVideo ? maxVideoSizeBytes : maxImageSizeBytes;
+  if (file.size > maxSize) {
+    const maxMb = Math.floor(maxSize / 1024 / 1024);
+    throw mediaFileError(`fichier trop lourd. Limite : ${maxMb} Mo.`);
+  }
+
+  return { mimeType, extension };
+}
+
+export async function uploadMedia(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const bucket = text(formData, "bucket");
+  const folder = sanitizeMediaFolder(text(formData, "folder"));
+  const file = formData.get("file");
+
+  if (!isMediaBucket(bucket)) {
+    throw mediaFileError("bucket invalide.");
+  }
+
+  if (!(file instanceof File)) {
+    throw mediaFileError("fichier manquant.");
+  }
+
+  const { mimeType, extension } = validateMediaFile(file);
+  const safeName = sanitizeMediaFilename(file.name);
+  const basename = safeName.replace(new RegExp(`\\.${extension}$`, "i"), "");
+  const uniqueName = `${basename}-${Date.now()}.${extension}`;
+  const path = folder ? `${folder}/${uniqueName}` : uniqueName;
+
+  const { error } = await supabase.storage.from(bucket).upload(path, file, {
+    cacheControl: "31536000",
+    contentType: mimeType,
+    upsert: false,
+  });
+
+  if (error) {
+    throw adminError("Upload média", error);
+  }
+
+  revalidatePath("/admin/media");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/partners");
+  revalidatePath("/admin/events");
+  revalidatePath("/admin/content");
+  revalidatePath("/", "layout");
+}
+
+export async function deleteMedia(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const bucket = text(formData, "bucket");
+  const path = text(formData, "path");
+
+  if (!isMediaBucket(bucket)) {
+    throw mediaFileError("bucket invalide.");
+  }
+
+  if (!path || path.includes("..")) {
+    throw mediaFileError("chemin invalide.");
+  }
+
+  const { error } = await supabase.storage.from(bucket).remove([path]);
+
+  if (error) {
+    throw adminError("Suppression média", error);
+  }
+
+  revalidatePath("/admin/media");
+  revalidatePath("/admin/products");
+  revalidatePath("/admin/partners");
+  revalidatePath("/admin/events");
+  revalidatePath("/admin/content");
+  revalidatePath("/", "layout");
 }
 
 export async function updateMaintenanceSetting(formData: FormData) {

@@ -20,6 +20,7 @@ export type ProductCard = {
   stripeProductId?: string | null;
   productType?: "physical" | "digital";
   requiresShipping?: boolean;
+  imageUrl?: string | null;
   variants?: Array<{
     id: string;
     name: string;
@@ -30,8 +31,8 @@ export type ProductCard = {
   }>;
 };
 export type GameCard = (typeof games)[number];
-export type PartnerCard = (typeof partners)[number];
-export type EventCard = (typeof events)[number];
+export type PartnerCard = (typeof partners)[number] & { imageUrl?: string | null };
+export type EventCard = (typeof events)[number] & { imageUrl?: string | null };
 export type TeamSupportBlock = (typeof teamSupportBlocks)[number];
 
 function formatPrice(priceCents: number, currency = "EUR") {
@@ -56,7 +57,7 @@ export async function getPublicProducts(): Promise<ProductCard[]> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "slug, name, category, description, short_description, price_cents, currency, stripe_product_id, stripe_price_id",
+      "slug, name, category, description, short_description, price_cents, currency, hero_image_url, stripe_product_id, stripe_price_id",
     )
     .eq("is_public", true)
     .order("sort_order", { ascending: true });
@@ -71,6 +72,7 @@ export async function getPublicProducts(): Promise<ProductCard[]> {
     category: item.category ?? "Collection",
     price: formatPrice(item.price_cents, item.currency ?? "EUR"),
     description: item.short_description ?? item.description ?? "",
+    imageUrl: item.hero_image_url,
     intro: item.description ?? item.short_description ?? "",
     details: [item.description, item.short_description]
       .filter((detail): detail is string => Boolean(detail)),
@@ -92,7 +94,7 @@ export async function getPublicProductBySlug(
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, slug, name, category, description, short_description, price_cents, currency, product_type, requires_shipping, allow_custom_name, allow_custom_number, allow_flocking, stripe_product_id, stripe_price_id",
+      "id, slug, name, category, description, short_description, price_cents, currency, hero_image_url, product_type, requires_shipping, allow_custom_name, allow_custom_number, allow_flocking, stripe_product_id, stripe_price_id",
     )
     .eq("slug", slug)
     .eq("is_public", true)
@@ -136,6 +138,7 @@ export async function getPublicProductBySlug(
     category: data.category ?? "Collection",
     price: formatPrice(data.price_cents, data.currency ?? "EUR"),
     description: data.short_description ?? data.description ?? "",
+    imageUrl: data.hero_image_url,
     intro: data.description ?? data.short_description ?? "",
     details: Array.from(new Set(details)).slice(0, 6),
     stripePriceId: data.stripe_price_id,
@@ -221,7 +224,7 @@ export async function getPublicPartners(): Promise<PartnerCard[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("partners")
-    .select("name, role_label, description, external_url")
+    .select("name, role_label, description, image_url, external_url")
     .eq("is_public", true)
     .order("sort_order", { ascending: true });
 
@@ -233,6 +236,7 @@ export async function getPublicPartners(): Promise<PartnerCard[]> {
     name: item.name,
     role: item.role_label ?? "Partenaire",
     description: item.description ?? "",
+    imageUrl: item.image_url,
     href: item.external_url ?? "#",
   }));
 }
@@ -247,7 +251,7 @@ export async function getPublicEvents(): Promise<EventCard[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("events")
-    .select("title, event_date, location, description")
+    .select("title, event_date, location, description, image_url")
     .eq("is_public", true)
     .order("event_date", { ascending: false });
 
@@ -260,6 +264,7 @@ export async function getPublicEvents(): Promise<EventCard[]> {
     date: new Date(item.event_date).toLocaleDateString("fr-FR"),
     location: item.location ?? "",
     description: item.description ?? "",
+    imageUrl: item.image_url,
     tone: index % 2 === 0 ? "studio" : "sunset",
   }));
 }

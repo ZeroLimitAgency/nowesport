@@ -94,6 +94,22 @@ begin
 end;
 $$;
 
+
+-- Public media buckets used by the admin Media Manager.
+-- Images are limited to 8 MiB. The CMS bucket allows MP4 videos up to 50 MiB for hero/maintenance blocks.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values
+  ('products', 'products', true, 8388608, array['image/png','image/jpeg','image/webp']),
+  ('roster', 'roster', true, 8388608, array['image/png','image/jpeg','image/webp']),
+  ('partners', 'partners', true, 8388608, array['image/png','image/jpeg','image/webp']),
+  ('events', 'events', true, 8388608, array['image/png','image/jpeg','image/webp']),
+  ('cms', 'cms', true, 52428800, array['image/png','image/jpeg','image/webp','video/mp4'])
+on conflict (id) do update
+set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   role public.app_role not null default 'customer',
@@ -721,6 +737,33 @@ create policy "public_read_site_media"
 on public.site_media
 for select
 using (is_active = true);
+
+
+
+drop policy if exists "public_read_media_storage" on storage.objects;
+create policy "public_read_media_storage"
+on storage.objects
+for select
+using (bucket_id in ('products', 'roster', 'partners', 'events', 'cms'));
+
+drop policy if exists "admins_upload_media_storage" on storage.objects;
+create policy "admins_upload_media_storage"
+on storage.objects
+for insert
+with check (bucket_id in ('products', 'roster', 'partners', 'events', 'cms') and public.is_admin());
+
+drop policy if exists "admins_update_media_storage" on storage.objects;
+create policy "admins_update_media_storage"
+on storage.objects
+for update
+using (bucket_id in ('products', 'roster', 'partners', 'events', 'cms') and public.is_admin())
+with check (bucket_id in ('products', 'roster', 'partners', 'events', 'cms') and public.is_admin());
+
+drop policy if exists "admins_delete_media_storage" on storage.objects;
+create policy "admins_delete_media_storage"
+on storage.objects
+for delete
+using (bucket_id in ('products', 'roster', 'partners', 'events', 'cms') and public.is_admin());
 
 drop policy if exists "profiles_select_own_or_admin" on public.profiles;
 create policy "profiles_select_own_or_admin"
