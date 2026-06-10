@@ -11,6 +11,13 @@ Ouvre le dashboard Supabase, puis :
 5. si Supabase répond qu'un objet existe déjà (`type ... already exists`, `relation ... already exists`, etc.), utilise la dernière version du fichier : elle est idempotente pour les types, tables, index, triggers et policies, puis relance le script complet
 6. exécute ensuite `supabase/verify.sql` pour vérifier les enums, tables, policies, triggers et settings requis
 
+
+> Note production : `supabase/schema.sql` décrit l'installation complète d'une base fraîche.
+> Pour une base Supabase déjà existante, exécute d'abord les migrations
+> idempotentes de `supabase/migrations/` adaptées à l'écart constaté, notamment
+> `supabase/migrations/20260610_roster_existing_schema.sql` pour ajouter sans
+> suppression les colonnes roster utilisées par le code déployé.
+
 ## 2. Donner le rôle admin
 
 Après ta première connexion, ton profil est créé automatiquement dans `public.profiles` par le trigger `handle_new_user()`.

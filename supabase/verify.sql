@@ -39,6 +39,17 @@ from storage.buckets
 where id in ('products', 'roster', 'partners', 'events', 'cms')
 order by id;
 
+-- Required roster columns used by the deployed code and production migration.
+select table_name, column_name, data_type, is_nullable, column_default
+from information_schema.columns
+where table_schema = 'public'
+  and (
+    (table_name = 'games' and column_name in ('id', 'slug', 'name', 'sort_order', 'is_public'))
+    or (table_name = 'rosters' and column_name in ('id', 'game_id', 'slug', 'name', 'category', 'description', 'logo_url', 'banner_url', 'sort_order', 'display_order', 'is_public', 'is_active'))
+    or (table_name = 'roster_members' and column_name in ('id', 'roster_id', 'slug', 'first_name', 'last_name', 'pseudo', 'display_name', 'role_type', 'custom_role', 'role_label', 'nationality', 'country', 'bio', 'photo_url', 'avatar_url', 'social_links', 'social_url', 'sort_order', 'display_order', 'is_public', 'is_active'))
+  )
+order by table_name, column_name;
+
 -- Required triggers.
 select event_object_table as table_name, trigger_name
 from information_schema.triggers
@@ -93,6 +104,19 @@ begin
 
   if not exists (select 1 from public.site_settings where key = 'maintenance_mode') then
     raise exception 'Supabase schema verification failed: maintenance_mode seed is missing';
+  end if;
+
+  select 38 - count(*) into missing_count
+  from information_schema.columns
+  where table_schema = 'public'
+    and (
+      (table_name = 'games' and column_name in ('id', 'slug', 'name', 'sort_order', 'is_public'))
+      or (table_name = 'rosters' and column_name in ('id', 'game_id', 'slug', 'name', 'category', 'description', 'logo_url', 'banner_url', 'sort_order', 'display_order', 'is_public', 'is_active'))
+      or (table_name = 'roster_members' and column_name in ('id', 'roster_id', 'slug', 'first_name', 'last_name', 'pseudo', 'display_name', 'role_type', 'custom_role', 'role_label', 'nationality', 'country', 'bio', 'photo_url', 'avatar_url', 'social_links', 'social_url', 'sort_order', 'display_order', 'is_public', 'is_active'))
+    );
+
+  if missing_count <> 0 then
+    raise exception 'Supabase schema verification failed: % required roster columns are missing; run supabase/migrations/20260610_roster_existing_schema.sql on existing production databases', missing_count;
   end if;
 
   if not exists (

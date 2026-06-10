@@ -244,7 +244,8 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
 
   const error = teamsError ?? membersError;
   if (error) {
-    throw new Error(`Lecture rosters Supabase impossible : ${error.message}`);
+    console.error(`Lecture rosters Supabase impossible : ${error.message}`);
+    return [];
   }
 
   return (teamsData ?? []).map((team) => {
