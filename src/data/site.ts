@@ -35,17 +35,17 @@ export const homeHighlights = [
   {
     title: "NOW eSport",
     description:
-      "Le bloc principal présente la structure, sa scène compétitive et son identité. Il sert de point d'entrée éditorial juste après le hero plein écran.",
+      "La structure, sa scène compétitive et son identité sont présentées dans un format direct, premium et orienté communauté.",
   },
   {
     title: "NOW Academy",
     description:
-      "L'académie met en avant le développement des talents et les rosters en construction, dans une lecture plus posée et plus structurée.",
+      "L'académie met en avant le développement des talents, l'encadrement et la progression des rosters NOW.",
   },
   {
     title: "NOW Studio",
     description:
-      "Le studio couvre l'image, la création de contenu et les activations. Cette partie donne de la matière au site sans casser la direction artistique.",
+      "Le studio rassemble image, contenus réseaux, media days et activations partenaires dans la direction artistique NOW.",
   },
 ];
 
@@ -61,8 +61,8 @@ export const collectionItems = [
       "Le maillot Crystal 2026 est la pièce phare de la boutique, présentée avec ses informations essentielles et ses options.",
     details: [
       "Déclinaison principale de la collection Crystal.",
-      "Zone prévue pour les visuels, les tailles et les variantes.",
-      "Structure prête pour le flocage, le numéro et le pseudo.",
+      "Coupe esport pensée pour la scène, les media days et les activations communautaires.",
+      "Personnalisation possible avec pseudo, numéro et finitions de collection.",
     ],
   },
   {
@@ -92,7 +92,7 @@ export const collectionItems = [
     details: [
       "Pièce lifestyle plus légère.",
       "Parfaite pour les shootings, contenus et activations.",
-      "Proposé en plusieurs coloris et visuels selon les collections.",
+      "Coupe lifestyle sobre, facile à porter en event comme au quotidien.",
     ],
   },
   {
@@ -147,7 +147,7 @@ export const games = [
     subtitle: "Rosters compétitifs",
     visual: "fortnite",
     description:
-      "La section Fortnite reprend la logique la plus riche du thème exporté, avec rosters, talents et lecture par pôles.",
+      "Pôle Fortnite compétitif avec talents, académie et créateurs réunis autour de la performance.",
     rosters: [
       {
         name: "Roster professionnel",
@@ -169,7 +169,7 @@ export const games = [
     subtitle: "Nouveau chapitre",
     visual: "cs2",
     description:
-      "La section Counter-Strike 2 présente l'équipe, son encadrement et ses contenus dédiés.",
+      "Nouveau chapitre Counter-Strike 2 avec encadrement, préparation et contenus dédiés à l'équipe.",
     rosters: [
       {
         name: "Encadrement",
@@ -183,7 +183,7 @@ export const games = [
     subtitle: "Scène dédiée",
     visual: "rocket",
     description:
-      "La page Rocket League présente le roster, les visuels clés et les informations de la section.",
+      "Section Rocket League pensée pour suivre le roster, ses rendez-vous et ses temps forts.",
     rosters: [
       {
         name: "Section Rocket League",
@@ -197,7 +197,7 @@ export const games = [
     subtitle: "Pôle académique",
     visual: "valorant",
     description:
-      "La section Valorant met en avant l'équipe, l'encadrement et les contenus dédiés à la scène académique.",
+      "Pôle Valorant orienté académie, progression et accompagnement des joueurs.",
     rosters: [
       {
         name: "Section Valorant",
@@ -211,12 +211,12 @@ export const teamSupportBlocks = [
   {
     title: "NOW Team",
     description:
-      "Direction, management et staff.",
+      "Direction sportive, management, staff et accompagnement des pôles compétitifs.",
   },
   {
     title: "Legends",
     description:
-      "Anciens joueurs et moments marquants.",
+      "Temps forts, anciens joueurs et moments qui construisent l'histoire NOW.",
   },
 ];
 
@@ -250,7 +250,7 @@ export const events = [
     date: "03/03/2026",
     location: "Paris",
     description:
-      "Activation de lancement avec captation, studio et mise en avant du projet dans un format plus éditorial.",
+      "Activation de lancement avec captation, studio et présentation de la saison NOW.",
     tone: "studio",
   },
   {

@@ -64,9 +64,9 @@ export default async function Home() {
       </section>
 
       <div className="space-y-4 py-10 sm:py-14">
-        <ShopGridSection items={products} productOptions={productOptions} shopCollections={shopCollections} />
-        <TeamsShowcaseSection gamesData={games} teamBlocks={getTeamSupportBlocks()} />
-        <PartnersShowcaseSection partnersData={partners} />
+        <ShopGridSection items={products} productOptions={productOptions} shopCollections={shopCollections} locale={locale} />
+        <TeamsShowcaseSection gamesData={games} teamBlocks={getTeamSupportBlocks()} locale={locale} />
+        <PartnersShowcaseSection partnersData={partners} locale={locale} />
       </div>
     </main>
   );

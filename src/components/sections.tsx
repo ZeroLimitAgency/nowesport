@@ -155,8 +155,8 @@ export function ShopBanner({
               NEVER
             </div>
             <div className="absolute bottom-[12%] right-[8%] w-56 rounded-[1.4rem] border border-white/10 bg-white/[0.05] p-4 text-white/70 backdrop-blur">
-              Collection Crystal, variantes, flocage et visuels pilotables plus
-              tard depuis ton futur back-office.
+              Collection Crystal, variantes, flocage et finitions pensées
+              pour la scène comme pour la communauté.
             </div>
           </div>
         </div>

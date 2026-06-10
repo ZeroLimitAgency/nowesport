@@ -11,7 +11,7 @@ export default async function PartnersPage() {
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <PageIntro kicker={intro.eyebrow ?? "Partners"} title={intro.title} description={intro.body} />
-      <PartnersShowcaseSection partnersData={partners} />
+      <PartnersShowcaseSection partnersData={partners} locale={locale} />
     </main>
   );
 }

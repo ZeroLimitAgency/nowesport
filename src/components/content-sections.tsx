@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { SiteLocale } from "@/lib/cms";
 import type {
   EventCard,
   GameCard,
@@ -7,23 +8,89 @@ import type {
   TeamSupportBlock,
 } from "@/lib/content";
 
+type SectionLocale = SiteLocale;
+
+const sectionCopy = {
+  fr: {
+    shopKicker: "Collections",
+    shopTitle: "La base de la boutique",
+    shopCta: "Découvrir les produits",
+    productOptions: "Options produit",
+    viewItem: "Voir l’article",
+    rostersKicker: "Rosters",
+    rostersTitle: "Découvrir nos rosters",
+    rostersLead: "Sélection compétitive NOW : équipes, staff et créateurs structurés par jeu.",
+    viewPage: "Voir la page",
+    partnersKicker: "Partenaires",
+    partnersTitle: "Découvrir nos partenaires",
+    partnersLead: "Un écosystème premium autour de la performance, des activations et du merch.",
+    eventsKicker: "Événements",
+    eventsTitle: "Timeline d’événements",
+    eventsLead: "Activations, media days et rendez-vous clés de la saison NOW.",
+    fallbackPartner: "Partenaire NOW",
+    eventVisual: "Activation NOW",
+  },
+  en: {
+    shopKicker: "Collections",
+    shopTitle: "Shop essentials",
+    shopCta: "Browse products",
+    productOptions: "Product options",
+    viewItem: "View item",
+    rostersKicker: "Rosters",
+    rostersTitle: "Explore our rosters",
+    rostersLead: "NOW competitive lineup: teams, staff and creators organized by game.",
+    viewPage: "View page",
+    partnersKicker: "Partners",
+    partnersTitle: "Explore our partners",
+    partnersLead: "A premium ecosystem around performance, activations and merch.",
+    eventsKicker: "Events",
+    eventsTitle: "Event timeline",
+    eventsLead: "Activations, media days and key NOW season milestones.",
+    fallbackPartner: "NOW partner",
+    eventVisual: "NOW activation",
+  },
+} satisfies Record<SectionLocale, Record<string, string>>;
+
+function copy(locale: SectionLocale = "fr") {
+  return sectionCopy[locale];
+}
+
+function ProductFallbackVisual({ label = "NOW" }: { label?: string }) {
+  return (
+    <>
+      <div className="absolute inset-x-[18%] top-[5%] h-[78%] rounded-[2rem_2rem_2.4rem_2.4rem] bg-[linear-gradient(180deg,#17171b_0%,#060606_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]" />
+      <div className="absolute inset-x-[28%] top-[12%] h-5 rounded-full border-4 border-[var(--color-accent)]/80" />
+      <div className="absolute top-[30%] text-center text-5xl font-black uppercase italic tracking-[-0.08em] text-white">
+        {label}
+      </div>
+      <div className="absolute bottom-[18%] h-[2px] w-24 bg-[var(--color-accent)]" />
+    </>
+  );
+}
+
 export function ShopGridSection({
   items,
   productOptions,
   shopCollections,
+  locale = "fr",
 }: {
   items: ProductCard[];
   productOptions: { label: string; value: string }[];
   shopCollections: { name: string; label: string; description: string }[];
+  locale?: SectionLocale;
 }) {
+  const t = copy(locale);
+
   return (
     <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
-      <div className="mb-8 flex items-end justify-between gap-6">
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
         <div>
-          <p className="section-kicker">Collections</p>
-          <h2 className="section-title">La base de la boutique</h2>
+          <p className="section-kicker">{t.shopKicker}</p>
+          <h2 className="section-title">{t.shopTitle}</h2>
         </div>
-        <span className="section-link">Découvrir les produits</span>
+        <Link href="/shop" className="section-link w-full sm:w-auto">
+          {t.shopCta}
+        </Link>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
@@ -45,7 +112,7 @@ export function ShopGridSection({
 
           <div className="rounded-[1.6rem] border border-white/8 bg-white/[0.03] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              Options produit
+              {t.productOptions}
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {productOptions.map((item) => (
@@ -78,25 +145,18 @@ export function ShopGridSection({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
                     ) : (
-                      <>
-                        <div className="absolute inset-x-[18%] top-[5%] h-[78%] rounded-[2rem_2rem_2.4rem_2.4rem] bg-[linear-gradient(180deg,#17171b_0%,#060606_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]" />
-                        <div className="absolute inset-x-[28%] top-[12%] h-5 rounded-full border-4 border-[var(--color-accent)]/80" />
-                        <div className="absolute top-[30%] text-center text-5xl font-black uppercase italic tracking-[-0.08em] text-white">
-                          {index === 0 ? "NEVER" : "NOW"}
-                        </div>
-                        <div className="absolute bottom-[18%] h-[2px] w-24 bg-[var(--color-accent)]" />
-                      </>
+                      <ProductFallbackVisual label={index === 0 ? "NEVER" : "NOW"} />
                     )}
                   </div>
                 </div>
 
                 <div className="px-2 pb-2 pt-5">
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div>
                       <h3 className="text-xl font-bold text-white">{item.name}</h3>
                       <p className="mt-1 text-sm text-white/50">{item.category}</p>
                     </div>
-                    <span className="rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/70">
+                    <span className="w-fit rounded-full border border-white/10 px-4 py-2 text-sm font-semibold text-white/70">
                       {item.price}
                     </span>
                   </div>
@@ -104,7 +164,7 @@ export function ShopGridSection({
                     {item.description}
                   </p>
                   <span className="mt-4 inline-flex text-sm font-semibold text-[var(--color-accent-soft)]">
-                    Voir l&apos;article
+                    {t.viewItem}
                   </span>
                 </div>
               </div>
@@ -126,19 +186,24 @@ function visualClass(visual: string) {
 export function TeamsShowcaseSection({
   gamesData,
   teamBlocks,
+  locale = "fr",
 }: {
   gamesData: GameCard[];
   teamBlocks: TeamSupportBlock[];
+  locale?: SectionLocale;
 }) {
+  const t = copy(locale);
+
   return (
     <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
-      <div className="mb-8">
-        <p className="section-kicker">Rosters</p>
-        <h2 className="section-title">Découvrir nos rosters</h2>
-      </div>
-
-      <div className="mx-auto mb-10 max-w-xl rounded-full border border-white/10 bg-white/[0.05] px-6 py-4 text-center text-sm font-semibold text-white/76">
-        Découvrir nos rosters
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="section-kicker">{t.rostersKicker}</p>
+          <h2 className="section-title">{t.rostersTitle}</h2>
+        </div>
+        <p className="max-w-xl rounded-[1.4rem] border border-white/10 bg-white/[0.04] px-5 py-4 text-sm font-semibold leading-6 text-white/70">
+          {t.rostersLead}
+        </p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
@@ -153,7 +218,7 @@ export function TeamsShowcaseSection({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={game.bannerUrl} alt={game.game} className="absolute inset-0 h-full w-full object-cover" />
               ) : null}
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_30%,rgba(0,0,0,0.62)_100%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),linear-gradient(180deg,transparent_28%,rgba(0,0,0,0.72)_100%)]" />
               <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
@@ -163,12 +228,14 @@ export function TeamsShowcaseSection({
                     {game.game}
                   </h3>
                 </div>
-                {game.logoUrl ? (
-                  <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/35">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/35 text-lg font-black uppercase text-white/80">
+                  {game.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={game.logoUrl} alt={`Logo ${game.game}`} className="h-full w-full object-cover" />
-                  </span>
-                ) : null}
+                  ) : (
+                    game.game.slice(0, 1)
+                  )}
+                </span>
               </div>
             </div>
           </Link>
@@ -212,7 +279,7 @@ export function TeamsShowcaseSection({
               ))}
             </div>
             <span className="mt-5 inline-flex text-sm font-semibold text-[var(--color-accent-soft)]">
-              Voir la page
+              {t.viewPage}
             </span>
           </Link>
         ))}
@@ -237,18 +304,23 @@ export function TeamsShowcaseSection({
 
 export function PartnersShowcaseSection({
   partnersData,
+  locale = "fr",
 }: {
   partnersData: PartnerCard[];
+  locale?: SectionLocale;
 }) {
+  const t = copy(locale);
+
   return (
     <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
-      <div className="mb-8">
-        <p className="section-kicker">Partenaires</p>
-        <h2 className="section-title">Découvrir nos partenaires</h2>
-      </div>
-
-      <div className="mx-auto mb-10 max-w-xl rounded-full border border-white/10 bg-white/[0.05] px-6 py-4 text-center text-sm font-semibold text-white/76">
-        Découvrir nos partenaires
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="section-kicker">{t.partnersKicker}</p>
+          <h2 className="section-title">{t.partnersTitle}</h2>
+        </div>
+        <p className="max-w-xl rounded-[1.4rem] border border-white/10 bg-white/[0.04] px-5 py-4 text-sm font-semibold leading-6 text-white/70">
+          {t.partnersLead}
+        </p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-3">
@@ -271,9 +343,14 @@ export function PartnersShowcaseSection({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={partner.imageUrl} alt={partner.name} className="h-full w-full object-cover" />
               ) : (
-                <span className="text-5xl font-black uppercase tracking-[-0.06em]">
-                  {partner.name.slice(0, 2)}
-                </span>
+                <div className="grid place-items-center gap-3 text-center">
+                  <span className="text-5xl font-black uppercase tracking-[-0.06em]">
+                    {partner.name.slice(0, 2)}
+                  </span>
+                  <span className="rounded-full border border-current/20 px-3 py-1 text-[0.62rem] font-black uppercase tracking-[0.22em] opacity-70">
+                    {t.fallbackPartner}
+                  </span>
+                </div>
               )}
             </div>
             <div className="px-5 py-5">
@@ -290,16 +367,25 @@ export function PartnersShowcaseSection({
   );
 }
 
-export function EventsTimelineSection({ eventsData }: { eventsData: EventCard[] }) {
+export function EventsTimelineSection({
+  eventsData,
+  locale = "fr",
+}: {
+  eventsData: EventCard[];
+  locale?: SectionLocale;
+}) {
+  const t = copy(locale);
+
   return (
     <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
-      <div className="mb-8">
-        <p className="section-kicker">Événements</p>
-        <h2 className="section-title">Timeline d&apos;événements</h2>
-      </div>
-
-      <div className="mx-auto mb-10 max-w-xl rounded-full border border-white/10 bg-white/[0.05] px-6 py-4 text-center text-sm font-semibold text-white/76">
-        Découvrir nos événements
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="section-kicker">{t.eventsKicker}</p>
+          <h2 className="section-title">{t.eventsTitle}</h2>
+        </div>
+        <p className="max-w-xl rounded-[1.4rem] border border-white/10 bg-white/[0.04] px-5 py-4 text-sm font-semibold leading-6 text-white/70">
+          {t.eventsLead}
+        </p>
       </div>
 
       <div className="grid gap-8">
@@ -322,18 +408,27 @@ export function EventsTimelineSection({ eventsData }: { eventsData: EventCard[] 
             <div className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#15151a_0%,#0a0a0c_100%)]">
               {event.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={event.imageUrl} alt={event.title} className="h-[22rem] w-full object-cover" />
+                <img src={event.imageUrl} alt={event.title} className="h-[18rem] w-full object-cover sm:h-[22rem]" />
               ) : (
                 <div
-                  className={`h-[22rem] ${
+                  className={`grid h-[18rem] place-items-center px-5 text-center sm:h-[22rem] ${
                     event.tone === "studio"
                       ? "bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_28%),linear-gradient(135deg,#2b2326,#121317)]"
                       : "bg-[linear-gradient(180deg,rgba(255,178,120,0.92),rgba(146,72,34,0.45))]"
                   }`}
-                />
+                >
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.3em] text-white/70">
+                      {t.eventVisual}
+                    </p>
+                    <p className="mt-3 text-4xl font-black uppercase italic tracking-[-0.08em] text-white sm:text-6xl">
+                      NOW
+                    </p>
+                  </div>
+                </div>
               )}
               <div className="space-y-4 px-5 py-5">
-                <div className="flex items-center justify-between text-sm text-white/42">
+                <div className="flex flex-col gap-2 text-sm text-white/42 sm:flex-row sm:items-center sm:justify-between">
                   <span>{event.location}</span>
                   <span>{event.date}</span>
                 </div>

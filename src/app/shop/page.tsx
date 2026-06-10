@@ -26,6 +26,7 @@ export default async function ShopPage() {
         items={products}
         productOptions={productOptions}
         shopCollections={shopCollections}
+        locale={locale}
       />
     </main>
   );
