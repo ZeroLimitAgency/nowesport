@@ -5,10 +5,12 @@ import {
   saveSiteNavigationItem,
   saveSiteSocialLink,
 } from "@/app/admin/actions";
+import { AdminMediaField } from "@/components/admin-media-field";
 import { AdminShell } from "@/components/admin-shell";
 import { getDefaultCmsContent, locales, type SiteLocale } from "@/lib/cms";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
+import { listMediaOptions } from "@/lib/media-storage";
 import { createClient } from "@/lib/supabase/server";
 
 type AdminContentBlock = {
@@ -148,7 +150,7 @@ async function getAdminContent() {
   }
 }
 
-function BlockForm({ block }: { block: AdminContentBlock }) {
+function BlockForm({ block, mediaOptions }: { block: AdminContentBlock; mediaOptions?: Awaited<ReturnType<typeof listMediaOptions>> }) {
   return (
     <form action={saveSiteContentBlock} className="grid gap-4 rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-5">
       <input type="hidden" name="locale" value={block.locale} />
@@ -175,7 +177,7 @@ function BlockForm({ block }: { block: AdminContentBlock }) {
         <Field label="Lien CTA"><input name="cta_href" defaultValue={block.cta_href ?? ""} className={inputClass} /></Field>
         <Field label="CTA secondaire"><input name="secondary_cta_label" defaultValue={block.secondary_cta_label ?? ""} className={inputClass} /></Field>
         <Field label="Lien secondaire"><input name="secondary_cta_href" defaultValue={block.secondary_cta_href ?? ""} className={inputClass} /></Field>
-        <Field label="Image / vidéo URL"><input name="media_url" defaultValue={block.media_url ?? ""} className={inputClass} /></Field>
+        <AdminMediaField label="Image / vidéo" name="media_url" bucket="cms" defaultValue={block.media_url} options={mediaOptions} acceptVideo />
         <Field label="Ordre"><input type="number" name="sort_order" defaultValue={block.sort_order} className={inputClass} /></Field>
       </div>
       <Field label="Texte"><textarea name="body" defaultValue={block.body ?? ""} className={textareaClass} /></Field>
@@ -241,7 +243,7 @@ function SocialForm({ item }: { item?: AdminSocialLink }) {
 
 export default async function AdminContentPage() {
   await requireAdmin();
-  const { blocks, navigation, socialLinks, isConfigured, hasCmsTables } = await getAdminContent();
+  const [{ blocks, navigation, socialLinks, isConfigured, hasCmsTables }, mediaOptions] = await Promise.all([getAdminContent(), listMediaOptions("cms")]);
 
   return (
     <AdminShell>
@@ -266,7 +268,7 @@ export default async function AdminContentPage() {
             <p className="section-kicker">Blocs éditoriaux</p>
             <h2 className="mt-2 text-3xl font-black uppercase tracking-[-0.04em] text-white">Home, boutique, roster, événements, maintenance et légal</h2>
           </div>
-          {blocks.map((block) => <BlockForm key={contentKey(block)} block={block} />)}
+          {blocks.map((block) => <BlockForm key={contentKey(block)} block={block} mediaOptions={mediaOptions} />)}
         </section>
 
         <section className="grid gap-4 rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 sm:p-6">

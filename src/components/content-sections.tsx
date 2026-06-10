@@ -73,13 +73,20 @@ export function ShopGridSection({
                   <div className="absolute right-3 top-3 rounded-full border border-black/8 bg-black/8 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-black/60">
                     {item.category}
                   </div>
-                  <div className="relative mx-auto mt-7 flex h-64 w-full max-w-[16rem] items-center justify-center">
-                    <div className="absolute inset-x-[18%] top-[5%] h-[78%] rounded-[2rem_2rem_2.4rem_2.4rem] bg-[linear-gradient(180deg,#17171b_0%,#060606_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]" />
-                    <div className="absolute inset-x-[28%] top-[12%] h-5 rounded-full border-4 border-[var(--color-accent)]/80" />
-                    <div className="absolute top-[30%] text-center text-5xl font-black uppercase italic tracking-[-0.08em] text-white">
-                      {index === 0 ? "NEVER" : "NOW"}
-                    </div>
-                    <div className="absolute bottom-[18%] h-[2px] w-24 bg-[var(--color-accent)]" />
+                  <div className="relative mx-auto mt-7 flex h-64 w-full max-w-[16rem] items-center justify-center overflow-hidden rounded-[1.5rem]">
+                    {item.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                    ) : (
+                      <>
+                        <div className="absolute inset-x-[18%] top-[5%] h-[78%] rounded-[2rem_2rem_2.4rem_2.4rem] bg-[linear-gradient(180deg,#17171b_0%,#060606_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]" />
+                        <div className="absolute inset-x-[28%] top-[12%] h-5 rounded-full border-4 border-[var(--color-accent)]/80" />
+                        <div className="absolute top-[30%] text-center text-5xl font-black uppercase italic tracking-[-0.08em] text-white">
+                          {index === 0 ? "NEVER" : "NOW"}
+                        </div>
+                        <div className="absolute bottom-[18%] h-[2px] w-24 bg-[var(--color-accent)]" />
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -240,7 +247,7 @@ export function PartnersShowcaseSection({
             className="group overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#18181d_0%,#0a0a0c_100%)] transition duration-300 hover:-translate-y-1 hover:border-[var(--color-accent)]/35"
           >
             <div
-              className={`flex h-56 items-center justify-center ${
+              className={`flex h-56 items-center justify-center overflow-hidden ${
                 index === 0
                   ? "bg-[linear-gradient(135deg,#27111c,#121217)]"
                   : index === 1
@@ -248,9 +255,14 @@ export function PartnersShowcaseSection({
                     : "bg-[linear-gradient(145deg,#ffffff,#d8c7d0)] text-black"
               }`}
             >
-              <span className="text-5xl font-black uppercase tracking-[-0.06em]">
-                {partner.name.slice(0, 2)}
-              </span>
+              {partner.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={partner.imageUrl} alt={partner.name} className="h-full w-full object-cover" />
+              ) : (
+                <span className="text-5xl font-black uppercase tracking-[-0.06em]">
+                  {partner.name.slice(0, 2)}
+                </span>
+              )}
             </div>
             <div className="px-5 py-5">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/38">
@@ -296,13 +308,18 @@ export function EventsTimelineSection({ eventsData }: { eventsData: EventCard[] 
             </div>
 
             <div className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#15151a_0%,#0a0a0c_100%)]">
-              <div
-                className={`h-[22rem] ${
-                  event.tone === "studio"
-                    ? "bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_28%),linear-gradient(135deg,#2b2326,#121317)]"
-                    : "bg-[linear-gradient(180deg,rgba(255,178,120,0.92),rgba(146,72,34,0.45))]"
-                }`}
-              />
+              {event.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={event.imageUrl} alt={event.title} className="h-[22rem] w-full object-cover" />
+              ) : (
+                <div
+                  className={`h-[22rem] ${
+                    event.tone === "studio"
+                      ? "bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_28%),linear-gradient(135deg,#2b2326,#121317)]"
+                      : "bg-[linear-gradient(180deg,rgba(255,178,120,0.92),rgba(146,72,34,0.45))]"
+                  }`}
+                />
+              )}
               <div className="space-y-4 px-5 py-5">
                 <div className="flex items-center justify-between text-sm text-white/42">
                   <span>{event.location}</span>

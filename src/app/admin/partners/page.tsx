@@ -1,7 +1,9 @@
 import { deletePartner, savePartner } from "@/app/admin/actions";
+import { AdminMediaField } from "@/components/admin-media-field";
 import { AdminShell } from "@/components/admin-shell";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
+import { listMediaOptions } from "@/lib/media-storage";
 import { createClient } from "@/lib/supabase/server";
 
 type AdminPartner = {
@@ -24,7 +26,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">{label}{children}</label>;
 }
 
-function PartnerForm({ partner }: { partner?: AdminPartner }) {
+function PartnerForm({ partner, mediaOptions }: { partner?: AdminPartner; mediaOptions?: Awaited<ReturnType<typeof listMediaOptions>> }) {
   return (
     <form action={savePartner} className="grid gap-4 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5">
       <input type="hidden" name="id" value={partner?.id ?? ""} />
@@ -32,7 +34,7 @@ function PartnerForm({ partner }: { partner?: AdminPartner }) {
         <Field label="Nom"><input required name="name" defaultValue={partner?.name ?? ""} className={inputClass} /></Field>
         <Field label="Slug"><input required name="slug" defaultValue={partner?.slug ?? ""} className={inputClass} /></Field>
         <Field label="Rôle"><input name="role_label" defaultValue={partner?.role_label ?? ""} className={inputClass} /></Field>
-        <Field label="Logo"><input name="image_url" defaultValue={partner?.image_url ?? ""} className={inputClass} /></Field>
+        <AdminMediaField label="Logo" name="image_url" bucket="partners" defaultValue={partner?.image_url} options={mediaOptions} />
         <Field label="URL"><input name="external_url" defaultValue={partner?.external_url ?? ""} className={inputClass} /></Field>
         <Field label="Ordre"><input type="number" name="sort_order" defaultValue={partner?.sort_order ?? 0} className={inputClass} /></Field>
         <label className="flex items-center gap-3 text-sm font-semibold text-white/72 sm:pt-7">
@@ -58,7 +60,7 @@ async function getPartners() {
 
 export default async function AdminPartnersPage() {
   await requireAdmin();
-  const { partners, isConfigured } = await getPartners();
+  const [{ partners, isConfigured }, mediaOptions] = await Promise.all([getPartners(), listMediaOptions("partners")]);
 
   return (
     <AdminShell>
@@ -66,7 +68,7 @@ export default async function AdminPartnersPage() {
         <section className="rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 sm:p-6">
           <p className="section-kicker">Partenaires</p>
           <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-white">Créer un partenaire</h2>
-          <div className="mt-5">{isConfigured ? <PartnerForm /> : <p className="text-sm text-white/58">Supabase doit être configuré pour gérer les partenaires.</p>}</div>
+          <div className="mt-5">{isConfigured ? <PartnerForm mediaOptions={mediaOptions} /> : <p className="text-sm text-white/58">Supabase doit être configuré pour gérer les partenaires.</p>}</div>
         </section>
         <div className="grid gap-4 xl:grid-cols-2">
           {partners.map((partner) => (
@@ -82,7 +84,7 @@ export default async function AdminPartnersPage() {
                   <button type="submit" className="secondary-cta border-red-400/30 text-red-100">Supprimer</button>
                 </form>
               </div>
-              <PartnerForm partner={partner} />
+              <PartnerForm partner={partner} mediaOptions={mediaOptions} />
             </article>
           ))}
         </div>

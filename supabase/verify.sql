@@ -30,8 +30,14 @@ order by table_name;
 -- Required RLS policies.
 select schemaname, tablename, policyname
 from pg_policies
-where schemaname = 'public'
-order by tablename, policyname;
+where schemaname in ('public', 'storage')
+order by schemaname, tablename, policyname;
+
+-- Required media buckets.
+select id, public, file_size_limit, allowed_mime_types
+from storage.buckets
+where id in ('products', 'roster', 'partners', 'events', 'cms')
+order by id;
 
 -- Required triggers.
 select event_object_table as table_name, trigger_name
@@ -88,6 +94,33 @@ begin
   if not exists (select 1 from public.site_settings where key = 'maintenance_mode') then
     raise exception 'Supabase schema verification failed: maintenance_mode seed is missing';
   end if;
+
+  if not exists (
+    select 1
+    from storage.buckets
+    where id in ('products', 'roster', 'partners', 'events', 'cms')
+    group by public
+    having count(*) = 5 and public = true
+  ) then
+    raise exception 'Supabase schema verification failed: media storage buckets are missing or not public';
+  end if;
+
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'storage'
+      and tablename = 'objects'
+      and policyname in (
+        'public_read_media_storage',
+        'admins_upload_media_storage',
+        'admins_update_media_storage',
+        'admins_delete_media_storage'
+      )
+    having count(*) = 4
+  ) then
+    raise exception 'Supabase schema verification failed: media storage policies are missing';
+  end if;
+
 
   if not exists (
     select 1

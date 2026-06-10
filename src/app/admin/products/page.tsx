@@ -5,9 +5,11 @@ import {
   saveProductVariant,
   toggleProductStatus,
 } from "@/app/admin/actions";
+import { AdminMediaField } from "@/components/admin-media-field";
 import { AdminShell } from "@/components/admin-shell";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
+import { listMediaOptions } from "@/lib/media-storage";
 import { createClient } from "@/lib/supabase/server";
 
 type AdminVariant = {
@@ -68,7 +70,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const inputClass = "min-h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm normal-case tracking-normal text-white outline-none focus:border-[var(--color-accent)]/60";
 
-function ProductForm({ product }: { product?: AdminProduct }) {
+function ProductForm({ product, mediaOptions }: { product?: AdminProduct; mediaOptions?: Awaited<ReturnType<typeof listMediaOptions>> }) {
   return (
     <form action={saveProduct} className="grid gap-4 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5">
       <input type="hidden" name="id" value={product?.id ?? ""} />
@@ -85,7 +87,7 @@ function ProductForm({ product }: { product?: AdminProduct }) {
         <Field label="Prix cents"><input required type="number" name="price_cents" defaultValue={product?.price_cents ?? 0} className={inputClass} /></Field>
         <Field label="Devise"><input name="currency" defaultValue={product?.currency ?? "EUR"} className={inputClass} /></Field>
         <Field label="Ordre"><input type="number" name="sort_order" defaultValue={product?.sort_order ?? 0} className={inputClass} /></Field>
-        <Field label="Image"><input name="hero_image_url" defaultValue={product?.hero_image_url ?? ""} className={inputClass} /></Field>
+        <AdminMediaField label="Image" name="hero_image_url" bucket="products" defaultValue={product?.hero_image_url} options={mediaOptions} />
         <Field label="Stripe product"><input name="stripe_product_id" defaultValue={product?.stripe_product_id ?? ""} className={inputClass} /></Field>
         <Field label="Stripe price"><input name="stripe_price_id" defaultValue={product?.stripe_price_id ?? ""} className={inputClass} /></Field>
         <label className="flex items-center gap-3 text-sm font-semibold text-white/72 sm:pt-7">
@@ -128,7 +130,7 @@ function VariantForm({ productId, variant }: { productId: string; variant?: Admi
 
 export default async function AdminProductsPage() {
   await requireAdmin();
-  const { products, isConfigured } = await getAdminProducts();
+  const [{ products, isConfigured }, mediaOptions] = await Promise.all([getAdminProducts(), listMediaOptions("products")]);
   return (
     <AdminShell>
       <div className="grid gap-6">
@@ -136,7 +138,7 @@ export default async function AdminProductsPage() {
           <p className="section-kicker">Produits</p>
           <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-white">Créer un produit</h2>
           <div className="mt-5">
-            {isConfigured ? <ProductForm /> : <p className="text-sm text-white/58">Supabase doit être configuré pour créer des produits.</p>}
+            {isConfigured ? <ProductForm mediaOptions={mediaOptions} /> : <p className="text-sm text-white/58">Supabase doit être configuré pour créer des produits.</p>}
           </div>
         </section>
 
@@ -173,7 +175,7 @@ export default async function AdminProductsPage() {
                 </div>
               </div>
 
-              <ProductForm product={product} />
+              <ProductForm product={product} mediaOptions={mediaOptions} />
 
               <div className="grid gap-3">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/48">Variantes</p>

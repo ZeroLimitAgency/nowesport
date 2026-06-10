@@ -24,13 +24,20 @@ export default async function ProductPage({
       <section className="mx-auto w-full max-w-[92rem] px-5 pb-10 pt-10 sm:px-8 sm:pt-14">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="overflow-hidden rounded-[2rem] border border-white/8 bg-[linear-gradient(160deg,#faf7f9_0%,#eadbe4_28%,#18151a_29%,#09090a_100%)] p-6">
-            <div className="relative mx-auto flex min-h-[34rem] w-full max-w-[22rem] items-center justify-center">
-              <div className="absolute inset-x-[12%] top-[5%] h-[78%] rounded-[2.4rem_2.4rem_2.8rem_2.8rem] bg-[linear-gradient(180deg,#17171b_0%,#060606_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]" />
-              <div className="absolute inset-x-[24%] top-[12%] h-5 rounded-full border-4 border-[var(--color-accent)]/80" />
-              <div className="absolute top-[30%] text-center text-6xl font-black uppercase italic tracking-[-0.08em] text-white">
-                NEVER
-              </div>
-              <div className="absolute bottom-[18%] h-[2px] w-28 bg-[var(--color-accent)]" />
+            <div className="relative mx-auto flex min-h-[34rem] w-full max-w-[22rem] items-center justify-center overflow-hidden rounded-[1.8rem]">
+              {product.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={product.imageUrl} alt={product.name} className="h-full min-h-[34rem] w-full object-cover" />
+              ) : (
+                <>
+                  <div className="absolute inset-x-[12%] top-[5%] h-[78%] rounded-[2.4rem_2.4rem_2.8rem_2.8rem] bg-[linear-gradient(180deg,#17171b_0%,#060606_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]" />
+                  <div className="absolute inset-x-[24%] top-[12%] h-5 rounded-full border-4 border-[var(--color-accent)]/80" />
+                  <div className="absolute top-[30%] text-center text-6xl font-black uppercase italic tracking-[-0.08em] text-white">
+                    NEVER
+                  </div>
+                  <div className="absolute bottom-[18%] h-[2px] w-28 bg-[var(--color-accent)]" />
+                </>
+              )}
             </div>
           </div>
 
