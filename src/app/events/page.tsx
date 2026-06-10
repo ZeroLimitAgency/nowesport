@@ -11,7 +11,7 @@ export default async function EventsPage() {
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <PageIntro kicker={intro.eyebrow ?? "Events"} title={intro.title} description={intro.body} />
-      <EventsTimelineSection eventsData={events} />
+      <EventsTimelineSection eventsData={events} locale={locale} />
     </main>
   );
 }

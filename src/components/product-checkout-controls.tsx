@@ -27,9 +27,9 @@ export function ProductCheckoutControls({ product }: { product: ProductCard }) {
   }, [product.slug, quantity, variantId]);
 
   const disabledReason = !product.stripePriceId && !selectedVariant?.stripePriceId
-    ? "Ce produit n'est pas encore relié à Stripe. Ajoute un stripe_price_id dans Supabase pour activer le paiement."
+    ? "Le paiement en ligne sera activé au lancement de ce produit."
     : hasVariants && !selectedVariant
-      ? "Selectionne une taille/variante avant de payer."
+      ? "Sélectionne une taille ou une variante avant de payer."
       : selectedVariant && selectedVariant.stock <= 0
         ? "Cette variante est en rupture de stock."
         : null;
@@ -73,7 +73,7 @@ export function ProductCheckoutControls({ product }: { product: ProductCard }) {
       {disabledReason ? (
         <>
           <button type="button" disabled className="primary-cta w-full cursor-not-allowed opacity-50 sm:w-auto">
-            Paiement indisponible
+            Paiement bientôt disponible
           </button>
           <p className="text-sm leading-6 text-white/46">{disabledReason}</p>
         </>

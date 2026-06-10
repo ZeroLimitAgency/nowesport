@@ -1,7 +1,9 @@
 import { unstable_noStore as noStore } from "next/cache";
 import {
+  collectionItems,
   events,
   games,
+  getProductBySlug,
   partners,
   teamSupportBlocks,
 } from "@/data/site";
@@ -74,15 +76,12 @@ function formatPrice(priceCents: number, currency = "EUR") {
   }).format(priceCents / 100);
 }
 
-function emptyWhenSupabaseUnavailable<T>() {
-  return [] as T[];
-}
 
 export async function getPublicProducts(): Promise<ProductCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return emptyWhenSupabaseUnavailable<ProductCard>();
+    return collectionItems;
   }
 
   const supabase = await createClient();
@@ -119,7 +118,7 @@ export async function getPublicProductBySlug(
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return null;
+    return getProductBySlug(slug) ?? null;
   }
 
   const supabase = await createClient();
@@ -208,7 +207,25 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return emptyWhenSupabaseUnavailable<RosterTeamCard>();
+    return games.map((game) => ({
+      slug: game.slug,
+      name: game.game,
+      game: game.subtitle,
+      gameSlug: game.visual,
+      category: game.subtitle,
+      description: game.description,
+      members: game.rosters.flatMap((roster) =>
+        roster.members.map((member) => ({
+          displayName: member,
+          pseudo: member,
+          role: roster.name,
+          roleType: roster.name.toLowerCase().includes("staff") || roster.name.toLowerCase().includes("encadrement")
+            ? "Staff"
+            : "Player",
+          socialLinks: {},
+        })),
+      ),
+    }));
   }
 
   const supabase = await createClient();
@@ -267,6 +284,10 @@ export async function getPublicRosterTeamBySlug(slug: string): Promise<RosterTea
 }
 
 export async function getPublicGames(): Promise<GameCard[]> {
+  if (!hasSupabaseEnv()) {
+    return games;
+  }
+
   const teams = await getPublicRosterTeams();
 
   return teams.map((team) => ({
@@ -295,7 +316,7 @@ export async function getPublicPartners(): Promise<PartnerCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return emptyWhenSupabaseUnavailable<PartnerCard>();
+    return partners;
   }
 
   const supabase = await createClient();
@@ -322,7 +343,7 @@ export async function getPublicEvents(): Promise<EventCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return emptyWhenSupabaseUnavailable<EventCard>();
+    return events;
   }
 
   const supabase = await createClient();

@@ -14,6 +14,7 @@ export default async function RosterPage() {
       <TeamsShowcaseSection
         gamesData={games}
         teamBlocks={getTeamSupportBlocks()}
+        locale={locale}
       />
     </main>
   );
