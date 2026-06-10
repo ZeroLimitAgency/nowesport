@@ -149,7 +149,9 @@ create table if not exists public.rosters (
   logo_url text,
   banner_url text,
   is_public boolean not null default true,
+  is_active boolean not null default true,
   sort_order integer not null default 0,
+  display_order integer not null default 0,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -173,7 +175,9 @@ create table if not exists public.roster_members (
   social_links jsonb not null default '{}'::jsonb,
   social_url text,
   is_public boolean not null default true,
+  is_active boolean not null default true,
   sort_order integer not null default 0,
+  display_order integer not null default 0,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now()),
   constraint roster_members_role_type_check check (role_type in ('Player', 'Coach', 'Manager', 'Analyst', 'Content Creator', 'Staff', 'Custom'))
@@ -181,7 +185,9 @@ create table if not exists public.roster_members (
 
 alter table public.rosters
   add column if not exists logo_url text,
-  add column if not exists banner_url text;
+  add column if not exists banner_url text,
+  add column if not exists is_active boolean not null default true,
+  add column if not exists display_order integer not null default 0;
 
 alter table public.roster_members
   add column if not exists first_name text,
@@ -191,7 +197,9 @@ alter table public.roster_members
   add column if not exists custom_role text,
   add column if not exists nationality text,
   add column if not exists photo_url text,
-  add column if not exists social_links jsonb not null default '{}'::jsonb;
+  add column if not exists social_links jsonb not null default '{}'::jsonb,
+  add column if not exists is_active boolean not null default true,
+  add column if not exists display_order integer not null default 0;
 
 create table if not exists public.partners (
   id uuid primary key default gen_random_uuid(),
