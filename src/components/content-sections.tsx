@@ -149,14 +149,26 @@ export function TeamsShowcaseSection({
             className="group overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#17151b_0%,#0b0b0d_100%)] transition duration-300 hover:-translate-y-1 hover:border-[var(--color-accent)]/30"
           >
             <div className={`relative h-64 ${visualClass(game.visual)}`}>
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_30%,rgba(0,0,0,0.55)_100%)]" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
-                  {game.subtitle}
-                </p>
-                <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-white">
-                  {game.game}
-                </h3>
+              {game.bannerUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={game.bannerUrl} alt={game.game} className="absolute inset-0 h-full w-full object-cover" />
+              ) : null}
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_30%,rgba(0,0,0,0.62)_100%)]" />
+              <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
+                    {game.subtitle}
+                  </p>
+                  <h3 className="mt-3 text-2xl font-black tracking-[-0.04em] text-white">
+                    {game.game}
+                  </h3>
+                </div>
+                {game.logoUrl ? (
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/35">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={game.logoUrl} alt={`Logo ${game.game}`} className="h-full w-full object-cover" />
+                  </span>
+                ) : null}
               </div>
             </div>
           </Link>

@@ -30,7 +30,39 @@ export type ProductCard = {
     stripePriceId?: string | null;
   }>;
 };
-export type GameCard = (typeof games)[number];
+export type RosterMemberCard = {
+  displayName: string;
+  firstName?: string | null;
+  lastName?: string | null;
+  pseudo?: string | null;
+  role: string;
+  roleType: string;
+  nationality?: string | null;
+  bio?: string | null;
+  photoUrl?: string | null;
+  socialLinks: Record<string, string>;
+};
+
+export type RosterTeamCard = {
+  slug: string;
+  name: string;
+  game: string;
+  gameSlug?: string | null;
+  category?: string | null;
+  description: string;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+  members: RosterMemberCard[];
+};
+
+export type GameCard = (typeof games)[number] & {
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+  rosters: Array<{
+    name: string;
+    members: string[];
+  }>;
+};
 export type PartnerCard = (typeof partners)[number] & { imageUrl?: string | null };
 export type EventCard = (typeof events)[number] & { imageUrl?: string | null };
 export type TeamSupportBlock = (typeof teamSupportBlocks)[number];
@@ -156,57 +188,102 @@ export async function getPublicProductBySlug(
   };
 }
 
-export async function getPublicGames(): Promise<GameCard[]> {
+function normalizeSocialLinks(value: unknown, fallback?: string | null) {
+  const links = value && typeof value === "object" && !Array.isArray(value)
+    ? Object.fromEntries(
+        Object.entries(value as Record<string, unknown>).filter(
+          (entry): entry is [string, string] => typeof entry[1] === "string" && Boolean(entry[1]),
+        ),
+      )
+    : {};
+
+  if (fallback && !links.website) {
+    links.website = fallback;
+  }
+
+  return links;
+}
+
+export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return emptyWhenSupabaseUnavailable<GameCard>();
+    return emptyWhenSupabaseUnavailable<RosterTeamCard>();
   }
 
   const supabase = await createClient();
-  const [{ data: gamesData, error: gamesError }, { data: rostersData, error: rostersError }, { data: membersData, error: membersError }] =
-    await Promise.all([
-      supabase
-        .from("games")
-        .select("id, slug, name, subtitle, description, visual")
-        .eq("is_public", true)
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("rosters")
-        .select("id, game_id, name, category")
-        .eq("is_public", true)
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("roster_members")
-        .select("roster_id, display_name")
-        .eq("is_public", true)
-        .order("sort_order", { ascending: true }),
-    ]);
+  const [{ data: teamsData, error: teamsError }, { data: membersData, error: membersError }] = await Promise.all([
+    supabase
+      .from("rosters")
+      .select("id, slug, name, category, description, logo_url, banner_url, sort_order, games(slug, name)")
+      .eq("is_public", true)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("roster_members")
+      .select("roster_id, first_name, last_name, pseudo, display_name, role_type, role_label, nationality, country, bio, photo_url, avatar_url, social_links, social_url, sort_order")
+      .eq("is_public", true)
+      .order("sort_order", { ascending: true }),
+  ]);
 
-  const error = gamesError ?? rostersError ?? membersError;
+  const error = teamsError ?? membersError;
   if (error) {
     throw new Error(`Lecture rosters Supabase impossible : ${error.message}`);
   }
 
-  return (gamesData ?? []).map((game) => {
-    const rosters = (rostersData ?? [])
-      .filter((roster) => roster.game_id === game.id)
-      .map((roster) => ({
-        name: roster.name,
-        members: (membersData ?? [])
-          .filter((member) => member.roster_id === roster.id)
-          .map((member) => member.display_name),
+  return (teamsData ?? []).map((team) => {
+    const game = Array.isArray(team.games) ? team.games[0] : team.games;
+    const members = (membersData ?? [])
+      .filter((member) => member.roster_id === team.id)
+      .map((member) => ({
+        displayName: member.pseudo ?? member.display_name,
+        firstName: member.first_name,
+        lastName: member.last_name,
+        pseudo: member.pseudo ?? member.display_name,
+        role: member.role_label ?? "Player",
+        roleType: member.role_type ?? member.role_label ?? "Player",
+        nationality: member.nationality ?? member.country,
+        bio: member.bio,
+        photoUrl: member.photo_url ?? member.avatar_url,
+        socialLinks: normalizeSocialLinks(member.social_links, member.social_url),
       }));
 
     return {
-      slug: game.slug,
-      game: game.name,
-      subtitle: game.subtitle ?? "Roster",
-      description: game.description ?? "",
-      visual: game.visual ?? "now",
-      rosters,
+      slug: team.slug,
+      name: team.name,
+      game: game?.name ?? team.category ?? "NOW eSport",
+      gameSlug: game?.slug ?? null,
+      category: team.category,
+      description: team.description ?? "",
+      logoUrl: team.logo_url,
+      bannerUrl: team.banner_url,
+      members,
     };
   });
+}
+
+export async function getPublicRosterTeamBySlug(slug: string): Promise<RosterTeamCard | null> {
+  const teams = await getPublicRosterTeams();
+  return teams.find((item) => item.slug === slug) ?? null;
+}
+
+export async function getPublicGames(): Promise<GameCard[]> {
+  const teams = await getPublicRosterTeams();
+
+  return teams.map((team) => ({
+    slug: team.slug,
+    game: team.name,
+    subtitle: team.game,
+    description: team.description,
+    visual: team.gameSlug ?? "now",
+    logoUrl: team.logoUrl,
+    bannerUrl: team.bannerUrl,
+    rosters: [
+      {
+        name: team.category ?? team.game,
+        members: team.members.map((member) => member.displayName),
+      },
+    ],
+  }));
 }
 
 export async function getPublicGameBySlug(slug: string): Promise<GameCard | null> {
