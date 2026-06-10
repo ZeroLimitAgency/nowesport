@@ -141,11 +141,13 @@ create table if not exists public.games (
 
 create table if not exists public.rosters (
   id uuid primary key default gen_random_uuid(),
-  game_id uuid references public.games(id) on delete cascade,
+  game_id uuid references public.games(id) on delete set null,
   slug text not null unique,
   name text not null,
   category text,
   description text,
+  logo_url text,
+  banner_url text,
   is_public boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default timezone('utc', now()),
@@ -156,17 +158,40 @@ create table if not exists public.roster_members (
   id uuid primary key default gen_random_uuid(),
   roster_id uuid not null references public.rosters(id) on delete cascade,
   slug text unique,
+  first_name text,
+  last_name text,
+  pseudo text,
   display_name text not null,
+  role_type text not null default 'Player',
+  custom_role text,
   role_label text,
+  nationality text,
   country text,
   bio text,
+  photo_url text,
   avatar_url text,
+  social_links jsonb not null default '{}'::jsonb,
   social_url text,
   is_public boolean not null default true,
   sort_order integer not null default 0,
   created_at timestamptz not null default timezone('utc', now()),
-  updated_at timestamptz not null default timezone('utc', now())
+  updated_at timestamptz not null default timezone('utc', now()),
+  constraint roster_members_role_type_check check (role_type in ('Player', 'Coach', 'Manager', 'Analyst', 'Content Creator', 'Staff', 'Custom'))
 );
+
+alter table public.rosters
+  add column if not exists logo_url text,
+  add column if not exists banner_url text;
+
+alter table public.roster_members
+  add column if not exists first_name text,
+  add column if not exists last_name text,
+  add column if not exists pseudo text,
+  add column if not exists role_type text not null default 'Player',
+  add column if not exists custom_role text,
+  add column if not exists nationality text,
+  add column if not exists photo_url text,
+  add column if not exists social_links jsonb not null default '{}'::jsonb;
 
 create table if not exists public.partners (
   id uuid primary key default gen_random_uuid(),
@@ -490,7 +515,9 @@ create index if not exists idx_site_navigation_locale_placement on public.site_n
 create index if not exists idx_site_social_links_sort_order on public.site_social_links(sort_order);
 create index if not exists idx_site_media_locale_type on public.site_media(locale, media_type, sort_order);
 create index if not exists idx_rosters_game_id on public.rosters(game_id);
+create index if not exists idx_rosters_sort_order on public.rosters(sort_order);
 create index if not exists idx_roster_members_roster_id on public.roster_members(roster_id);
+create index if not exists idx_roster_members_sort_order on public.roster_members(sort_order);
 create index if not exists idx_product_variants_product_id on public.product_variants(product_id);
 create index if not exists idx_carts_user_id on public.carts(user_id);
 create index if not exists idx_cart_items_cart_id on public.cart_items(cart_id);

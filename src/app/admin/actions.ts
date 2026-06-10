@@ -572,3 +572,152 @@ export async function deleteSiteSocialLink(formData: FormData) {
   revalidatePath("/admin/content");
   revalidatePath("/", "layout");
 }
+
+const rosterRoleTypes = new Set([
+  "Player",
+  "Coach",
+  "Manager",
+  "Analyst",
+  "Content Creator",
+  "Staff",
+  "Custom",
+]);
+
+function rosterRoleLabel(formData: FormData) {
+  const roleType = requiredText(formData, "role_type", "Type de rôle");
+  if (!rosterRoleTypes.has(roleType)) {
+    throw new Error("Type de rôle invalide.");
+  }
+
+  const customRole = nullableText(formData, "custom_role");
+  if (roleType === "Custom" && !customRole) {
+    throw new Error("Le rôle personnalisé est obligatoire pour le type Custom.");
+  }
+
+  return { roleType, customRole, roleLabel: roleType === "Custom" ? customRole : roleType };
+}
+
+function socialLinksValue(formData: FormData) {
+  const entries = [
+    ["x", nullableText(formData, "social_x")],
+    ["instagram", nullableText(formData, "social_instagram")],
+    ["twitch", nullableText(formData, "social_twitch")],
+    ["youtube", nullableText(formData, "social_youtube")],
+    ["tiktok", nullableText(formData, "social_tiktok")],
+    ["website", nullableText(formData, "social_website")],
+  ].filter((entry): entry is [string, string] => Boolean(entry[1]));
+
+  for (const [platform, href] of entries) {
+    try {
+      const url = new URL(href);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        throw new Error("invalid protocol");
+      }
+    } catch {
+      throw new Error(`Le réseau social ${platform} doit être une URL http(s) valide.`);
+    }
+  }
+
+  return Object.fromEntries(entries);
+}
+
+export async function saveRosterTeam(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const id = nullableText(formData, "id");
+  const payload = {
+    game_id: nullableText(formData, "game_id"),
+    slug: requiredText(formData, "slug", "Slug équipe"),
+    name: requiredText(formData, "name", "Nom équipe"),
+    category: nullableText(formData, "category"),
+    description: nullableText(formData, "description"),
+    logo_url: optionalUrl(formData, "logo_url", "Logo équipe", { allowRelative: true }),
+    banner_url: optionalUrl(formData, "banner_url", "Bannière équipe", { allowRelative: true }),
+    is_public: formData.get("is_public") === "on",
+    sort_order: intValue(formData, "sort_order"),
+  };
+
+  const query = id
+    ? supabase.from("rosters").update(payload).eq("id", id)
+    : supabase.from("rosters").insert(payload);
+  const { error } = await query;
+
+  if (error) {
+    throw adminError("Équipe roster", error);
+  }
+
+  revalidatePath("/admin/roster");
+  revalidatePath("/roster");
+  revalidatePath("/roster/[slug]", "page");
+}
+
+export async function deleteRosterTeam(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const id = text(formData, "id");
+  const { error } = await supabase.from("rosters").delete().eq("id", id);
+
+  if (error) {
+    throw adminError("Suppression équipe roster", error);
+  }
+
+  revalidatePath("/admin/roster");
+  revalidatePath("/roster");
+}
+
+export async function saveRosterMember(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const id = nullableText(formData, "id");
+  const rosterId = requiredText(formData, "roster_id", "Équipe");
+  const pseudo = requiredText(formData, "pseudo", "Pseudo");
+  const firstName = nullableText(formData, "first_name");
+  const lastName = nullableText(formData, "last_name");
+  const { roleType, customRole, roleLabel } = rosterRoleLabel(formData);
+  const socialLinks = socialLinksValue(formData);
+  const primarySocialUrl = Object.values(socialLinks)[0] ?? null;
+  const payload = {
+    roster_id: rosterId,
+    slug: nullableText(formData, "slug"),
+    first_name: firstName,
+    last_name: lastName,
+    pseudo,
+    display_name: pseudo,
+    role_type: roleType,
+    custom_role: customRole,
+    role_label: roleLabel,
+    nationality: nullableText(formData, "nationality"),
+    country: nullableText(formData, "nationality"),
+    bio: nullableText(formData, "bio"),
+    photo_url: optionalUrl(formData, "photo_url", "Photo", { allowRelative: true }),
+    avatar_url: optionalUrl(formData, "photo_url", "Photo", { allowRelative: true }),
+    social_links: socialLinks,
+    social_url: primarySocialUrl,
+    is_public: formData.get("is_public") === "on",
+    sort_order: intValue(formData, "sort_order"),
+  };
+
+  const query = id
+    ? supabase.from("roster_members").update(payload).eq("id", id)
+    : supabase.from("roster_members").insert(payload);
+  const { error } = await query;
+
+  if (error) {
+    throw adminError("Membre roster", error);
+  }
+
+  revalidatePath("/admin/roster");
+  revalidatePath("/roster");
+  revalidatePath("/roster/[slug]", "page");
+}
+
+export async function deleteRosterMember(formData: FormData) {
+  const { supabase } = await getAdminClient();
+  const id = text(formData, "id");
+  const { error } = await supabase.from("roster_members").delete().eq("id", id);
+
+  if (error) {
+    throw adminError("Suppression membre roster", error);
+  }
+
+  revalidatePath("/admin/roster");
+  revalidatePath("/roster");
+  revalidatePath("/roster/[slug]", "page");
+}
