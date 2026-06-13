@@ -33,11 +33,10 @@ function EventForm({ event, mediaOptions }: { event?: AdminEvent; mediaOptions?:
       <input type="hidden" name="id" value={event?.id ?? ""} />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field label="Titre"><input required name="title" defaultValue={event?.title ?? ""} className={inputClass} /></Field>
-        <Field label="Slug"><input required name="slug" defaultValue={event?.slug ?? ""} className={inputClass} /></Field>
         <Field label="Date"><input required type="date" name="event_date" defaultValue={event?.event_date ?? ""} className={inputClass} /></Field>
         <Field label="Lieu"><input name="location" defaultValue={event?.location ?? ""} className={inputClass} /></Field>
-        <AdminMediaField label="Image" name="image_url" bucket="events" defaultValue={event?.image_url} options={mediaOptions} />
-        <Field label="URL"><input name="external_url" defaultValue={event?.external_url ?? ""} className={inputClass} /></Field>
+        <AdminMediaField label="Grande image événement" name="image_url" bucket="events" folder="timeline" defaultValue={event?.image_url} options={mediaOptions} />
+        <Field label="Lien externe"><input name="external_url" defaultValue={event?.external_url ?? ""} className={inputClass} placeholder="https://..." /></Field>
         <Field label="Ordre"><input type="number" name="sort_order" defaultValue={event?.sort_order ?? 0} className={inputClass} /></Field>
         <label className="flex items-center gap-3 text-sm font-semibold text-white/72 sm:pt-7">
           <input type="checkbox" name="is_public" defaultChecked={event?.is_public ?? true} className="h-5 w-5 accent-pink-500" />
@@ -45,7 +44,7 @@ function EventForm({ event, mediaOptions }: { event?: AdminEvent; mediaOptions?:
         </label>
       </div>
       <Field label="Description"><textarea name="description" defaultValue={event?.description ?? ""} className={`${inputClass} min-h-24 py-3`} /></Field>
-      <button type="submit" className="primary-cta w-fit">{event ? "Enregistrer" : "Créer l'événement"}</button>
+      <div className="flex flex-wrap items-center justify-between gap-4"><details className="rounded-2xl border border-white/8 bg-white/[0.025] p-4"><summary className="cursor-pointer text-xs font-black uppercase tracking-[0.16em] text-white/45">Options avancées</summary><Field label="Slug personnalisé"><input name="slug" defaultValue={event?.slug ?? ""} className={inputClass} placeholder="auto" /></Field></details><button type="submit" className="primary-cta w-fit">{event ? "Enregistrer" : "Créer l'événement"}</button></div>
     </form>
   );
 }
@@ -70,6 +69,7 @@ export default async function AdminEventsPage() {
         <section className="rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 sm:p-6">
           <p className="section-kicker">Événements</p>
           <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-white">Créer un événement</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/58">Ajoute une grande image, une date, un lieu et un lien externe. Le slug est généré automatiquement.</p>
           <div className="mt-5">{isConfigured ? <EventForm mediaOptions={mediaOptions} /> : <p className="text-sm text-white/58">Supabase doit être configuré pour gérer les événements.</p>}</div>
         </section>
         {events.map((event) => (
