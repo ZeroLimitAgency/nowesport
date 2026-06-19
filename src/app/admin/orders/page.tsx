@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { updateOrderStatus } from "@/app/admin/actions";
 import { AdminShell } from "@/components/admin-shell";
+import { AdminEmptyState, AdminPageHeader, AdminStatusBadge } from "@/components/admin-ui";
 import { requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -35,7 +36,8 @@ export default async function AdminOrdersPage() {
 
   return (
     <AdminShell>
-      <div className="grid gap-4">
+      <div className="grid gap-6"><AdminPageHeader kicker="Commandes" title="Suivi des commandes" description="Liste lisible des commandes Stripe/Supabase avec changement de statut et accès au détail." />
+        <div className="grid gap-4">
         {orders.map((order) => (
           <article key={order.id} className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5">
             <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
@@ -43,7 +45,7 @@ export default async function AdminOrdersPage() {
                 <div className="flex flex-wrap items-center gap-3 text-sm text-white/58">
                   <strong className="text-white">{order.id.slice(0, 8).toUpperCase()}</strong>
                   <span>{order.email}</span>
-                  <span>{order.payment_status}</span>
+                  <AdminStatusBadge tone={order.payment_status === "paid" ? "success" : "warning"}>{order.payment_status}</AdminStatusBadge>
                   <span>{new Date(order.created_at).toLocaleDateString("fr-FR")}</span>
                 </div>
                 <p className="mt-3 text-2xl font-black text-white">
@@ -67,7 +69,8 @@ export default async function AdminOrdersPage() {
             </div>
           </article>
         ))}
-        {!orders.length ? <p className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5 text-white/58">Aucune commande à afficher.</p> : null}
+        {!orders.length ? <AdminEmptyState title="Aucune commande" description="Les nouvelles commandes synchronisées depuis Stripe apparaîtront ici." /> : null}
+        </div>
       </div>
     </AdminShell>
   );
