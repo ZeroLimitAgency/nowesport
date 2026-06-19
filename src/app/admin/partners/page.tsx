@@ -1,6 +1,7 @@
 import { deletePartner, savePartner } from "@/app/admin/actions";
 import { AdminMediaField } from "@/components/admin-media-field";
 import { AdminShell } from "@/components/admin-shell";
+import { AdminAdvancedPanel, AdminEmptyState, AdminPageHeader, AdminSection, adminInputClass } from "@/components/admin-ui";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { listMediaOptions } from "@/lib/media-storage";
@@ -20,7 +21,7 @@ type AdminPartner = {
 
 export const dynamic = "force-dynamic";
 
-const inputClass = "min-h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-[var(--color-accent)]/60";
+const inputClass = adminInputClass;
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">{label}{children}</label>;
@@ -32,18 +33,18 @@ function PartnerForm({ partner, mediaOptions }: { partner?: AdminPartner; mediaO
       <input type="hidden" name="id" value={partner?.id ?? ""} />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field label="Nom"><input required name="name" defaultValue={partner?.name ?? ""} className={inputClass} /></Field>
-        <Field label="Slug"><input required name="slug" defaultValue={partner?.slug ?? ""} className={inputClass} /></Field>
+
         <Field label="Rôle"><input name="role_label" defaultValue={partner?.role_label ?? ""} className={inputClass} /></Field>
         <AdminMediaField label="Logo" name="image_url" bucket="partners" defaultValue={partner?.image_url} options={mediaOptions} />
         <Field label="URL"><input name="external_url" defaultValue={partner?.external_url ?? ""} className={inputClass} /></Field>
-        <Field label="Ordre"><input type="number" name="sort_order" defaultValue={partner?.sort_order ?? 0} className={inputClass} /></Field>
+
         <label className="flex items-center gap-3 text-sm font-semibold text-white/72 sm:pt-7">
           <input type="checkbox" name="is_public" defaultChecked={partner?.is_public ?? true} className="h-5 w-5 accent-pink-500" />
           Publié
         </label>
       </div>
       <Field label="Description"><textarea name="description" defaultValue={partner?.description ?? ""} className={`${inputClass} min-h-24 py-3`} /></Field>
-      <button type="submit" className="primary-cta w-fit">{partner ? "Enregistrer" : "Créer le partenaire"}</button>
+      <AdminAdvancedPanel><Field label="Slug"><input required name="slug" defaultValue={partner?.slug ?? ""} className={inputClass} /></Field><Field label="Ordre"><input type="number" name="sort_order" defaultValue={partner?.sort_order ?? 0} className={inputClass} /></Field></AdminAdvancedPanel><button type="submit" className="primary-cta w-fit">{partner ? "Sauvegarder" : "Créer le partenaire"}</button>
     </form>
   );
 }
@@ -65,11 +66,8 @@ export default async function AdminPartnersPage() {
   return (
     <AdminShell>
       <div className="grid gap-6">
-        <section className="rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 sm:p-6">
-          <p className="section-kicker">Partenaires</p>
-          <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-white">Créer un partenaire</h2>
-          <div className="mt-5">{isConfigured ? <PartnerForm mediaOptions={mediaOptions} /> : <p className="text-sm text-white/58">Supabase doit être configuré pour gérer les partenaires.</p>}</div>
-        </section>
+        <AdminPageHeader kicker="Partenaires" title="Ajouter un partenaire simplement" description="Nom, logo, catégorie, description, lien et publication. Le slug et l’ordre sont cachés en options avancées." />
+        <AdminSection kicker="Nouveau partenaire" title="Identité partenaire">{isConfigured ? <PartnerForm mediaOptions={mediaOptions} /> : <AdminEmptyState title="Partenaires indisponibles" description="Supabase doit être configuré pour gérer les partenaires." />}</AdminSection>
         <div className="grid gap-4 xl:grid-cols-2">
           {partners.map((partner) => (
             <article key={partner.id} className="grid gap-4 rounded-[1.6rem] border border-white/8 bg-white/[0.03] p-5">

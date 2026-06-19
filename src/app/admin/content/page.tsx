@@ -7,6 +7,7 @@ import {
 } from "@/app/admin/actions";
 import { AdminMediaField } from "@/components/admin-media-field";
 import { AdminShell } from "@/components/admin-shell";
+import { AdminAdvancedPanel, AdminPageHeader, AdminStatusBadge, adminInputClass, adminTextareaClass } from "@/components/admin-ui";
 import { getDefaultCmsContent, locales, type SiteLocale } from "@/lib/cms";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
@@ -51,8 +52,8 @@ type AdminSocialLink = {
 
 export const dynamic = "force-dynamic";
 
-const inputClass = "min-h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-[var(--color-accent)]/60";
-const textareaClass = `${inputClass} min-h-28 py-3`;
+const inputClass = adminInputClass;
+const textareaClass = adminTextareaClass;
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -181,10 +182,8 @@ function BlockForm({ block, mediaOptions }: { block: AdminContentBlock; mediaOpt
         <Field label="Ordre"><input type="number" name="sort_order" defaultValue={block.sort_order} className={inputClass} /></Field>
       </div>
       <Field label="Texte"><textarea name="body" defaultValue={block.body ?? ""} className={textareaClass} /></Field>
-      <Field label="Metadata JSON (sponsors, sections légales, poster...)">
-        <textarea name="metadata" defaultValue={JSON.stringify(block.metadata ?? {}, null, 2)} className={`${textareaClass} font-mono text-xs normal-case tracking-normal`} />
-      </Field>
-      <p className="text-xs leading-5 text-white/42">Les liens et médias doivent être des URL http(s), mailto ou des chemins internes commençant par /. Un JSON invalide est refusé à la sauvegarde.</p>
+      <AdminAdvancedPanel title="Options avancées : metadata JSON"><Field label="Metadata JSON"><textarea name="metadata" defaultValue={JSON.stringify(block.metadata ?? {}, null, 2)} className={`${textareaClass} font-mono text-xs normal-case tracking-normal`} /></Field><p className="text-xs leading-5 text-white/42">Un JSON invalide est refusé à la sauvegarde.</p></AdminAdvancedPanel>
+      <p className="text-xs leading-5 text-white/42">Les liens et médias doivent être des URL http(s), mailto ou des chemins internes commençant par /.</p>
       <button type="submit" className="primary-cta w-fit">Sauvegarder le bloc</button>
     </form>
   );
@@ -248,20 +247,7 @@ export default async function AdminContentPage() {
   return (
     <AdminShell>
       <div className="grid gap-6">
-        <section className="rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 sm:p-6">
-          <p className="section-kicker">Contenu du site</p>
-          <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-white">CMS global FR/EN</h2>
-          <p className="mt-3 max-w-4xl text-sm leading-6 text-white/58">
-            Les produits, événements, partenaires et rosters restent dans leurs modules métier. Cette page pilote les textes globaux, CTA, liens, médias, maintenance, navigation, réseaux sociaux et pages légales sans demander à l’admin d’ouvrir Supabase.
-          </p>
-          <p className="mt-3 max-w-4xl text-sm leading-6 text-white/50">En cas d’erreur, le formulaire affiche un message serveur lisible : champ obligatoire, URL invalide ou JSON metadata incorrect.</p>
-          {!isConfigured ? (
-            <p className="mt-4 rounded-2xl border border-yellow-300/20 bg-yellow-300/10 p-4 text-sm text-yellow-100">Supabase n’est pas configuré : seuls les contenus de fallback sont affichés.</p>
-          ) : null}
-          {isConfigured && !hasCmsTables ? (
-            <p className="mt-4 rounded-2xl border border-yellow-300/20 bg-yellow-300/10 p-4 text-sm text-yellow-100">Applique le nouveau schéma Supabase pour activer l’édition persistante des tables CMS.</p>
-          ) : null}
-        </section>
+        <AdminPageHeader kicker="Contenu du site" title="CMS simple FR/EN" description="Les blocs sont regroupés par page métier : accueil, boutique, roster, événements, partenaires, maintenance, navigation, réseaux sociaux et pages légales. Les metadata JSON sont masquées par défaut." actions={<>{!isConfigured ? <AdminStatusBadge tone="warning">Fallback local</AdminStatusBadge> : null}{isConfigured && !hasCmsTables ? <AdminStatusBadge tone="warning">Schéma CMS à appliquer</AdminStatusBadge> : null}</>} />
 
         <section className="grid gap-4">
           <div>

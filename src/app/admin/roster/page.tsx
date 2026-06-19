@@ -1,6 +1,7 @@
 import { deleteRosterMember, deleteRosterTeam, saveRosterMember, saveRosterTeam } from "@/app/admin/actions";
 import { AdminMediaField } from "@/components/admin-media-field";
 import { AdminShell } from "@/components/admin-shell";
+import { AdminPageHeader, adminInputClass } from "@/components/admin-ui";
 import { listMediaOptions } from "@/lib/media-storage";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
@@ -8,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-const inputClass = "min-h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-[var(--color-accent)]/60";
+const inputClass = adminInputClass;
 const cardClass = "rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 shadow-2xl shadow-black/20 sm:p-6";
 const roleTypes = ["Player", "Coach", "Manager", "Analyst", "Content Creator", "Staff", "Custom"];
 const rosterCategories = ["Pro", "Académie", "Créateurs", "Staff", "Autre"];
@@ -74,19 +75,6 @@ function TeamSelect({ games, defaultValue }: { games: AdminGame[]; defaultValue?
   );
 }
 
-function AdvancedSlug({ defaultValue, label = "Options avancées" }: { defaultValue?: string | null; label?: string }) {
-  return (
-    <details className="rounded-2xl border border-white/8 bg-white/[0.025] p-4">
-      <summary className="cursor-pointer text-xs font-black uppercase tracking-[0.16em] text-white/45">{label}</summary>
-      <div className="mt-4 grid gap-2">
-        <Field label="Slug personnalisé" hint="Laisse vide : il sera généré automatiquement depuis le nom.">
-          <input name="slug" defaultValue={defaultValue ?? ""} className={inputClass} placeholder="auto" />
-        </Field>
-      </div>
-    </details>
-  );
-}
-
 function TeamForm({ team, games, mediaOptions }: { team?: AdminRosterTeam; games: AdminGame[]; mediaOptions: Awaited<ReturnType<typeof listMediaOptions>> }) {
   return (
     <form action={saveRosterTeam} className="grid gap-5 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5">
@@ -99,7 +87,7 @@ function TeamForm({ team, games, mediaOptions }: { team?: AdminRosterTeam; games
             {rosterCategories.map((category) => <option key={category} value={category}>{category}</option>)}
           </select>
         </Field>
-        <Field label="Ordre d’affichage"><input type="number" name="sort_order" defaultValue={team?.sort_order ?? 0} className={inputClass} /></Field>
+
       </div>
       <Field label="Description"><textarea name="description" defaultValue={team?.description ?? ""} className={`${inputClass} min-h-24 py-3`} placeholder="Présente l’équipe en une ou deux phrases." /></Field>
       <div className="grid gap-4 lg:grid-cols-3">
@@ -114,7 +102,7 @@ function TeamForm({ team, games, mediaOptions }: { team?: AdminRosterTeam; games
         </label>
         <button type="submit" className="primary-cta w-fit">{team ? "Enregistrer le roster" : "Créer un roster"}</button>
       </div>
-      <AdvancedSlug defaultValue={team?.slug} />
+      <details className="rounded-2xl border border-white/8 bg-white/[0.025] p-4"><summary className="cursor-pointer text-xs font-black uppercase tracking-[0.16em] text-white/45">Options avancées</summary><div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="Slug personnalisé" hint="Laisse vide : il sera généré automatiquement depuis le nom."><input name="slug" defaultValue={team?.slug ?? ""} className={inputClass} placeholder="auto" /></Field><Field label="Ordre d’affichage"><input type="number" name="sort_order" defaultValue={team?.sort_order ?? 0} className={inputClass} /></Field></div></details>
     </form>
   );
 }
@@ -167,10 +155,10 @@ function MemberForm({ member, teams, currentTeamId, mediaOptions }: { member?: A
           <input type="checkbox" name="is_public" defaultChecked={member?.is_public ?? true} className="h-5 w-5 accent-pink-500" />
           Actif / visible
         </label>
-        <Field label="Ordre"><input type="number" name="sort_order" defaultValue={member?.sort_order ?? 0} className={inputClass} /></Field>
+
         <button type="submit" className="primary-cta w-fit">{member ? "Enregistrer le membre" : "Ajouter le membre"}</button>
       </div>
-      <AdvancedSlug defaultValue={member?.slug} label="Options avancées membre" />
+      <details className="rounded-2xl border border-white/8 bg-white/[0.025] p-4"><summary className="cursor-pointer text-xs font-black uppercase tracking-[0.16em] text-white/45">Options avancées membre</summary><div className="mt-4 grid gap-3 sm:grid-cols-2"><Field label="Slug"><input name="slug" defaultValue={member?.slug ?? ""} className={inputClass} placeholder="auto" /></Field><Field label="Ordre"><input type="number" name="sort_order" defaultValue={member?.sort_order ?? 0} className={inputClass} /></Field></div></details>
     </form>
   );
 }
@@ -199,11 +187,7 @@ export default async function AdminRosterPage() {
   return (
     <AdminShell>
       <div className="grid gap-6">
-        <section className={cardClass}>
-          <p className="section-kicker">Dashboard roster</p>
-          <h1 className="mt-3 text-4xl font-black uppercase tracking-[-0.05em] text-white">Gérer les équipes NOW</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-white/58">Un roster est un bloc d’équipe. Crée le bloc, ajoute sa bannière et ses logos, puis gère les membres directement à l’intérieur.</p>
-        </section>
+        <AdminPageHeader kicker="Roster" title="Gérer les équipes NOW" description="Un roster = un bloc équipe. Crée le roster avec nom, catégorie, jeu, bannière, logo et description ; les membres se gèrent ensuite dans des cartes dédiées." />
 
         <section className={cardClass}>
           <p className="section-kicker">Créer un roster</p>

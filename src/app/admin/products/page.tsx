@@ -7,6 +7,7 @@ import {
 } from "@/app/admin/actions";
 import { AdminMediaField } from "@/components/admin-media-field";
 import { AdminShell } from "@/components/admin-shell";
+import { AdminActionButton, AdminAdvancedPanel, AdminEmptyState, AdminPageHeader, AdminSection, adminInputClass } from "@/components/admin-ui";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { listMediaOptions } from "@/lib/media-storage";
@@ -68,7 +69,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-const inputClass = "min-h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm normal-case tracking-normal text-white outline-none focus:border-[var(--color-accent)]/60";
+const inputClass = adminInputClass;
 
 function ProductForm({ product, mediaOptions }: { product?: AdminProduct; mediaOptions?: Awaited<ReturnType<typeof listMediaOptions>> }) {
   return (
@@ -76,7 +77,6 @@ function ProductForm({ product, mediaOptions }: { product?: AdminProduct; mediaO
       <input type="hidden" name="id" value={product?.id ?? ""} />
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Field label="Nom"><input required name="name" defaultValue={product?.name ?? ""} className={inputClass} /></Field>
-        <Field label="Slug"><input required name="slug" defaultValue={product?.slug ?? ""} className={inputClass} /></Field>
         <Field label="Catégorie"><input name="category" defaultValue={product?.category ?? ""} className={inputClass} /></Field>
         <Field label="Type">
           <select name="product_type" defaultValue={product?.product_type ?? "physical"} className={inputClass}>
@@ -86,10 +86,7 @@ function ProductForm({ product, mediaOptions }: { product?: AdminProduct; mediaO
         </Field>
         <Field label="Prix cents"><input required type="number" name="price_cents" defaultValue={product?.price_cents ?? 0} className={inputClass} /></Field>
         <Field label="Devise"><input name="currency" defaultValue={product?.currency ?? "EUR"} className={inputClass} /></Field>
-        <Field label="Ordre"><input type="number" name="sort_order" defaultValue={product?.sort_order ?? 0} className={inputClass} /></Field>
-        <AdminMediaField label="Image" name="hero_image_url" bucket="products" defaultValue={product?.hero_image_url} options={mediaOptions} />
-        <Field label="Stripe product"><input name="stripe_product_id" defaultValue={product?.stripe_product_id ?? ""} className={inputClass} /></Field>
-        <Field label="Stripe price"><input name="stripe_price_id" defaultValue={product?.stripe_price_id ?? ""} className={inputClass} /></Field>
+        <AdminMediaField label="Image principale" name="hero_image_url" bucket="products" defaultValue={product?.hero_image_url} options={mediaOptions} />
         <label className="flex items-center gap-3 text-sm font-semibold text-white/72 sm:pt-7">
           <input type="checkbox" name="is_public" defaultChecked={product?.is_public ?? true} className="h-5 w-5 accent-pink-500" />
           Actif / public
@@ -97,7 +94,8 @@ function ProductForm({ product, mediaOptions }: { product?: AdminProduct; mediaO
       </div>
       <Field label="Résumé"><input name="short_description" defaultValue={product?.short_description ?? ""} className={inputClass} /></Field>
       <Field label="Description"><textarea name="description" defaultValue={product?.description ?? ""} className={`${inputClass} min-h-24 py-3`} /></Field>
-      <button type="submit" className="primary-cta w-fit">{product ? "Enregistrer" : "Créer le produit"}</button>
+      <AdminAdvancedPanel title="Options avancées : slug, Stripe et ordre"><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Field label="Slug"><input required name="slug" defaultValue={product?.slug ?? ""} className={inputClass} /></Field><Field label="Stripe product"><input name="stripe_product_id" defaultValue={product?.stripe_product_id ?? ""} className={inputClass} /></Field><Field label="Stripe price"><input name="stripe_price_id" defaultValue={product?.stripe_price_id ?? ""} className={inputClass} /></Field><Field label="Ordre"><input type="number" name="sort_order" defaultValue={product?.sort_order ?? 0} className={inputClass} /></Field></div></AdminAdvancedPanel>
+      <button type="submit" className="primary-cta w-fit">{product ? "Sauvegarder" : "Créer le produit"}</button>
     </form>
   );
 }
@@ -134,20 +132,11 @@ export default async function AdminProductsPage() {
   return (
     <AdminShell>
       <div className="grid gap-6">
-        <section className="rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 sm:p-6">
-          <p className="section-kicker">Produits</p>
-          <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-white">Créer un produit</h2>
-          <div className="mt-5">
-            {isConfigured ? <ProductForm mediaOptions={mediaOptions} /> : <p className="text-sm text-white/58">Supabase doit être configuré pour créer des produits.</p>}
-          </div>
-        </section>
+        <AdminPageHeader kicker="Produits" title="Créer un produit comme une boutique" description="Infos principales, images, prix, variantes, stock, Stripe et publication sont séparés pour éviter l’effet table SQL." />
+        <AdminSection kicker="Nouveau produit" title="Infos principales">{isConfigured ? <ProductForm mediaOptions={mediaOptions} /> : <AdminEmptyState title="Produits indisponibles" description="Supabase doit être configuré pour créer des produits." />}</AdminSection>
 
         {!products.length ? (
-          <section className="rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5">
-            <p className="text-sm leading-6 text-white/58">
-              Aucun produit Supabase pour le moment. Crée le premier produit ici pour alimenter la boutique publique.
-            </p>
-          </section>
+          <AdminEmptyState title="Aucun produit" description="Crée le premier produit ici pour alimenter la boutique publique." />
         ) : null}
 
         {products.map((product) => {
@@ -170,7 +159,7 @@ export default async function AdminProductsPage() {
                   </form>
                   <form action={deleteProduct}>
                     <input type="hidden" name="id" value={product.id} />
-                    <button type="submit" className="secondary-cta border-red-400/30 text-red-100">Supprimer</button>
+                    <AdminActionButton type="submit" tone="danger">Supprimer</AdminActionButton>
                   </form>
                 </div>
               </div>

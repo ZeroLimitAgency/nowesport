@@ -1,6 +1,7 @@
 import { deleteEvent, saveEvent } from "@/app/admin/actions";
 import { AdminMediaField } from "@/components/admin-media-field";
 import { AdminShell } from "@/components/admin-shell";
+import { AdminAdvancedPanel, AdminEmptyState, AdminPageHeader, AdminSection, adminInputClass } from "@/components/admin-ui";
 import { requireAdmin } from "@/lib/auth";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { listMediaOptions } from "@/lib/media-storage";
@@ -21,7 +22,7 @@ type AdminEvent = {
 
 export const dynamic = "force-dynamic";
 
-const inputClass = "min-h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none placeholder:text-white/30 focus:border-[var(--color-accent)]/60";
+const inputClass = adminInputClass;
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">{label}{children}</label>;
@@ -37,14 +38,14 @@ function EventForm({ event, mediaOptions }: { event?: AdminEvent; mediaOptions?:
         <Field label="Lieu"><input name="location" defaultValue={event?.location ?? ""} className={inputClass} /></Field>
         <AdminMediaField label="Grande image événement" name="image_url" bucket="events" folder="timeline" defaultValue={event?.image_url} options={mediaOptions} />
         <Field label="Lien externe"><input name="external_url" defaultValue={event?.external_url ?? ""} className={inputClass} placeholder="https://..." /></Field>
-        <Field label="Ordre"><input type="number" name="sort_order" defaultValue={event?.sort_order ?? 0} className={inputClass} /></Field>
+
         <label className="flex items-center gap-3 text-sm font-semibold text-white/72 sm:pt-7">
           <input type="checkbox" name="is_public" defaultChecked={event?.is_public ?? true} className="h-5 w-5 accent-pink-500" />
           Publié
         </label>
       </div>
       <Field label="Description"><textarea name="description" defaultValue={event?.description ?? ""} className={`${inputClass} min-h-24 py-3`} /></Field>
-      <div className="flex flex-wrap items-center justify-between gap-4"><details className="rounded-2xl border border-white/8 bg-white/[0.025] p-4"><summary className="cursor-pointer text-xs font-black uppercase tracking-[0.16em] text-white/45">Options avancées</summary><Field label="Slug personnalisé"><input name="slug" defaultValue={event?.slug ?? ""} className={inputClass} placeholder="auto" /></Field></details><button type="submit" className="primary-cta w-fit">{event ? "Enregistrer" : "Créer l'événement"}</button></div>
+      <div className="flex flex-wrap items-center justify-between gap-4"><AdminAdvancedPanel><Field label="Slug personnalisé"><input name="slug" defaultValue={event?.slug ?? ""} className={inputClass} placeholder="auto" /></Field><Field label="Ordre"><input type="number" name="sort_order" defaultValue={event?.sort_order ?? 0} className={inputClass} /></Field></AdminAdvancedPanel><button type="submit" className="primary-cta w-fit">{event ? "Sauvegarder" : "Créer l'événement"}</button></div>
     </form>
   );
 }
@@ -66,12 +67,8 @@ export default async function AdminEventsPage() {
   return (
     <AdminShell>
       <div className="grid gap-6">
-        <section className="rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 sm:p-6">
-          <p className="section-kicker">Événements</p>
-          <h2 className="mt-3 text-3xl font-black uppercase tracking-[-0.04em] text-white">Créer un événement</h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-white/58">Ajoute une grande image, une date, un lieu et un lien externe. Le slug est généré automatiquement.</p>
-          <div className="mt-5">{isConfigured ? <EventForm mediaOptions={mediaOptions} /> : <p className="text-sm text-white/58">Supabase doit être configuré pour gérer les événements.</p>}</div>
-        </section>
+        <AdminPageHeader kicker="Événements" title="Créer un événement visuel" description="Titre, grande image, date, lieu, description, lien externe et publication. Le slug et l’ordre restent en options avancées." />
+        <AdminSection kicker="Nouvel événement" title="Timeline">{isConfigured ? <EventForm mediaOptions={mediaOptions} /> : <AdminEmptyState title="Événements indisponibles" description="Supabase doit être configuré pour gérer les événements." />}</AdminSection>
         {events.map((event) => (
           <article key={event.id} className="grid gap-4 rounded-[1.6rem] border border-white/8 bg-white/[0.03] p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
