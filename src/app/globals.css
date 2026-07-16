@@ -276,3 +276,81 @@ input {
     letter-spacing: 0.14em;
   }
 }
+
+/* Mobile launch hardening */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  overflow-wrap: anywhere;
+}
+
+img,
+video,
+svg,
+canvas {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  max-width: 100%;
+}
+
+@media (max-width: 640px) {
+  body {
+    background:
+      radial-gradient(circle at top, rgba(233, 53, 133, 0.14), transparent 18rem),
+      #050505;
+  }
+
+  .primary-cta,
+  .secondary-cta,
+  .section-link {
+    min-height: 2.9rem;
+    width: 100%;
+    padding-inline: 1rem;
+    text-align: center;
+    letter-spacing: 0.1em;
+    line-height: 1.15;
+  }
+
+  .section-kicker {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    overflow-wrap: anywhere;
+  }
+
+  .section-title {
+    font-size: clamp(1.9rem, 11vw, 2.65rem);
+    line-height: 1;
+    letter-spacing: -0.045em;
+    overflow-wrap: anywhere;
+  }
+
+  .hero-grid {
+    background-size: 2rem 2rem;
+    opacity: 0.28;
+  }
+
+  .logo-mark {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

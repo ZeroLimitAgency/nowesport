@@ -1,9 +1,7 @@
 import { unstable_noStore as noStore } from "next/cache";
 import {
-  collectionItems,
   events,
   games,
-  getProductBySlug,
   partners,
   teamSupportBlocks,
 } from "@/data/site";
@@ -85,7 +83,7 @@ export async function getPublicProducts(): Promise<ProductCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return collectionItems;
+    return [];
   }
 
   const supabase = await createClient();
@@ -98,14 +96,15 @@ export async function getPublicProducts(): Promise<ProductCard[]> {
     .order("sort_order", { ascending: true });
 
   if (error) {
-    throw new Error(`Lecture produits Supabase impossible : ${error.message}`);
+    console.error(`Lecture produits Supabase impossible : ${error.message}`);
+    return [];
   }
 
   return (data ?? []).map((item) => ({
     slug: item.slug,
     name: item.name,
     category: item.category ?? "Collection",
-    price: formatPrice(item.price_cents, item.currency ?? "EUR"),
+    price: typeof item.price_cents === "number" ? formatPrice(item.price_cents, item.currency ?? "EUR") : "Prix à venir",
     description: item.short_description ?? item.description ?? "",
     imageUrl: item.hero_image_url,
     intro: item.description ?? item.short_description ?? "",
@@ -122,7 +121,7 @@ export async function getPublicProductBySlug(
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return getProductBySlug(slug) ?? null;
+    return null;
   }
 
   const supabase = await createClient();
@@ -136,7 +135,8 @@ export async function getPublicProductBySlug(
     .maybeSingle();
 
   if (error) {
-    throw new Error(`Lecture produit Supabase impossible : ${error.message}`);
+    console.error(`Lecture produit Supabase impossible : ${error.message}`);
+    return null;
   }
 
   if (!data) {
@@ -151,7 +151,7 @@ export async function getPublicProductBySlug(
     .order("sort_order", { ascending: true });
 
   if (variantsError) {
-    throw new Error(`Lecture variantes Supabase impossible : ${variantsError.message}`);
+    console.error(`Lecture variantes Supabase impossible : ${variantsError.message}`);
   }
 
   const details = [
@@ -171,7 +171,7 @@ export async function getPublicProductBySlug(
     slug: data.slug,
     name: data.name,
     category: data.category ?? "Collection",
-    price: formatPrice(data.price_cents, data.currency ?? "EUR"),
+    price: typeof data.price_cents === "number" ? formatPrice(data.price_cents, data.currency ?? "EUR") : "Prix à venir",
     description: data.short_description ?? data.description ?? "",
     imageUrl: data.hero_image_url,
     intro: data.description ?? data.short_description ?? "",
@@ -211,25 +211,7 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return games.map((game) => ({
-      slug: game.slug,
-      name: game.game,
-      game: game.subtitle,
-      gameSlug: game.visual,
-      category: game.subtitle,
-      description: game.description,
-      members: game.rosters.flatMap((roster) =>
-        roster.members.map((member) => ({
-          displayName: member,
-          pseudo: member,
-          role: roster.name,
-          roleType: roster.name.toLowerCase().includes("staff") || roster.name.toLowerCase().includes("encadrement")
-            ? "Staff"
-            : "Player",
-          socialLinks: {},
-        })),
-      ),
-    }));
+    return [];
   }
 
   const supabase = await createClient();
@@ -293,7 +275,7 @@ export async function getPublicRosterTeamBySlug(slug: string): Promise<RosterTea
 
 export async function getPublicGames(): Promise<GameCard[]> {
   if (!hasSupabaseEnv()) {
-    return games;
+    return [];
   }
 
   const teams = await getPublicRosterTeams();
@@ -325,7 +307,7 @@ export async function getPublicPartners(): Promise<PartnerCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return partners;
+    return [];
   }
 
   const supabase = await createClient();
@@ -336,7 +318,8 @@ export async function getPublicPartners(): Promise<PartnerCard[]> {
     .order("sort_order", { ascending: true });
 
   if (error) {
-    throw new Error(`Lecture partenaires Supabase impossible : ${error.message}`);
+    console.error(`Lecture partenaires Supabase impossible : ${error.message}`);
+    return [];
   }
 
   return (data ?? []).map((item) => ({
@@ -344,7 +327,7 @@ export async function getPublicPartners(): Promise<PartnerCard[]> {
     role: item.role_label ?? "Partenaire",
     description: item.description ?? "",
     imageUrl: item.image_url,
-    href: item.external_url ?? "#",
+    href: item.external_url ?? "",
   }));
 }
 
@@ -352,7 +335,7 @@ export async function getPublicEvents(): Promise<EventCard[]> {
   noStore();
 
   if (!hasSupabaseEnv()) {
-    return events;
+    return [];
   }
 
   const supabase = await createClient();
@@ -363,12 +346,13 @@ export async function getPublicEvents(): Promise<EventCard[]> {
     .order("event_date", { ascending: false });
 
   if (error) {
-    throw new Error(`Lecture événements Supabase impossible : ${error.message}`);
+    console.error(`Lecture événements Supabase impossible : ${error.message}`);
+    return [];
   }
 
   return (data ?? []).map((item, index) => ({
     title: item.title,
-    date: new Date(item.event_date).toLocaleDateString("fr-FR"),
+    date: item.event_date ? new Date(item.event_date).toLocaleDateString("fr-FR") : "Date à venir",
     location: item.location ?? "",
     description: item.description ?? "",
     imageUrl: item.image_url,

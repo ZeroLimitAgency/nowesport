@@ -5,6 +5,24 @@ import { createClient } from "@/lib/supabase/client";
 
 type AuthMode = "login" | "reset";
 
+function friendlyAuthError(error: unknown) {
+  if (!(error instanceof Error)) return "Impossible de continuer pour le moment.";
+  const message = error.message.toLowerCase();
+  if (message.includes("invalid login") || message.includes("invalid credentials")) {
+    return "Adresse e-mail ou mot de passe incorrect.";
+  }
+  if (message.includes("email not confirmed")) {
+    return "Confirme ton adresse e-mail avant de te connecter.";
+  }
+  if (message.includes("rate limit") || message.includes("too many")) {
+    return "Trop de tentatives. Réessaie dans quelques minutes.";
+  }
+  if (message.includes("network") || message.includes("fetch")) {
+    return "Connexion impossible. Vérifie ta connexion puis réessaie.";
+  }
+  return "Action impossible pour le moment. Réessaie ou contacte le support.";
+}
+
 export function AuthPanel({
   userEmail,
   hasUser,
@@ -57,9 +75,7 @@ export function AuthPanel({
       }
 
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Impossible de continuer.",
-      );
+      setMessage(friendlyAuthError(error));
     } finally {
       setIsLoading(false);
     }
@@ -79,9 +95,7 @@ export function AuthPanel({
 
       window.location.href = "/login";
     } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Impossible de se déconnecter.",
-      );
+      setMessage(friendlyAuthError(error));
       setIsLoading(false);
     }
   }
@@ -127,17 +141,22 @@ export function AuthPanel({
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8 grid gap-4">
+        <label className="grid gap-2 text-left text-sm font-semibold text-white/70">Adresse e-mail
         <input
           type="email"
+          autoComplete="email"
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="Adresse e-mail"
           className="min-h-14 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
         />
+        </label>
         {mode === "login" ? (
+          <label className="grid gap-2 text-left text-sm font-semibold text-white/70">Mot de passe
           <input
             type="password"
+            autoComplete="current-password"
             required
             minLength={8}
             value={password}
@@ -145,6 +164,7 @@ export function AuthPanel({
             placeholder="Mot de passe"
             className="min-h-14 rounded-full border border-white/10 bg-white/[0.04] px-5 text-sm text-white outline-none placeholder:text-white/28 focus:border-[var(--color-accent)]/60"
           />
+          </label>
         ) : null}
 
         <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
@@ -165,7 +185,7 @@ export function AuthPanel({
         </div>
       </form>
 
-      {message ? <p className="mt-5 text-center text-sm text-white/58">{message}</p> : null}
+      {message ? <p className="mt-5 text-center text-sm text-white/58" role="status" aria-live="polite">{message}</p> : null}
     </div>
   );
 }
