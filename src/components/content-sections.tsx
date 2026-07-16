@@ -29,6 +29,14 @@ const sectionCopy = {
     eventsLead: "Activations, media days et rendez-vous clés de la saison NOW.",
     fallbackPartner: "Partenaire NOW",
     eventVisual: "Activation NOW",
+    shopEmptyTitle: "La boutique se prépare",
+    shopEmptyBody: "Les premiers articles seront ajoutés depuis l’administration. En attendant, la page reste disponible sans commande inactive.",
+    rosterEmptyTitle: "Les rosters seront présentés bientôt",
+    rosterEmptyBody: "Les équipes, joueurs et staffs seront publiés depuis l’administration dès que les informations finales seront prêtes.",
+    partnersEmptyTitle: "Les partenaires seront affichés ici",
+    partnersEmptyBody: "Les logos et présentations partenaires seront ajoutés sans inventer de collaboration temporaire.",
+    eventsEmptyTitle: "Aucun événement publié",
+    eventsEmptyBody: "Les rendez-vous publics seront ajoutés depuis l’administration dès validation du calendrier.",
   },
   en: {
     shopKicker: "Collections",
@@ -48,11 +56,31 @@ const sectionCopy = {
     eventsLead: "Activations, media days and key NOW season milestones.",
     fallbackPartner: "NOW partner",
     eventVisual: "NOW activation",
+    shopEmptyTitle: "The shop is being prepared",
+    shopEmptyBody: "Products will be added from the admin. Until then, the page stays clean without inactive checkout links.",
+    rosterEmptyTitle: "Rosters will be introduced soon",
+    rosterEmptyBody: "Teams, players and staff will be published from the admin once the final information is ready.",
+    partnersEmptyTitle: "Partners will appear here",
+    partnersEmptyBody: "Partner logos and descriptions will be added without temporary fake collaborations.",
+    eventsEmptyTitle: "No published event",
+    eventsEmptyBody: "Public events will be added from the admin once the calendar is confirmed.",
   },
 } satisfies Record<SectionLocale, Record<string, string>>;
 
 function copy(locale: SectionLocale = "fr") {
   return sectionCopy[locale];
+}
+
+
+function PublicEmptyState({ title, body, href = "/" }: { title: string; body: string; href?: string }) {
+  return (
+    <div className="relative overflow-hidden rounded-[2rem] border border-dashed border-white/14 bg-[radial-gradient(circle_at_top,rgba(244,108,160,0.16),transparent_34%),linear-gradient(180deg,#141218_0%,#08080a_100%)] p-8 text-center sm:p-10">
+      <div className="mx-auto grid h-20 w-20 place-items-center rounded-[1.6rem] border border-white/10 bg-white/[0.04] text-3xl font-black uppercase italic tracking-[-0.08em] text-white">NOW</div>
+      <h3 className="mt-6 text-2xl font-black uppercase tracking-[-0.04em] text-white sm:text-3xl">{title}</h3>
+      <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/58">{body}</p>
+      <Link href={href} className="secondary-cta mt-6 inline-flex">Retour à l’accueil</Link>
+    </div>
+  );
 }
 
 function ProductFallbackVisual({ label = "NOW" }: { label?: string }) {
@@ -128,7 +156,7 @@ export function ShopGridSection({
           </div>
         </div>
 
-        <div className="grid gap-5 md:grid-cols-2">
+        {items.length ? <div className="grid gap-5 md:grid-cols-2">
           {items.map((item, index) => (
             <Link
               key={item.slug}
@@ -170,7 +198,7 @@ export function ShopGridSection({
               </div>
             </Link>
           ))}
-        </div>
+        </div> : <PublicEmptyState title={t.shopEmptyTitle} body={t.shopEmptyBody} />}
       </div>
     </section>
   );
@@ -206,7 +234,7 @@ export function TeamsShowcaseSection({
         </p>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+      {gamesData.length ? <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
         {gamesData.map((game) => (
           <Link
             key={game.slug}
@@ -240,9 +268,9 @@ export function TeamsShowcaseSection({
             </div>
           </Link>
         ))}
-      </div>
+      </div> : <PublicEmptyState title={t.rosterEmptyTitle} body={t.rosterEmptyBody} href="/roster" />}
 
-      <div className="mt-8 grid gap-5 md:grid-cols-2">
+      {gamesData.length ? <div className="mt-8 grid gap-5 md:grid-cols-2">
         {gamesData.map((game) => (
           <Link
             key={`${game.slug}-detail`}
@@ -283,7 +311,7 @@ export function TeamsShowcaseSection({
             </span>
           </Link>
         ))}
-      </div>
+      </div> : null}
 
       <div className="mt-5 grid gap-5 md:grid-cols-2">
         {teamBlocks.map((item) => (
@@ -323,11 +351,13 @@ export function PartnersShowcaseSection({
         </p>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-3">
+      {partnersData.length ? <div className="grid gap-5 md:grid-cols-3">
         {partnersData.map((partner, index) => (
           <a
             key={`${partner.name}-${index}`}
-            href={partner.href}
+            href={partner.href || "/partners"}
+            target={partner.href ? "_blank" : undefined}
+            rel={partner.href ? "noreferrer" : undefined}
             className="group overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#18181d_0%,#0a0a0c_100%)] transition duration-300 hover:-translate-y-1 hover:border-[var(--color-accent)]/35"
           >
             <div
@@ -362,7 +392,7 @@ export function PartnersShowcaseSection({
             </div>
           </a>
         ))}
-      </div>
+      </div> : <PublicEmptyState title={t.partnersEmptyTitle} body={t.partnersEmptyBody} href="/partners" />}
     </section>
   );
 }
@@ -388,7 +418,7 @@ export function EventsTimelineSection({
         </p>
       </div>
 
-      <div className="grid gap-8">
+      {eventsData.length ? <div className="grid gap-8">
         {eventsData.map((event, index) => (
           <article
             key={`${event.title}-${event.date}`}
@@ -437,7 +467,7 @@ export function EventsTimelineSection({
             </div>
           </article>
         ))}
-      </div>
+      </div> : <PublicEmptyState title={t.eventsEmptyTitle} body={t.eventsEmptyBody} href="/events" />}
     </section>
   );
 }

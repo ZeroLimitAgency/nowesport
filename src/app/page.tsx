@@ -22,26 +22,26 @@ export default async function Home() {
   ]);
   const hero = cms.blocks["home.hero"];
   const sponsors = getMetadataList(hero, "sponsors");
-  const videoHref = typeof hero.metadata?.videoHref === "string" ? hero.metadata.videoHref : "#";
+  const videoHref = typeof hero.metadata?.videoHref === "string" && hero.metadata.videoHref.trim() ? hero.metadata.videoHref : null;
   const poster = typeof hero.metadata?.poster === "string" ? hero.metadata.poster : "/media/jersey.jpeg";
   const { productOptions, shopCollections } = getShopPresentation();
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <section className="relative min-h-[100svh] overflow-hidden">
-        <a href={videoHref} target="_blank" rel="noreferrer" className="absolute inset-0 block" aria-label={hero.title}>
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            poster={poster}
-            className="h-full w-full object-cover"
-          >
-            <source src={hero.mediaUrl ?? "/media/now-academy.mp4"} type="video/mp4" />
-          </video>
-        </a>
+        {videoHref ? (
+          <a href={videoHref} target="_blank" rel="noreferrer" className="absolute inset-0 block" aria-label={hero.title}>
+            <video autoPlay muted loop playsInline preload="auto" poster={poster} className="h-full w-full object-cover">
+              <source src={hero.mediaUrl ?? "/media/now-academy.mp4"} type="video/mp4" />
+            </video>
+          </a>
+        ) : (
+          <div className="absolute inset-0" aria-hidden="true">
+            <video autoPlay muted loop playsInline preload="auto" poster={poster} className="h-full w-full object-cover">
+              <source src={hero.mediaUrl ?? "/media/now-academy.mp4"} type="video/mp4" />
+            </video>
+          </div>
+        )}
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.2)_58%,rgba(0,0,0,0.55)_100%)]" />
 
         <div className="absolute bottom-7 left-5 z-10 flex flex-wrap items-center gap-8 sm:bottom-10 sm:left-8">
