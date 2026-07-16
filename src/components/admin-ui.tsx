@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-export const adminInputClass = "min-h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/30 focus:border-[var(--color-accent)]/60";
+export const adminInputClass = "min-h-12 w-full min-w-0 rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-sm normal-case tracking-normal text-white outline-none placeholder:text-white/30 focus:border-[var(--color-accent)]/60";
 export const adminTextareaClass = `${adminInputClass} min-h-28 py-3`;
 
 type Tone = "default" | "success" | "warning" | "danger" | "info";
@@ -16,14 +16,14 @@ const toneClasses: Record<Tone, string> = {
 
 export function AdminPageHeader({ kicker, title, description, actions }: { kicker: string; title: string; description?: string; actions?: ReactNode }) {
   return (
-    <section className="rounded-[1.8rem] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(255,42,109,.16),transparent_34%),linear-gradient(180deg,#151219_0%,#09090b_100%)] p-5 shadow-2xl shadow-black/20 sm:p-7">
+    <section className="rounded-[1.8rem] border border-white/8 bg-[radial-gradient(circle_at_top_left,rgba(255,42,109,.16),transparent_34%),linear-gradient(180deg,#151219_0%,#09090b_100%)] p-4 shadow-2xl shadow-black/20 sm:p-7">
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="section-kicker">{kicker}</p>
-          <h1 className="mt-3 text-3xl font-black uppercase tracking-[-0.05em] text-white sm:text-5xl">{title}</h1>
+          <h1 className="mt-3 text-[clamp(1.85rem,10vw,3rem)] font-black uppercase leading-none tracking-[-0.05em] text-white sm:text-5xl">{title}</h1>
           {description ? <p className="mt-3 max-w-4xl text-sm leading-6 text-white/58">{description}</p> : null}
         </div>
-        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+        {actions ? <div className="flex w-full flex-wrap gap-2 sm:w-auto">{actions}</div> : null}
       </div>
     </section>
   );
@@ -31,11 +31,11 @@ export function AdminPageHeader({ kicker, title, description, actions }: { kicke
 
 export function AdminSection({ kicker, title, description, children, actions }: { kicker?: string; title?: string; description?: string; children: ReactNode; actions?: ReactNode }) {
   return (
-    <section className="grid gap-5 rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-5 shadow-2xl shadow-black/20 sm:p-6">
+    <section className="grid gap-5 rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#131218_0%,#0b0b0d_100%)] p-4 shadow-2xl shadow-black/20 sm:p-6">
       {(kicker || title || description || actions) ? (
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>{kicker ? <p className="section-kicker">{kicker}</p> : null}{title ? <h2 className="mt-2 text-2xl font-black uppercase tracking-[-0.04em] text-white sm:text-3xl">{title}</h2> : null}{description ? <p className="mt-2 max-w-3xl text-sm leading-6 text-white/55">{description}</p> : null}</div>
-          {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+          {actions ? <div className="flex w-full flex-wrap gap-2 sm:w-auto">{actions}</div> : null}
         </div>
       ) : null}
       {children}
@@ -56,11 +56,11 @@ export function AdminEmptyState({ title, description, action }: { title: string;
 }
 
 export function AdminFormGrid({ children, cols = "xl:grid-cols-4" }: { children: ReactNode; cols?: string }) {
-  return <div className={`grid gap-3 sm:grid-cols-2 ${cols}`}>{children}</div>;
+  return <div className={`grid min-w-0 gap-3 md:grid-cols-2 ${cols}`}>{children}</div>;
 }
 
 export function AdminField({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
-  return <label className="grid gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-white/45">{label}{children}{hint ? <span className="normal-case tracking-normal text-[0.68rem] leading-4 text-white/35">{hint}</span> : null}</label>;
+  return <label className="grid min-w-0 gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/45 sm:tracking-[0.16em]">{label}{children}{hint ? <span className="normal-case tracking-normal text-[0.68rem] leading-4 text-white/35">{hint}</span> : null}</label>;
 }
 
 export function AdminAdvancedPanel({ title = "Options avancées", children }: { title?: string; children: ReactNode }) {
@@ -68,7 +68,7 @@ export function AdminAdvancedPanel({ title = "Options avancées", children }: { 
 }
 
 export function AdminDangerZone({ children }: { children: ReactNode }) {
-  return <div className="rounded-[1.4rem] border border-red-400/20 bg-red-500/[0.06] p-4"><p className="text-xs font-black uppercase tracking-[0.18em] text-red-100/80">Zone dangereuse</p><div className="mt-3 flex flex-wrap gap-2">{children}</div></div>;
+  return <div className="rounded-[1.4rem] border border-red-400/20 bg-red-500/[0.06] p-4"><p className="text-xs font-black uppercase tracking-[0.18em] text-red-100/80">Zone dangereuse</p><div className="mt-3 grid gap-2 sm:flex sm:flex-wrap">{children}</div></div>;
 }
 
 export function AdminStatusBadge({ children, tone = "default" }: { children: ReactNode; tone?: Tone }) {

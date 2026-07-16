@@ -73,9 +73,9 @@ const inputClass = adminInputClass;
 
 function ProductForm({ product, mediaOptions }: { product?: AdminProduct; mediaOptions?: Awaited<ReturnType<typeof listMediaOptions>> }) {
   return (
-    <form action={saveProduct} className="grid gap-4 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-5">
+    <form action={saveProduct} className="grid gap-4 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-4 sm:p-5">
       <input type="hidden" name="id" value={product?.id ?? ""} />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         <Field label="Nom"><input required name="name" defaultValue={product?.name ?? ""} className={inputClass} /></Field>
         <Field label="Catégorie"><input name="category" defaultValue={product?.category ?? ""} className={inputClass} /></Field>
         <Field label="Type">
@@ -94,8 +94,8 @@ function ProductForm({ product, mediaOptions }: { product?: AdminProduct; mediaO
       </div>
       <Field label="Résumé"><input name="short_description" defaultValue={product?.short_description ?? ""} className={inputClass} /></Field>
       <Field label="Description"><textarea name="description" defaultValue={product?.description ?? ""} className={`${inputClass} min-h-24 py-3`} /></Field>
-      <AdminAdvancedPanel title="Options avancées : slug, Stripe et ordre"><div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Field label="Slug"><input required name="slug" defaultValue={product?.slug ?? ""} className={inputClass} /></Field><Field label="Stripe product"><input name="stripe_product_id" defaultValue={product?.stripe_product_id ?? ""} className={inputClass} /></Field><Field label="Stripe price"><input name="stripe_price_id" defaultValue={product?.stripe_price_id ?? ""} className={inputClass} /></Field><Field label="Ordre"><input type="number" name="sort_order" defaultValue={product?.sort_order ?? 0} className={inputClass} /></Field></div></AdminAdvancedPanel>
-      <button type="submit" className="primary-cta w-fit">{product ? "Sauvegarder" : "Créer le produit"}</button>
+      <AdminAdvancedPanel title="Options avancées : slug, Stripe et ordre"><div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4"><Field label="Slug"><input required name="slug" defaultValue={product?.slug ?? ""} className={inputClass} /></Field><Field label="Stripe product"><input name="stripe_product_id" defaultValue={product?.stripe_product_id ?? ""} className={inputClass} /></Field><Field label="Stripe price"><input name="stripe_price_id" defaultValue={product?.stripe_price_id ?? ""} className={inputClass} /></Field><Field label="Ordre"><input type="number" name="sort_order" defaultValue={product?.sort_order ?? 0} className={inputClass} /></Field></div></AdminAdvancedPanel>
+      <button type="submit" className="primary-cta sm:w-fit">{product ? "Sauvegarder" : "Créer le produit"}</button>
     </form>
   );
 }
@@ -105,7 +105,7 @@ function VariantForm({ productId, variant }: { productId: string; variant?: Admi
     <form action={saveProductVariant} className="grid gap-3 rounded-[1.2rem] border border-white/8 bg-black/20 p-4">
       <input type="hidden" name="product_id" value={productId} />
       <input type="hidden" name="variant_id" value={variant?.id ?? ""} />
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-7">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
         <Field label="Nom"><input name="name" defaultValue={variant?.name ?? "Standard"} className={inputClass} /></Field>
         <Field label="SKU"><input name="sku" defaultValue={variant?.sku ?? ""} className={inputClass} /></Field>
         <Field label="Taille"><input name="size" defaultValue={variant?.size ?? ""} className={inputClass} /></Field>
@@ -114,7 +114,7 @@ function VariantForm({ productId, variant }: { productId: string; variant?: Admi
         <Field label="Prix cents"><input type="number" name="price_cents" defaultValue={variant?.price_cents ?? ""} className={inputClass} /></Field>
         <Field label="Ordre"><input type="number" name="sort_order" defaultValue={variant?.sort_order ?? 0} className={inputClass} /></Field>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
         <Field label="Stripe price"><input name="stripe_price_id" defaultValue={variant?.stripe_price_id ?? ""} className={inputClass} /></Field>
         <label className="flex items-center gap-3 text-sm font-semibold text-white/72">
           <input type="checkbox" name="is_active" defaultChecked={variant?.is_active ?? true} className="h-5 w-5 accent-pink-500" />
@@ -145,13 +145,13 @@ export default async function AdminProductsPage() {
 
           return (
             <article key={product.id} className="grid gap-4 rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#151218_0%,#09090b_100%)] p-5 sm:p-6">
-              <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="grid gap-4 sm:flex sm:flex-wrap sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--color-accent-soft)]">{product.product_type} · stock {stock}</p>
-                  <h2 className="mt-2 text-3xl font-black text-white">{product.name}</h2>
+                  <h2 className="mt-2 text-[clamp(1.6rem,8vw,2rem)] font-black leading-tight text-white">{product.name}</h2>
                   <p className="mt-2 text-sm text-white/50">{product.slug} · {product.is_public ? "Actif" : "Inactif"}</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid gap-2 sm:flex sm:flex-wrap">
                   <form action={toggleProductStatus}>
                     <input type="hidden" name="id" value={product.id} />
                     <input type="hidden" name="is_public" value={String(product.is_public)} />

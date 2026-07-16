@@ -74,7 +74,7 @@ function copy(locale: SectionLocale = "fr") {
 
 function PublicEmptyState({ title, body, href = "/" }: { title: string; body: string; href?: string }) {
   return (
-    <div className="relative overflow-hidden rounded-[2rem] border border-dashed border-white/14 bg-[radial-gradient(circle_at_top,rgba(244,108,160,0.16),transparent_34%),linear-gradient(180deg,#141218_0%,#08080a_100%)] p-8 text-center sm:p-10">
+    <div className="relative overflow-hidden rounded-[1.5rem] border border-dashed border-white/14 sm:rounded-[2rem] bg-[radial-gradient(circle_at_top,rgba(244,108,160,0.16),transparent_34%),linear-gradient(180deg,#141218_0%,#08080a_100%)] p-5 text-center sm:p-10">
       <div className="mx-auto grid h-20 w-20 place-items-center rounded-[1.6rem] border border-white/10 bg-white/[0.04] text-3xl font-black uppercase italic tracking-[-0.08em] text-white">NOW</div>
       <h3 className="mt-6 text-2xl font-black uppercase tracking-[-0.04em] text-white sm:text-3xl">{title}</h3>
       <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/58">{body}</p>
@@ -110,7 +110,7 @@ export function ShopGridSection({
   const t = copy(locale);
 
   return (
-    <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
+    <section className="mx-auto w-full max-w-[92rem] px-4 py-7 sm:px-8 sm:py-10">
       <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
         <div>
           <p className="section-kicker">{t.shopKicker}</p>
@@ -168,7 +168,7 @@ export function ShopGridSection({
                   <div className="absolute right-3 top-3 rounded-full border border-black/8 bg-black/8 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-black/60">
                     {item.category}
                   </div>
-                  <div className="relative mx-auto mt-7 flex h-64 w-full max-w-[16rem] items-center justify-center overflow-hidden rounded-[1.5rem]">
+                  <div className="relative mx-auto mt-7 flex h-56 w-full max-w-[14rem] sm:h-64 sm:max-w-[16rem] items-center justify-center overflow-hidden rounded-[1.5rem]">
                     {item.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
@@ -223,7 +223,7 @@ export function TeamsShowcaseSection({
   const t = copy(locale);
 
   return (
-    <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
+    <section className="mx-auto w-full max-w-[92rem] px-4 py-7 sm:px-8 sm:py-10">
       <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="section-kicker">{t.rostersKicker}</p>
@@ -340,7 +340,7 @@ export function PartnersShowcaseSection({
   const t = copy(locale);
 
   return (
-    <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
+    <section className="mx-auto w-full max-w-[92rem] px-4 py-7 sm:px-8 sm:py-10">
       <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="section-kicker">{t.partnersKicker}</p>
@@ -407,7 +407,7 @@ export function EventsTimelineSection({
   const t = copy(locale);
 
   return (
-    <section className="mx-auto w-full max-w-[92rem] px-5 py-10 sm:px-8">
+    <section className="mx-auto w-full max-w-[92rem] px-4 py-7 sm:px-8 sm:py-10">
       <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="section-kicker">{t.eventsKicker}</p>
@@ -422,14 +422,14 @@ export function EventsTimelineSection({
         {eventsData.map((event, index) => (
           <article
             key={`${event.title}-${event.date}`}
-            className="grid gap-4 lg:grid-cols-[18rem_1fr]"
+            className="grid gap-4 rounded-[1.5rem] border border-white/8 bg-white/[0.02] p-3 sm:p-0 lg:grid-cols-[18rem_1fr] lg:border-0 lg:bg-transparent"
           >
-            <div className="relative pl-10 lg:pl-12">
+            <div className="relative pl-8 lg:pl-12">
               <span className="absolute left-0 top-2 h-4 w-4 rounded-full border-4 border-[#0b0b0d] bg-[var(--color-accent)] shadow-[0_0_0_6px_rgba(233,53,133,0.12)]" />
               {index < eventsData.length - 1 ? (
                 <span className="absolute left-[0.45rem] top-6 h-[calc(100%+2rem)] w-px bg-white/10" />
               ) : null}
-              <h3 className="text-3xl font-black leading-none tracking-[-0.05em] text-white">
+              <h3 className="text-[clamp(1.55rem,8vw,3rem)] font-black leading-none tracking-[-0.05em] text-white">
                 {event.title}
               </h3>
               <p className="mt-2 text-sm text-white/48">{event.date}</p>
@@ -438,10 +438,10 @@ export function EventsTimelineSection({
             <div className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#15151a_0%,#0a0a0c_100%)]">
               {event.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={event.imageUrl} alt={event.title} className="h-[18rem] w-full object-cover sm:h-[22rem]" />
+                <img src={event.imageUrl} alt={event.title} className="h-56 w-full object-cover sm:h-[22rem]" />
               ) : (
                 <div
-                  className={`grid h-[18rem] place-items-center px-5 text-center sm:h-[22rem] ${
+                  className={`grid h-56 place-items-center px-5 text-center sm:h-[22rem] ${
                     event.tone === "studio"
                       ? "bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_28%),linear-gradient(135deg,#2b2326,#121317)]"
                       : "bg-[linear-gradient(180deg,rgba(255,178,120,0.92),rgba(146,72,34,0.45))]"
@@ -451,7 +451,7 @@ export function EventsTimelineSection({
                     <p className="text-xs font-black uppercase tracking-[0.3em] text-white/70">
                       {t.eventVisual}
                     </p>
-                    <p className="mt-3 text-4xl font-black uppercase italic tracking-[-0.08em] text-white sm:text-6xl">
+                    <p className="mt-3 text-3xl font-black uppercase italic tracking-[-0.08em] text-white sm:text-6xl">
                       NOW
                     </p>
                   </div>

@@ -22,8 +22,8 @@ export function PageIntro({
   description: string;
 }) {
   return (
-    <section className="mx-auto w-full max-w-[92rem] px-5 pb-8 pt-10 sm:px-8 sm:pt-14">
-      <div className="rounded-[2rem] border border-white/8 bg-[linear-gradient(145deg,#171219_0%,#09090b_100%)] px-6 py-10 shadow-[0_30px_120px_rgba(0,0,0,0.35)] sm:px-10">
+    <section className="mx-auto w-full max-w-[92rem] px-4 pb-7 pt-7 sm:px-8 sm:pt-14">
+      <div className="rounded-[1.5rem] border border-white/8 bg-[linear-gradient(145deg,#171219_0%,#09090b_100%)] px-5 py-7 sm:rounded-[2rem] shadow-[0_30px_120px_rgba(0,0,0,0.35)] sm:px-10">
         <p className="section-kicker">{kicker}</p>
         <h1 className="mt-4 max-w-5xl text-5xl font-black uppercase leading-[0.92] tracking-[-0.05em] sm:text-7xl">
           {title}
