@@ -7,6 +7,7 @@ import {
 } from "@/data/site";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { getSeoPriceCents, isSeoProductOutOfStock, isSeoPublishableProduct } from "@/lib/publication";
 
 export type ProductCard = {
   slug: string;
@@ -21,6 +22,11 @@ export type ProductCard = {
   productType?: "physical" | "digital";
   requiresShipping?: boolean;
   imageUrl?: string | null;
+  priceCents?: number | null;
+  currency?: string | null;
+  seoPublishable: boolean;
+  seoPriceCents?: number | null;
+  outOfStock?: boolean;
   variants?: Array<{
     id: string;
     name: string;
@@ -90,7 +96,7 @@ export async function getPublicProducts(): Promise<ProductCard[]> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "slug, name, category, description, short_description, price_cents, currency, hero_image_url, stripe_product_id, stripe_price_id",
+      "slug, name, category, description, short_description, price_cents, currency, hero_image_url, stripe_product_id, stripe_price_id, is_public, product_variants(price_cents, stock_quantity, is_active)",
     )
     .eq("is_public", true)
     .order("sort_order", { ascending: true });
@@ -104,9 +110,14 @@ export async function getPublicProducts(): Promise<ProductCard[]> {
     slug: item.slug,
     name: item.name,
     category: item.category ?? "Collection",
-    price: typeof item.price_cents === "number" ? formatPrice(item.price_cents, item.currency ?? "EUR") : "Prix à venir",
+    price: getSeoPriceCents(item) !== null ? formatPrice(getSeoPriceCents(item)!, item.currency ?? "EUR") : "Prix à venir",
     description: item.short_description ?? item.description ?? "",
     imageUrl: item.hero_image_url,
+    priceCents: item.price_cents,
+    currency: item.currency,
+    seoPublishable: isSeoPublishableProduct(item),
+    seoPriceCents: getSeoPriceCents(item),
+    outOfStock: isSeoProductOutOfStock(item),
     intro: item.description ?? item.short_description ?? "",
     details: [item.description, item.short_description]
       .filter((detail): detail is string => Boolean(detail)),
@@ -128,7 +139,7 @@ export async function getPublicProductBySlug(
   const { data, error } = await supabase
     .from("products")
     .select(
-      "id, slug, name, category, description, short_description, price_cents, currency, hero_image_url, product_type, requires_shipping, allow_custom_name, allow_custom_number, allow_flocking, stripe_product_id, stripe_price_id",
+      "id, slug, name, category, description, short_description, price_cents, currency, hero_image_url, product_type, requires_shipping, allow_custom_name, allow_custom_number, allow_flocking, stripe_product_id, stripe_price_id, is_public",
     )
     .eq("slug", slug)
     .eq("is_public", true)
@@ -145,7 +156,7 @@ export async function getPublicProductBySlug(
 
   const { data: variants, error: variantsError } = await supabase
     .from("product_variants")
-    .select("id, name, size, color, stock_quantity, stripe_price_id")
+    .select("id, name, size, color, stock_quantity, price_cents, stripe_price_id, is_active")
     .eq("product_id", data.id)
     .eq("is_active", true)
     .order("sort_order", { ascending: true });
@@ -167,13 +178,20 @@ export async function getPublicProductBySlug(
       : []),
   ].filter((item): item is string => Boolean(item));
 
+  const publicationRecord = { ...data, product_variants: variants ?? [] };
+
   return {
     slug: data.slug,
     name: data.name,
     category: data.category ?? "Collection",
-    price: typeof data.price_cents === "number" ? formatPrice(data.price_cents, data.currency ?? "EUR") : "Prix à venir",
+    price: getSeoPriceCents(publicationRecord) !== null ? formatPrice(getSeoPriceCents(publicationRecord)!, data.currency ?? "EUR") : "Prix à venir",
     description: data.short_description ?? data.description ?? "",
     imageUrl: data.hero_image_url,
+    priceCents: data.price_cents,
+    currency: data.currency,
+    seoPublishable: isSeoPublishableProduct(publicationRecord),
+    seoPriceCents: getSeoPriceCents(publicationRecord),
+    outOfStock: isSeoProductOutOfStock(publicationRecord),
     intro: data.description ?? data.short_description ?? "",
     details: Array.from(new Set(details)).slice(0, 6),
     stripePriceId: data.stripe_price_id,
@@ -218,13 +236,15 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
   const [{ data: teamsData, error: teamsError }, { data: membersData, error: membersError }] = await Promise.all([
     supabase
       .from("rosters")
-      .select("id, slug, name, category, description, logo_url, game_icon_url, banner_url, sort_order, games(slug, name)")
+      .select("id, slug, name, category, description, logo_url, game_icon_url, banner_url, sort_order, is_public, is_active, games(slug, name)")
       .eq("is_public", true)
+      .eq("is_active", true)
       .order("sort_order", { ascending: true }),
     supabase
       .from("roster_members")
       .select("roster_id, first_name, last_name, pseudo, display_name, role_type, role_label, nationality, country, bio, photo_url, avatar_url, ranking_points, prize_earnings, social_links, social_url, sort_order")
       .eq("is_public", true)
+      .eq("is_active", true)
       .order("sort_order", { ascending: true }),
   ]);
 

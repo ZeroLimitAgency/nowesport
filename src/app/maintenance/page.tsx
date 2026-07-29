@@ -3,7 +3,7 @@ import { MaintenanceControls } from "@/components/maintenance-controls";
 import { getCurrentLocale, getSiteCmsContent } from "@/lib/cms";
 
 export const metadata: Metadata = {
-  title: "Maintenance | NOW eSport",
+  title: "Maintenance",
   description: "Le site NOW eSport est temporairement en maintenance.",
 };
 

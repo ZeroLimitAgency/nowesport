@@ -2,6 +2,9 @@ import { ShopGridSection } from "@/components/content-sections";
 import { PageIntro, ShopBanner } from "@/components/sections";
 import { getCurrentLocale, getShopPresentation, getSiteCmsContent } from "@/lib/cms";
 import { getPublicProducts } from "@/lib/content";
+import { publicMetadata } from "@/lib/seo";
+
+export const metadata = publicMetadata({ title: "Boutique", description: "Découvrez les produits officiels publiés par NOW Esport.", path: "/shop" });
 
 export default async function ShopPage() {
   const locale = await getCurrentLocale();

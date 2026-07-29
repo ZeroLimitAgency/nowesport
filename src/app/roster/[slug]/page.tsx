@@ -1,8 +1,18 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
 import { getPublicRosterTeamBySlug } from "@/lib/content";
+import { breadcrumbJsonLd, privateRobots, publicMetadata } from "@/lib/seo";
+import { isSeoPublishableRoster } from "@/lib/publication";
 
-export function generateStaticParams() {
-  return [];
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const team = await getPublicRosterTeamBySlug(slug);
+  if (!team || !isSeoPublishableRoster({ ...team, is_public: true, is_active: true })) {
+    return { title: "Équipe indisponible", robots: privateRobots };
+  }
+  const description = [team.description, team.game, team.category].filter(Boolean).join(" · ");
+  return publicMetadata({ title: team.name, description, path: `/roster/${team.slug}`, image: team.bannerUrl || team.logoUrl });
 }
 
 const roleBuckets = ["Player", "Coach", "Manager", "Analyst", "Content Creator", "Staff"];
@@ -50,6 +60,7 @@ export default async function RosterTeamPage({
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Rosters", path: "/roster" }, { name: team.name, path: `/roster/${team.slug}` }])} />
       <section className="mx-auto w-full max-w-[92rem] px-4 pb-8 pt-7 sm:px-8 sm:pt-14">
         <div className="overflow-hidden rounded-[1.5rem] sm:rounded-[2rem] border border-white/8 bg-[linear-gradient(180deg,#171219_0%,#08080a_100%)]">
           <div className="relative min-h-[19rem] sm:min-h-[25rem]">

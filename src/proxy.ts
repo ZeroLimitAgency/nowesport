@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { getOptionalSupabasePublicEnv } from "@/lib/supabase/env";
+import { isMaintenanceEnabled, isPreviewDeployment, MAINTENANCE_RETRY_AFTER_SECONDS } from "@/lib/maintenance";
 
 const discordTicketUrl = "https://discord.gg/K5AxWfD7tc";
 const previewCookieName = "now-preview";
@@ -231,16 +231,23 @@ const maintenanceHtml = `<!doctype html>
 
 const sharedHeaders = {
   "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-  "X-Robots-Tag": "noindex, nofollow",
+  "X-Robots-Tag": "noindex, nofollow, noarchive",
+  "Retry-After": String(MAINTENANCE_RETRY_AFTER_SECONDS),
 };
 
 const publicDuringMaintenance = [
   "/api",
+  "/admin",
   "/auth/callback",
   "/login",
   "/admin/preview",
   "/maintenance",
   "/favicon.ico",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/manifest.webmanifest",
+  "/opengraph-image",
+  "/",
 ];
 
 function isPublicDuringMaintenance(pathname: string) {
@@ -253,31 +260,9 @@ function isStaticAsset(pathname: string) {
   return pathname.startsWith("/_next/") || pathname.startsWith("/media/");
 }
 
-async function isMaintenanceEnabled() {
-  const supabaseEnv = getOptionalSupabasePublicEnv();
-
-  if (supabaseEnv) {
-    try {
-      const supabase = createSupabaseClient(
-        supabaseEnv.url,
-        supabaseEnv.publishableKey,
-        { auth: { persistSession: false } },
-      );
-      const { data } = await supabase
-        .from("site_settings")
-        .select("value")
-        .eq("key", "maintenance_mode")
-        .maybeSingle();
-
-      if (typeof data?.value === "boolean") {
-        return data.value;
-      }
-    } catch {
-      // fallback env below
-    }
-  }
-
-  return process.env.NEXT_PUBLIC_MAINTENANCE_MODE !== "off";
+function applyDeploymentRobots(response: NextResponse | Response) {
+  if (isPreviewDeployment()) response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  return response;
 }
 
 async function getAdminBypassResponse(request: NextRequest) {
@@ -352,42 +337,42 @@ export async function proxy(request: NextRequest) {
     isPublicDuringMaintenance(pathname) ||
     isStaticAsset(pathname)
   ) {
-    return updateSession(request);
+    return applyDeploymentRobots(await updateSession(request));
   }
 
   const adminResponse = await getAdminBypassResponse(request);
 
   if (adminResponse) {
-    return adminResponse;
+    return applyDeploymentRobots(adminResponse);
   }
 
   if (request.method === "HEAD") {
-    return new Response(null, {
+    return applyDeploymentRobots(new Response(null, {
       status: 503,
       headers: {
         ...sharedHeaders,
         "Content-Type": "text/html; charset=utf-8",
       },
-    });
+    }));
   }
 
   if (request.method !== "GET") {
-    return new Response("Site en maintenance", {
+    return applyDeploymentRobots(new Response("Site en maintenance", {
       status: 503,
       headers: {
         ...sharedHeaders,
         "Content-Type": "text/plain; charset=utf-8",
       },
-    });
+    }));
   }
 
-  return new Response(maintenanceHtml, {
+  return applyDeploymentRobots(new Response(maintenanceHtml, {
     status: 503,
     headers: {
       ...sharedHeaders,
       "Content-Type": "text/html; charset=utf-8",
     },
-  });
+  }));
 }
 
 export const config = {

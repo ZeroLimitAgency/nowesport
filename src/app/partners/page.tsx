@@ -2,6 +2,9 @@ import { PartnersShowcaseSection } from "@/components/content-sections";
 import { PageIntro } from "@/components/sections";
 import { getCurrentLocale, getSiteCmsContent } from "@/lib/cms";
 import { getPublicPartners } from "@/lib/content";
+import { publicMetadata } from "@/lib/seo";
+
+export const metadata = publicMetadata({ title: "Partenaires", description: "Découvrez les partenaires officiels publiés par NOW Esport.", path: "/partners" });
 
 export default async function PartnersPage() {
   const locale = await getCurrentLocale();

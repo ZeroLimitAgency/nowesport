@@ -10,7 +10,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "check": "npm run lint && npm run build"
+    "check": "npm run lint && npm run build",
+    "test": "npm run test:seo",
+    "test:seo": "npm run build && node --experimental-strip-types --test --test-concurrency=1 tests/seo/*.test.mjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.3.0",

@@ -2,6 +2,9 @@ import Link from "next/link";
 import { PageIntro } from "@/components/sections";
 import { getCurrentLocale, getSiteCmsContent } from "@/lib/cms";
 import { getPublicRosterTeams } from "@/lib/content";
+import { publicMetadata } from "@/lib/seo";
+
+export const metadata = publicMetadata({ title: "Rosters", description: "Découvrez les équipes et membres officiels publiés par NOW Esport.", path: "/roster" });
 
 function initials(name: string) {
   return name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();

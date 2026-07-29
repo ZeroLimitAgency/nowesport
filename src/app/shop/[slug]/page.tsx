@@ -1,11 +1,19 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
 import { ProductCheckoutControls } from "@/components/product-checkout-controls";
 import { productOptions } from "@/data/site";
 import { getCurrentLocale } from "@/lib/cms";
 import { getPublicProductBySlug } from "@/lib/content";
+import { breadcrumbJsonLd, privateRobots, productJsonLd, publicMetadata } from "@/lib/seo";
 
-export function generateStaticParams() {
-  return [];
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getPublicProductBySlug(slug);
+  if (!product?.seoPublishable) {
+    return { title: "Produit indisponible", robots: privateRobots };
+  }
+  return publicMetadata({ title: product.name, description: product.description, path: `/shop/${product.slug}`, image: product.imageUrl });
 }
 
 const productCopy = {
@@ -31,9 +39,17 @@ export default async function ProductPage({
   if (!product) {
     notFound();
   }
+  const productStructuredData = productJsonLd({
+    publishable: product.seoPublishable, name: product.name, description: product.description,
+    path: `/shop/${product.slug}`, priceCents: product.seoPriceCents ?? null,
+    currency: product.currency || "EUR", image: product.imageUrl,
+    sku: product.stripeProductId, outOfStock: product.outOfStock,
+  });
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: "Boutique", path: "/shop" }, { name: product.name, path: `/shop/${product.slug}` }])} />
+      {productStructuredData ? <JsonLd data={productStructuredData} /> : null}
       <section className="mx-auto w-full max-w-[92rem] px-4 pb-8 pt-7 sm:px-8 sm:pt-14">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
           <div className="overflow-hidden rounded-[1.5rem] border border-white/8 bg-[linear-gradient(160deg,#faf7f9_0%,#eadbe4_28%,#18151a_29%,#09090a_100%)] p-3 sm:rounded-[2rem] sm:p-6">
