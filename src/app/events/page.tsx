@@ -2,6 +2,9 @@ import { EventsTimelineSection } from "@/components/content-sections";
 import { PageIntro } from "@/components/sections";
 import { getCurrentLocale, getSiteCmsContent } from "@/lib/cms";
 import { getPublicEvents } from "@/lib/content";
+import { publicMetadata } from "@/lib/seo";
+
+export const metadata = publicMetadata({ title: "Événements", description: "Retrouvez les événements publics de NOW Esport.", path: "/events" });
 
 export default async function EventsPage() {
   const locale = await getCurrentLocale();

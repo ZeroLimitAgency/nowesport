@@ -50,5 +50,5 @@ export function getSiteUrlFromRequest(request?: Request) {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  return "https://nowesport.vercel.app";
+  return "https://nowesport.org";
 }

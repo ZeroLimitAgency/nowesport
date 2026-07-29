@@ -1,12 +1,19 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { JsonLd } from "@/components/json-ld";
 import { getCurrentLocale, getMetadataList, getSiteCmsContent } from "@/lib/cms";
+import { getLegalPageBySlug } from "@/data/site";
+import { breadcrumbJsonLd, privateRobots, publicMetadata } from "@/lib/seo";
 
-export function generateStaticParams() {
-  return [
-    { slug: "mentions-legales" },
-    { slug: "confidentialite" },
-    { slug: "cgv" },
-  ];
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const locale = await getCurrentLocale();
+  const cmsPage = (await getSiteCmsContent(locale)).blocks[`legal.${slug}`];
+  const staticPage = getLegalPageBySlug(slug);
+  const page = cmsPage ?? (staticPage ? { title: staticPage.title, body: staticPage.intro } : null);
+  return page
+    ? publicMetadata({ title: page.title, description: page.body, path: `/legal/${slug}`, type: "article" })
+    : { title: "Page introuvable", robots: privateRobots };
 }
 
 export default async function LegalPage({
@@ -17,7 +24,13 @@ export default async function LegalPage({
   const { slug } = await params;
   const locale = await getCurrentLocale();
   const cms = await getSiteCmsContent(locale);
-  const page = cms.blocks[`legal.${slug}`];
+  const cmsPage = cms.blocks[`legal.${slug}`];
+  const staticPage = getLegalPageBySlug(slug);
+  const page = cmsPage ?? (staticPage ? {
+    area: "legal", key: slug, eyebrow: staticPage.kicker,
+    title: staticPage.title, body: staticPage.intro,
+    metadata: { sections: staticPage.sections },
+  } : null);
 
   if (!page) {
     notFound();
@@ -27,6 +40,7 @@ export default async function LegalPage({
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[var(--color-bg)] text-[var(--color-text)]">
+      <JsonLd data={breadcrumbJsonLd([{ name: "Accueil", path: "/" }, { name: page.title, path: `/legal/${slug}` }])} />
       <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_top,rgba(93,18,55,0.34)_0%,rgba(93,18,55,0.12)_34%,transparent_72%)]" />
       <div className="pointer-events-none absolute left-1/2 top-[24rem] -z-10 h-[26rem] w-[26rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(233,53,133,0.12)_0%,rgba(233,53,133,0.03)_38%,transparent_72%)] blur-2xl" />
 
