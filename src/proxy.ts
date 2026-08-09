@@ -246,6 +246,9 @@ const publicDuringMaintenance = [
   "/robots.txt",
   "/sitemap.xml",
   "/manifest.webmanifest",
+  "/workspace.webmanifest",
+  "/workspace-sw.js",
+  "/overlay",
   "/opengraph-image",
   "/",
 ];
@@ -262,6 +265,15 @@ function isStaticAsset(pathname: string) {
 
 function applyDeploymentRobots(response: NextResponse | Response) {
   if (isPreviewDeployment()) response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  return response;
+}
+
+function applyOverlayHeaders(response: NextResponse | Response, pathname: string) {
+  if (!pathname.startsWith("/overlay")) return response;
+  response.headers.set("Cache-Control", "private, no-store, max-age=0");
+  response.headers.set("X-Robots-Tag", "noindex, nofollow, noarchive");
+  response.headers.set("Referrer-Policy", "no-referrer");
+  response.headers.set("Content-Security-Policy", "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; media-src 'self' https:; connect-src 'self'; font-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'");
   return response;
 }
 
@@ -337,7 +349,7 @@ export async function proxy(request: NextRequest) {
     isPublicDuringMaintenance(pathname) ||
     isStaticAsset(pathname)
   ) {
-    return applyDeploymentRobots(await updateSession(request));
+    return applyOverlayHeaders(applyDeploymentRobots(await updateSession(request)), pathname);
   }
 
   const adminResponse = await getAdminBypassResponse(request);

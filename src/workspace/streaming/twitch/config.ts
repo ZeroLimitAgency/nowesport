@@ -1,0 +1,3 @@
+export type TwitchConfig={clientId?:string;clientSecret?:string;eventSubSecret?:string;eventSubCallbackUrl?:string;timeoutMs:number;maxRetries:number};
+const positive=(value:string|undefined,fallback:number)=>Number.isSafeInteger(Number(value))&&Number(value)>0?Number(value):fallback;
+export function getTwitchConfig(env:NodeJS.ProcessEnv=process.env):TwitchConfig{return{clientId:env.TWITCH_CLIENT_ID,clientSecret:env.TWITCH_CLIENT_SECRET,eventSubSecret:env.TWITCH_EVENTSUB_SECRET,eventSubCallbackUrl:env.TWITCH_EVENTSUB_CALLBACK_URL,timeoutMs:positive(env.TWITCH_API_TIMEOUT_MS,8000),maxRetries:positive(env.TWITCH_API_MAX_RETRIES,2)}}
