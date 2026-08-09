@@ -53,9 +53,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             >
               Menu
             </button>
-            <Link href="/api/admin/preview?next=/admin" className="primary-cta hidden !w-auto shrink-0 lg:inline-flex">
-              Preview
-            </Link>
+            <div className="hidden shrink-0 gap-2 lg:flex"><Link href="/workspace" className="secondary-cta !w-auto">NOW Workspace</Link><Link href="/api/admin/preview?next=/admin" className="primary-cta !w-auto">Preview</Link></div>
           </div>
 
           <nav className="mt-5 hidden gap-2 overflow-x-auto pb-2 lg:flex" aria-label="Navigation admin">
@@ -85,6 +83,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
               <div className="grid gap-2">
+                <Link href="/workspace" onClick={() => setIsOpen(false)} className="secondary-cta mb-2">NOW Workspace</Link>
                 {adminLinks.map((link) => {
                   const active = pathname === link.href;
                   return (

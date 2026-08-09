@@ -11,8 +11,12 @@
     "start": "next start",
     "lint": "eslint",
     "check": "npm run lint && npm run build",
-    "test": "npm run test:seo",
-    "test:seo": "npm run build && node --experimental-strip-types --test --test-concurrency=1 tests/seo/*.test.mjs"
+    "test": "npm run test:workspace && npm run test:fortnite && npm run test:live && npm run test:overlays && npm run test:seo",
+    "test:seo": "npm run build && node --experimental-strip-types --test --test-concurrency=1 tests/seo/*.test.mjs",
+    "test:workspace": "node --test tests/workspace/*.test.mjs",
+    "test:fortnite": "node --experimental-strip-types --test tests/fortnite/*.test.mjs",
+    "test:live": "node --experimental-strip-types --test tests/live/*.test.mjs",
+    "test:overlays": "node --experimental-strip-types --test tests/overlays/*.test.mjs"
   },
   "dependencies": {
     "@stripe/react-stripe-js": "^6.3.0",

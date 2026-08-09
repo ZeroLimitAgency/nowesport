@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 const privateRoutes = [
   "/api/", "/admin", "/auth", "/login", "/account", "/compte",
   "/profile", "/profil", "/cart", "/panier", "/checkout", "/maintenance",
+  "/workspace", "/overlay",
 ];
 
 export default async function robots(): Promise<MetadataRoute.Robots> {

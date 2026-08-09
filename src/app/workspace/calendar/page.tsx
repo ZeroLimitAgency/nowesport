@@ -1,0 +1,2 @@
+import { WorkspaceCard, WorkspaceHeader } from "@/components/workspace-shell"; import { requireWorkspacePermission } from "@/workspace/core/auth";
+export default async function Page(){await requireWorkspacePermission("calendar.view");return <><WorkspaceHeader eyebrow="Operations" title="Calendar" description="Événements internes et connecteurs futurs."/><WorkspaceCard title="Aucun événement">Le calendrier est prêt à recevoir compétitions, entraînements, réunions et échéances.</WorkspaceCard></>}

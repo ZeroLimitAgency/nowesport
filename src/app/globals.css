@@ -35,6 +35,11 @@ body {
   font-family: var(--font-geist-sans), sans-serif;
 }
 
+body:has(.overlay-root) {
+  overflow: hidden;
+  background: transparent;
+}
+
 a,
 button,
 input {
@@ -50,6 +55,13 @@ input {
   background: rgba(233, 53, 133, 0.35);
   color: #fff;
 }
+
+@keyframes overlay-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-slide { from { transform: translateY(1.5rem); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes overlay-pulse { 50% { opacity: 0.55; } }
+.overlay-fade { animation: overlay-fade 500ms ease-out both; }
+.overlay-slide { animation: overlay-slide 500ms ease-out both; }
+.overlay-pulse { animation: overlay-pulse 1.8s ease-in-out infinite; }
 
 .logo-mark {
   display: block;
