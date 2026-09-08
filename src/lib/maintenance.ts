@@ -1,10 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
+import { cache } from "react";
 import { getOptionalSupabasePublicEnv } from "@/lib/supabase/env";
 import { resolveMaintenanceMode } from "@/lib/maintenance-policy";
 
 export const MAINTENANCE_RETRY_AFTER_SECONDS = 3600;
 
-export async function isMaintenanceEnabled(): Promise<boolean> {
+export const isMaintenanceEnabled = cache(async (): Promise<boolean> => {
   const env = getOptionalSupabasePublicEnv();
 
   if (env) {
@@ -26,7 +27,7 @@ export async function isMaintenanceEnabled(): Promise<boolean> {
   }
 
   return resolveMaintenanceMode(undefined, process.env.NEXT_PUBLIC_MAINTENANCE_MODE);
-}
+});
 
 export function isPreviewDeployment() {
   return Boolean(process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production");

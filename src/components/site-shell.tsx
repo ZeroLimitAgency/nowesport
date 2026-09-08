@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CmsContent, SiteLocale } from "@/lib/cms";
 
 type SiteShellProps = {
@@ -14,10 +14,17 @@ function languageHref(language: SiteLocale, pathname: string) {
   return `/api/language?lang=${language}&next=${encodeURIComponent(pathname || "/")}`;
 }
 
+function isActivePath(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function SiteShell({ children, cms }: SiteShellProps) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLElement>(null);
+  const wasMenuOpen = useRef(false);
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 36);
@@ -41,6 +48,34 @@ export function SiteShell({ children, cms }: SiteShellProps) {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
     };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      if (wasMenuOpen.current) menuButtonRef.current?.focus();
+      wasMenuOpen.current = false;
+      return;
+    }
+
+    wasMenuOpen.current = true;
+    const menu = menuRef.current;
+    const focusable = menu?.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+    focusable?.[0]?.focus();
+
+    const trapFocus = (event: KeyboardEvent) => {
+      if (event.key !== "Tab" || !focusable?.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", trapFocus);
+    return () => window.removeEventListener("keydown", trapFocus);
   }, [isMenuOpen]);
 
   if (pathname === "/login") {
@@ -68,7 +103,7 @@ export function SiteShell({ children, cms }: SiteShellProps) {
 
           <nav className="hidden items-center gap-10 lg:flex">
             {cms.navigation.map((item) => {
-              const active = pathname === item.href;
+              const active = isActivePath(pathname, item.href);
               return (
                 <Link
                   key={`${item.href}-${item.label}`}
@@ -84,6 +119,7 @@ export function SiteShell({ children, cms }: SiteShellProps) {
           </nav>
 
           <button
+            ref={menuButtonRef}
             type="button"
             onClick={() => setIsMenuOpen((v) => !v)}
             aria-expanded={isMenuOpen}
@@ -95,8 +131,9 @@ export function SiteShell({ children, cms }: SiteShellProps) {
         </div>
 
         {isMenuOpen && (
-          <div className="fixed inset-0 top-[4.25rem] z-40 bg-black/70 backdrop-blur-sm lg:hidden" onClick={() => setIsMenuOpen(false)}>
+          <div role="dialog" aria-modal="true" aria-label="Navigation" className="fixed inset-0 top-[4.25rem] z-40 bg-black/70 backdrop-blur-sm lg:hidden" onClick={() => setIsMenuOpen(false)}>
             <nav
+              ref={menuRef}
               id="mobile-navigation"
               aria-label="Navigation mobile"
               className="mx-3 max-h-[calc(100dvh-5.5rem)] overflow-y-auto rounded-[1.5rem] border border-white/10 bg-[#08080a] p-3 shadow-2xl supports-[padding:max(0px)]:pb-[max(0.75rem,env(safe-area-inset-bottom))]"
@@ -104,7 +141,7 @@ export function SiteShell({ children, cms }: SiteShellProps) {
             >
               <div className="grid gap-2">
                 {cms.navigation.map((item) => {
-                  const active = pathname === item.href;
+                  const active = isActivePath(pathname, item.href);
                   return (
                     <Link
                       key={`${item.href}-${item.label}-mobile`}
@@ -117,6 +154,9 @@ export function SiteShell({ children, cms }: SiteShellProps) {
                     </Link>
                   );
                 })}
+                <button type="button" onClick={() => setIsMenuOpen(false)} className="min-h-12 rounded-2xl border border-white/15 bg-white/[0.06] px-4 text-sm font-bold uppercase tracking-[0.12em] text-white">
+                  {cms.locale === "fr" ? "Fermer" : "Close"}
+                </button>
               </div>
             </nav>
           </div>
@@ -138,7 +178,7 @@ export function SiteShell({ children, cms }: SiteShellProps) {
                 key={`${item.platform}-${item.href}`}
                 href={item.href}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="rounded-full border border-white/10 px-4 py-2 text-white/68 hover:text-white"
               >
                 {item.label}
@@ -164,7 +204,7 @@ export function SiteShell({ children, cms }: SiteShellProps) {
           </div>
 
           <div className="mt-6 text-sm text-white/45">
-            <p>© 2026 NOW eSport.</p>
+            <p>© {new Date().getFullYear()} NOW eSport.</p>
             <div className="mt-3 flex flex-wrap gap-4">
               {cms.legalNavigation.map((item) => (
                 <Link key={`${item.href}-${item.label}`} href={item.href} className="hover:text-white/70">

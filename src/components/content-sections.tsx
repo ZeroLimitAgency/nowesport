@@ -15,8 +15,10 @@ const sectionCopy = {
     shopKicker: "Collections",
     shopTitle: "La base de la boutique",
     shopCta: "Découvrir les produits",
-    productOptions: "Options produit",
     viewItem: "Voir l’article",
+    imageUnavailable: "Image produit indisponible",
+    eventLink: "En savoir plus",
+    datePending: "Date à confirmer",
     rostersKicker: "Rosters",
     rostersTitle: "Découvrir nos rosters",
     rostersLead: "Sélection compétitive NOW : équipes, staff et créateurs structurés par jeu.",
@@ -42,8 +44,10 @@ const sectionCopy = {
     shopKicker: "Collections",
     shopTitle: "Shop essentials",
     shopCta: "Browse products",
-    productOptions: "Product options",
     viewItem: "View item",
+    imageUnavailable: "Product image unavailable",
+    eventLink: "Learn more",
+    datePending: "Date to be confirmed",
     rostersKicker: "Rosters",
     rostersTitle: "Explore our rosters",
     rostersLead: "NOW competitive lineup: teams, staff and creators organized by game.",
@@ -83,28 +87,19 @@ function PublicEmptyState({ title, body, href = "/" }: { title: string; body: st
   );
 }
 
-function ProductFallbackVisual({ label = "NOW" }: { label?: string }) {
+function ProductFallbackVisual({ label }: { label: string }) {
   return (
-    <>
-      <div className="absolute inset-x-[18%] top-[5%] h-[78%] rounded-[2rem_2rem_2.4rem_2.4rem] bg-[linear-gradient(180deg,#17171b_0%,#060606_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]" />
-      <div className="absolute inset-x-[28%] top-[12%] h-5 rounded-full border-4 border-[var(--color-accent)]/80" />
-      <div className="absolute top-[30%] text-center text-5xl font-black uppercase italic tracking-[-0.08em] text-white">
-        {label}
-      </div>
-      <div className="absolute bottom-[18%] h-[2px] w-24 bg-[var(--color-accent)]" />
-    </>
+    <div className="grid h-full w-full place-items-center rounded-[1.5rem] border border-dashed border-white/15 bg-[radial-gradient(circle_at_top,rgba(233,53,133,0.12),transparent_45%),#0b0b0d] p-6 text-center">
+      <span className="max-w-44 text-xs font-bold uppercase tracking-[0.14em] text-white/65">{label}</span>
+    </div>
   );
 }
 
 export function ShopGridSection({
   items,
-  productOptions,
-  shopCollections,
   locale = "fr",
 }: {
   items: ProductCard[];
-  productOptions: { label: string; value: string }[];
-  shopCollections: { name: string; label: string; description: string }[];
   locale?: SectionLocale;
 }) {
   const t = copy(locale);
@@ -121,43 +116,8 @@ export function ShopGridSection({
         </Link>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-        <div className="grid gap-4">
-          {shopCollections.map((item) => (
-            <article
-              key={item.name}
-              className="rounded-[1.6rem] border border-white/8 bg-[linear-gradient(180deg,#171318_0%,#0b0b0d_100%)] p-5"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-accent-soft)]">
-                {item.label}
-              </p>
-              <h3 className="mt-3 text-2xl font-black uppercase tracking-[-0.04em] text-white">
-                {item.name}
-              </h3>
-              <p className="mt-3 text-sm leading-6 text-white/56">{item.description}</p>
-            </article>
-          ))}
-
-          <div className="rounded-[1.6rem] border border-white/8 bg-white/[0.03] p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/40">
-              {t.productOptions}
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {productOptions.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-[1.2rem] border border-white/8 bg-black/20 px-4 py-4"
-                >
-                  <p className="text-sm font-semibold text-white">{item.label}</p>
-                  <p className="mt-1 text-sm text-white/48">{item.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {items.length ? <div className="grid gap-5 md:grid-cols-2">
-          {items.map((item, index) => (
+      {items.length ? <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {items.map((item) => (
             <Link
               key={item.slug}
               href={`/shop/${item.slug}`}
@@ -171,9 +131,9 @@ export function ShopGridSection({
                   <div className="relative mx-auto mt-7 flex h-56 w-full max-w-[14rem] sm:h-64 sm:max-w-[16rem] items-center justify-center overflow-hidden rounded-[1.5rem]">
                     {item.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                      <img src={item.imageUrl} alt={item.name} loading="lazy" className="h-full w-full object-cover" />
                     ) : (
-                      <ProductFallbackVisual label={index === 0 ? "NEVER" : "NOW"} />
+                      <ProductFallbackVisual label={t.imageUnavailable} />
                     )}
                   </div>
                 </div>
@@ -199,7 +159,6 @@ export function ShopGridSection({
             </Link>
           ))}
         </div> : <PublicEmptyState title={t.shopEmptyTitle} body={t.shopEmptyBody} />}
-      </div>
     </section>
   );
 }
@@ -244,7 +203,7 @@ export function TeamsShowcaseSection({
             <div className={`relative h-64 ${visualClass(game.visual)}`}>
               {game.bannerUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={game.bannerUrl} alt={game.game} className="absolute inset-0 h-full w-full object-cover" />
+                <img src={game.bannerUrl} alt={game.game} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
               ) : null}
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_28%),linear-gradient(180deg,transparent_28%,rgba(0,0,0,0.72)_100%)]" />
               <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
@@ -259,7 +218,7 @@ export function TeamsShowcaseSection({
                 <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/35 text-lg font-black uppercase text-white/80">
                   {game.logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={game.logoUrl} alt={`Logo ${game.game}`} className="h-full w-full object-cover" />
+                    <img src={game.logoUrl} alt={`Logo ${game.game}`} loading="lazy" className="h-full w-full object-cover" />
                   ) : (
                     game.game.slice(0, 1)
                   )}
@@ -352,14 +311,8 @@ export function PartnersShowcaseSection({
       </div>
 
       {partnersData.length ? <div className="grid gap-5 md:grid-cols-3">
-        {partnersData.map((partner, index) => (
-          <a
-            key={`${partner.name}-${index}`}
-            href={partner.href || "/partners"}
-            target={partner.href ? "_blank" : undefined}
-            rel={partner.href ? "noreferrer" : undefined}
-            className="group overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#18181d_0%,#0a0a0c_100%)] transition duration-300 hover:-translate-y-1 hover:border-[var(--color-accent)]/35"
-          >
+        {partnersData.map((partner, index) => {
+          const content = <>
             <div
               className={`flex h-56 items-center justify-center overflow-hidden ${
                 index === 0
@@ -371,7 +324,7 @@ export function PartnersShowcaseSection({
             >
               {partner.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={partner.imageUrl} alt={partner.name} className="h-full w-full object-cover" />
+                <img src={partner.imageUrl} alt={partner.name} loading="lazy" className="h-full w-full object-cover" />
               ) : (
                 <div className="grid place-items-center gap-3 text-center">
                   <span className="text-5xl font-black uppercase tracking-[-0.06em]">
@@ -384,14 +337,20 @@ export function PartnersShowcaseSection({
               )}
             </div>
             <div className="px-5 py-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/38">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/65">
                 {partner.role}
               </p>
               <h3 className="mt-2 text-xl font-bold text-white">{partner.name}</h3>
-              <p className="mt-2 text-sm leading-6 text-white/45">{partner.description}</p>
+              <p className="mt-2 text-sm leading-6 text-white/60">{partner.description}</p>
             </div>
-          </a>
-        ))}
+          </>;
+          const className = "group overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#18181d_0%,#0a0a0c_100%)] transition duration-300 hover:border-[var(--color-accent)]/35";
+          return partner.href ? (
+            <a key={`${partner.name}-${index}`} href={partner.href} target="_blank" rel="noopener noreferrer" className={`${className} hover:-translate-y-1`}>{content}</a>
+          ) : (
+            <article key={`${partner.name}-${index}`} className={className}>{content}</article>
+          );
+        })}
       </div> : <PublicEmptyState title={t.partnersEmptyTitle} body={t.partnersEmptyBody} href="/partners" />}
     </section>
   );
@@ -405,6 +364,7 @@ export function EventsTimelineSection({
   locale?: SectionLocale;
 }) {
   const t = copy(locale);
+  const dateLocale = locale === "en" ? "en-GB" : "fr-FR";
 
   return (
     <section className="mx-auto w-full max-w-[92rem] px-4 py-7 sm:px-8 sm:py-10">
@@ -432,13 +392,13 @@ export function EventsTimelineSection({
               <h3 className="text-[clamp(1.55rem,8vw,3rem)] font-black leading-none tracking-[-0.05em] text-white">
                 {event.title}
               </h3>
-              <p className="mt-2 text-sm text-white/48">{event.date}</p>
+              <p className="mt-2 text-sm text-white/65">{event.date ? new Date(`${event.date}T12:00:00Z`).toLocaleDateString(dateLocale) : t.datePending}</p>
             </div>
 
             <div className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-[linear-gradient(180deg,#15151a_0%,#0a0a0c_100%)]">
               {event.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={event.imageUrl} alt={event.title} className="h-56 w-full object-cover sm:h-[22rem]" />
+                <img src={event.imageUrl} alt={event.title} loading="lazy" className="h-56 w-full object-cover sm:h-[22rem]" />
               ) : (
                 <div
                   className={`grid h-56 place-items-center px-5 text-center sm:h-[22rem] ${
@@ -458,11 +418,12 @@ export function EventsTimelineSection({
                 </div>
               )}
               <div className="space-y-4 px-5 py-5">
-                <div className="flex flex-col gap-2 text-sm text-white/42 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-2 text-sm text-white/65 sm:flex-row sm:items-center sm:justify-between">
                   <span>{event.location}</span>
-                  <span>{event.date}</span>
+                  <span>{event.date ? new Date(`${event.date}T12:00:00Z`).toLocaleDateString(dateLocale) : t.datePending}</span>
                 </div>
-                <p className="text-sm leading-6 text-white/58">{event.description}</p>
+                <p className="text-sm leading-6 text-white/65">{event.description}</p>
+                {event.href ? <a href={event.href} target="_blank" rel="noopener noreferrer" className="section-link">{t.eventLink}</a> : null}
               </div>
             </div>
           </article>

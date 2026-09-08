@@ -3,12 +3,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import {
   getSeoPriceCents,
+  isCommerciallyReadyProduct,
   isSeoProductOutOfStock,
   isSeoPublishableProduct,
   isSeoPublishableRoster,
 } from "../../src/lib/publication.ts";
 import { absoluteUrl, breadcrumbJsonLd, jsonLd, productJsonLd, SITE_URL } from "../../src/lib/seo.ts";
 import { resolveMaintenanceMode } from "../../src/lib/maintenance-policy.ts";
+import { safeExternalUrl, safePublicHref } from "../../src/lib/public-urls.ts";
 
 const completeProduct = {
   is_public: true,
@@ -52,6 +54,41 @@ test("publication produit: épuisé et sans image", () => {
   assert.equal(isSeoPublishableProduct(soldOut), true);
   assert.equal(isSeoProductOutOfStock(soldOut), true);
   assert.equal(getSeoPriceCents(soldOut), 4900);
+});
+
+test("catalogue commercial: image, prix Stripe et stock réel sont requis", () => {
+  const ready = { ...completeProduct, hero_image_url: "https://cdn.example.com/product.webp", stripe_price_id: "price_live" };
+  assert.equal(isCommerciallyReadyProduct(ready), true);
+  assert.equal(isCommerciallyReadyProduct({ ...ready, hero_image_url: null }), false);
+  assert.equal(isCommerciallyReadyProduct({ ...ready, stripe_price_id: null }), false);
+  assert.equal(isCommerciallyReadyProduct({
+    ...ready,
+    stripe_price_id: null,
+    product_variants: [{ price_cents: 4900, stock_quantity: 2, stripe_price_id: "price_variant", is_active: true }],
+  }), true);
+  assert.equal(isCommerciallyReadyProduct({
+    ...ready,
+    stripe_price_id: null,
+    product_variants: [{ price_cents: 4900, stock_quantity: 0, stripe_price_id: "price_variant", is_active: true }],
+  }), false);
+});
+
+test("les URL publiques refusent les protocoles dangereux", () => {
+  assert.equal(safeExternalUrl("javascript:alert(1)"), null);
+  assert.equal(safeExternalUrl("mailto:test@example.com"), null);
+  assert.equal(safeExternalUrl("https://example.com/path"), "https://example.com/path");
+  assert.equal(safePublicHref("/shop"), "/shop");
+  assert.equal(safePublicHref("//evil.example"), null);
+});
+
+test("le hero sans CMS ne référence aucun média local absent", async () => {
+  const [page, cms] = await Promise.all([
+    readFile(new URL("../../src/app/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../../src/lib/cms.ts", import.meta.url), "utf8"),
+  ]);
+  assert.doesNotMatch(`${page}\n${cms}`, /media\/(?:now-academy\.mp4|jersey\.jpeg)/);
+  assert.match(page, /videoSrc \? \(/);
+  assert.match(page, /preload="metadata"/);
 });
 
 test("publication roster: public actif, incomplet et privé", () => {

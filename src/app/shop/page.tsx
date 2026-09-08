@@ -1,6 +1,6 @@
 import { ShopGridSection } from "@/components/content-sections";
 import { PageIntro, ShopBanner } from "@/components/sections";
-import { getCurrentLocale, getShopPresentation, getSiteCmsContent } from "@/lib/cms";
+import { getCurrentLocale, getSiteCmsContent } from "@/lib/cms";
 import { getPublicProducts } from "@/lib/content";
 import { publicMetadata } from "@/lib/seo";
 
@@ -11,12 +11,11 @@ export default async function ShopPage() {
   const [products, cms] = await Promise.all([getPublicProducts(), getSiteCmsContent(locale)]);
   const intro = cms.blocks["shop.intro"];
   const banner = cms.blocks["shop.banner"];
-  const { productOptions, shopCollections } = getShopPresentation();
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <PageIntro kicker={intro.eyebrow ?? "Shop"} title={intro.title} description={intro.body} />
-      <ShopBanner
+      {products.length ? <ShopBanner
         eyebrow={banner.eyebrow}
         title={banner.title}
         description={banner.body}
@@ -24,11 +23,9 @@ export default async function ShopPage() {
         primaryHref={banner.ctaHref}
         secondaryCta={banner.secondaryCtaLabel}
         secondaryHref={banner.secondaryCtaHref}
-      />
+      /> : null}
       <ShopGridSection
         items={products}
-        productOptions={productOptions}
-        shopCollections={shopCollections}
         locale={locale}
       />
     </main>

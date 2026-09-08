@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/json-ld";
 import { ProductCheckoutControls } from "@/components/product-checkout-controls";
-import { productOptions } from "@/data/site";
 import { getCurrentLocale } from "@/lib/cms";
 import { getPublicProductBySlug } from "@/lib/content";
 import { breadcrumbJsonLd, privateRobots, productJsonLd, publicMetadata } from "@/lib/seo";
@@ -19,11 +18,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 const productCopy = {
   fr: {
     details: "Détails produit",
-    options: "Options disponibles",
   },
   en: {
     details: "Product details",
-    options: "Available options",
   },
 };
 
@@ -57,16 +54,7 @@ export default async function ProductPage({
               {product.imageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={product.imageUrl} alt={product.name} className="h-full min-h-[18rem] w-full object-cover sm:min-h-[34rem]" />
-              ) : (
-                <>
-                  <div className="absolute inset-x-[12%] top-[5%] h-[78%] rounded-[2.4rem_2.4rem_2.8rem_2.8rem] bg-[linear-gradient(180deg,#17171b_0%,#060606_100%)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]" />
-                  <div className="absolute inset-x-[24%] top-[12%] h-5 rounded-full border-4 border-[var(--color-accent)]/80" />
-                  <div className="absolute top-[30%] text-center text-5xl font-black uppercase italic tracking-[-0.08em] text-white sm:text-6xl">
-                    NOW
-                  </div>
-                  <div className="absolute bottom-[18%] h-[2px] w-28 bg-[var(--color-accent)]" />
-                </>
-              )}
+              ) : <p className="px-6 text-center text-xs font-bold uppercase tracking-[0.14em] text-white/65">{locale === "fr" ? "Image produit indisponible" : "Product image unavailable"}</p>}
             </div>
           </div>
 
@@ -85,7 +73,7 @@ export default async function ProductPage({
 
             {product.details.length ? (
               <div className="mt-8">
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-white/38">{t.details}</p>
+                <p className="text-xs font-black uppercase tracking-[0.24em] text-white/65">{t.details}</p>
                 <div className="mt-4 grid gap-3">
                   {product.details.map((detail) => (
                     <div
@@ -98,21 +86,6 @@ export default async function ProductPage({
                 </div>
               </div>
             ) : null}
-
-            <div className="mt-8">
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-white/38">{t.options}</p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {productOptions.map((option) => (
-                  <div
-                    key={option.label}
-                    className="rounded-[1.1rem] border border-white/8 bg-white/[0.03] px-4 py-4"
-                  >
-                    <p className="text-sm font-semibold text-white">{option.label}</p>
-                    <p className="mt-1 text-sm text-white/48">{option.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
 
             <ProductCheckoutControls product={product} />
           </div>

@@ -4,6 +4,7 @@ export type SeoVariant = {
   price_cents?: number | null;
   stock_quantity?: number | null;
   is_active?: boolean | null;
+  stripe_price_id?: string | null;
 };
 
 export type SeoProductRecord = {
@@ -13,6 +14,8 @@ export type SeoProductRecord = {
   description?: string | null;
   short_description?: string | null;
   price_cents?: number | null;
+  hero_image_url?: string | null;
+  stripe_price_id?: string | null;
   product_variants?: SeoVariant[] | null;
 };
 
@@ -48,6 +51,18 @@ export function isSeoPublishableProduct(product: SeoProductRecord) {
     && text(product.name)
     && text(product.short_description ?? product.description)
     && getSeoPriceCents(product) !== null;
+}
+
+/** Public catalogue readiness is deliberately stricter than is_public. */
+export function isCommerciallyReadyProduct(product: SeoProductRecord) {
+  if (!isSeoPublishableProduct(product) || !text(product.hero_image_url)) return false;
+  const variants = activeVariants(product);
+  if (variants.length > 0) {
+    return variants.some((variant) =>
+      (variant.stock_quantity ?? 0) > 0 && text(variant.stripe_price_id),
+    );
+  }
+  return text(product.stripe_price_id);
 }
 
 export function isSeoProductOutOfStock(product: SeoProductRecord) {

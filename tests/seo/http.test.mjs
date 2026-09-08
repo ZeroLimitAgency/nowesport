@@ -92,8 +92,11 @@ test("HTTP pendant la maintenance", async () => {
     assert.match(html, /Organization/);
     assert.match(html, /WebSite/);
     assert.doesNotMatch(html, /href="\/(?:shop|roster|events|partners|cart|compte)"/);
+    assert.doesNotMatch(html, /La base de la boutique|Découvrir nos rosters|Découvrir nos partenaires/);
 
-    const robots = await (await fetch(`${origin}/robots.txt`)).text();
+    const robotsResponse = await fetch(`${origin}/robots.txt`);
+    assert.equal(robotsResponse.status, 200);
+    const robots = await robotsResponse.text();
     assert.match(robots, /Allow: \//);
     assert.doesNotMatch(robots, /Disallow: \/\s*(?:\n|$)/);
     assert.match(robots, /Disallow: \/admin/);
