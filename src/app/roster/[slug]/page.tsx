@@ -82,7 +82,7 @@ export default async function RosterTeamPage({
               <div className="flex h-20 w-20 shrink-0 sm:h-28 sm:w-28 items-center justify-center overflow-hidden rounded-[1.8rem] border border-white/10 bg-black/40 text-4xl font-black uppercase text-white shadow-2xl backdrop-blur">
                 {team.gameIconUrl || team.logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={team.gameIconUrl ?? team.logoUrl ?? ""} alt={`Logo ${team.game}`} className="h-full w-full object-cover" />
+                  <img src={team.gameIconUrl ?? team.logoUrl ?? ""} alt={`Logo ${team.game}`} loading="lazy" className="h-full w-full object-cover" />
                 ) : initials(team.game)}
               </div>
             </div>
@@ -95,7 +95,7 @@ export default async function RosterTeamPage({
             return (
               <div key={role} className="rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-5">
                 <p className="text-3xl font-black text-white">{count}</p>
-                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/42">{role}</p>
+                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/65">{role}</p>
               </div>
             );
           })}
@@ -114,7 +114,7 @@ export default async function RosterTeamPage({
                     <div className="flex min-h-52 items-center sm:min-h-64 justify-center overflow-hidden bg-[radial-gradient(circle_at_top,rgba(244,108,160,0.24),transparent_35%),#0d0d10] text-5xl font-black uppercase text-white/78">
                       {member.photoUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={member.photoUrl} alt={member.displayName} className="h-full w-full object-cover" />
+                        <img src={member.photoUrl} alt={member.displayName} loading="lazy" className="h-full w-full object-cover" />
                       ) : initials(member.displayName)}
                     </div>
                     <div className="flex flex-col justify-between p-5">
@@ -125,17 +125,17 @@ export default async function RosterTeamPage({
                           <span className="rounded-full border border-white/10 px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.18em] text-white/48">{team.game}</span>
                         </div>
                         <h3 className="mt-4 text-[clamp(1.8rem,9vw,2.5rem)] font-black uppercase leading-none tracking-[-0.06em] text-white">{member.pseudo ?? member.displayName}</h3>
-                        {(member.firstName || member.lastName) ? <p className="mt-1 text-sm text-white/42">{[member.firstName, member.lastName].filter(Boolean).join(" ")}</p> : null}
+                        {(member.firstName || member.lastName) ? <p className="mt-1 text-sm text-white/65">{[member.firstName, member.lastName].filter(Boolean).join(" ")}</p> : null}
                         <div className="mt-4 flex flex-wrap gap-3">
-                          {member.rankingPoints ? <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"><p className="text-lg font-black text-white">{member.rankingPoints}</p><p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/35">points</p></div> : null}
-                          {member.prizeEarnings ? <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"><p className="text-lg font-black text-white">{new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(member.prizeEarnings)}</p><p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/35">gains</p></div> : null}
+                          {member.rankingPoints !== null && member.rankingPoints !== undefined ? <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"><p className="text-lg font-black text-white">{member.rankingPoints}</p><p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/65">points</p></div> : null}
+                          {member.prizeEarnings ? <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"><p className="text-lg font-black text-white">{new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(member.prizeEarnings)}</p><p className="text-[0.62rem] font-bold uppercase tracking-[0.18em] text-white/65">gains</p></div> : null}
                         </div>
                         {member.bio ? <p className="mt-4 text-sm leading-6 text-white/56">{member.bio}</p> : null}
                       </div>
                       {Object.entries(member.socialLinks).length ? (
                         <div className="mt-5 flex flex-wrap gap-2">
                           {Object.entries(member.socialLinks).map(([platform, href]) => (
-                            <a key={platform} href={href} className="rounded-full border border-white/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white/62 transition hover:border-[var(--color-accent)]/40 hover:text-white">
+                            <a key={platform} href={href} target="_blank" rel="noopener noreferrer" className="rounded-full border border-white/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-white/70 transition hover:border-[var(--color-accent)]/40 hover:text-white">
                               {socialLabel(platform)}
                             </a>
                           ))}

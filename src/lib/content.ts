@@ -1,13 +1,13 @@
 import { unstable_noStore as noStore } from "next/cache";
 import {
-  events,
   games,
   partners,
   teamSupportBlocks,
 } from "@/data/site";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
-import { getSeoPriceCents, isSeoProductOutOfStock, isSeoPublishableProduct } from "@/lib/publication";
+import { getSeoPriceCents, isCommerciallyReadyProduct, isSeoProductOutOfStock, isSeoPublishableProduct, isSeoPublishableRoster } from "@/lib/publication";
+import { safeExternalUrl } from "@/lib/public-urls";
 
 export type ProductCard = {
   slug: string;
@@ -74,7 +74,15 @@ export type GameCard = (typeof games)[number] & {
   }>;
 };
 export type PartnerCard = (typeof partners)[number] & { imageUrl?: string | null };
-export type EventCard = (typeof events)[number] & { imageUrl?: string | null };
+export type EventCard = {
+  title: string;
+  date: string | null;
+  location: string;
+  description: string;
+  imageUrl?: string | null;
+  href?: string;
+  tone: string;
+};
 export type TeamSupportBlock = (typeof teamSupportBlocks)[number];
 
 function formatPrice(priceCents: number, currency = "EUR") {
@@ -96,7 +104,7 @@ export async function getPublicProducts(): Promise<ProductCard[]> {
   const { data, error } = await supabase
     .from("products")
     .select(
-      "slug, name, category, description, short_description, price_cents, currency, hero_image_url, stripe_product_id, stripe_price_id, is_public, product_variants(price_cents, stock_quantity, is_active)",
+      "slug, name, category, description, short_description, price_cents, currency, hero_image_url, stripe_product_id, stripe_price_id, is_public, product_variants(price_cents, stock_quantity, stripe_price_id, is_active)",
     )
     .eq("is_public", true)
     .order("sort_order", { ascending: true });
@@ -106,7 +114,7 @@ export async function getPublicProducts(): Promise<ProductCard[]> {
     return [];
   }
 
-  return (data ?? []).map((item) => ({
+  return (data ?? []).filter(isCommerciallyReadyProduct).map((item) => ({
     slug: item.slug,
     name: item.name,
     category: item.category ?? "Collection",
@@ -180,6 +188,8 @@ export async function getPublicProductBySlug(
 
   const publicationRecord = { ...data, product_variants: variants ?? [] };
 
+  if (!isCommerciallyReadyProduct(publicationRecord)) return null;
+
   return {
     slug: data.slug,
     name: data.name,
@@ -212,14 +222,15 @@ export async function getPublicProductBySlug(
 function normalizeSocialLinks(value: unknown, fallback?: string | null) {
   const links = value && typeof value === "object" && !Array.isArray(value)
     ? Object.fromEntries(
-        Object.entries(value as Record<string, unknown>).filter(
-          (entry): entry is [string, string] => typeof entry[1] === "string" && Boolean(entry[1]),
-        ),
+        Object.entries(value as Record<string, unknown>)
+          .map(([platform, href]) => [platform, typeof href === "string" ? safeExternalUrl(href) : null] as const)
+          .filter((entry): entry is readonly [string, string] => Boolean(entry[1])),
       )
     : {};
 
-  if (fallback && !links.website) {
-    links.website = fallback;
+  const safeFallback = safeExternalUrl(fallback);
+  if (safeFallback && !links.website) {
+    links.website = safeFallback;
   }
 
   return links;
@@ -254,7 +265,9 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
     return [];
   }
 
-  return (teamsData ?? []).map((team) => {
+  return (teamsData ?? [])
+    .filter((team) => isSeoPublishableRoster({ ...team, is_public: true, is_active: true }))
+    .map((team) => {
     const game = Array.isArray(team.games) ? team.games[0] : team.games;
     const members = (membersData ?? [])
       .filter((member) => member.roster_id === team.id)
@@ -285,7 +298,7 @@ export async function getPublicRosterTeams(): Promise<RosterTeamCard[]> {
       bannerUrl: team.banner_url,
       members,
     };
-  });
+    });
 }
 
 export async function getPublicRosterTeamBySlug(slug: string): Promise<RosterTeamCard | null> {
@@ -347,7 +360,7 @@ export async function getPublicPartners(): Promise<PartnerCard[]> {
     role: item.role_label ?? "Partenaire",
     description: item.description ?? "",
     imageUrl: item.image_url,
-    href: item.external_url ?? "",
+    href: safeExternalUrl(item.external_url) ?? "",
   }));
 }
 
@@ -361,7 +374,7 @@ export async function getPublicEvents(): Promise<EventCard[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("events")
-    .select("title, event_date, location, description, image_url")
+    .select("title, event_date, location, description, image_url, external_url")
     .eq("is_public", true)
     .order("event_date", { ascending: false });
 
@@ -372,10 +385,11 @@ export async function getPublicEvents(): Promise<EventCard[]> {
 
   return (data ?? []).map((item, index) => ({
     title: item.title,
-    date: item.event_date ? new Date(item.event_date).toLocaleDateString("fr-FR") : "Date à venir",
+    date: item.event_date ?? null,
     location: item.location ?? "",
     description: item.description ?? "",
     imageUrl: item.image_url,
+    href: safeExternalUrl(item.external_url) ?? "",
     tone: index % 2 === 0 ? "studio" : "sunset",
   }));
 }

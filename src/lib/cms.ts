@@ -1,4 +1,5 @@
 import { unstable_noStore as noStore } from "next/cache";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import {
   footerLegalLinks,
@@ -9,6 +10,7 @@ import {
 } from "@/data/site";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { safeExternalUrl, safePublicHref } from "@/lib/public-urls";
 
 export type SiteLocale = "fr" | "en";
 
@@ -66,35 +68,30 @@ const defaultBlocksByLocale: Record<SiteLocale, Record<string, CmsBlock>> = {
       key: "hero",
       eyebrow: "Accueil",
       title: "NOW eSport",
-      body: "Une entrée plein écran avec vidéo, partenaires et accès rapide aux temps forts NOW.",
+      body: "Découvrez NOW Esport, ses équipes et ses actualités.",
       ctaLabel: "Découvrir la boutique",
       ctaHref: "/shop",
       secondaryCtaLabel: "Voir les rosters",
       secondaryCtaHref: "/roster",
-      mediaUrl: "/media/now-academy.mp4",
       metadata: {
-        poster: "/media/jersey.jpeg",
-        videoHref: "https://youtu.be/F7VLXWSbRoE?si=vzBYyV9froSyNNC7",
-        sponsors: ["GENESIS", "leo express", "tp-link"],
+        sponsors: [],
       },
     },
     "shop.intro": {
       area: "shop",
       key: "intro",
       eyebrow: "Boutique",
-      title: "Produits, collections et personnalisation",
-      body: "La boutique NOW rassemble les drops, les pièces performance et les options de personnalisation essentielles.",
+      title: "La boutique NOW Esport",
+      body: "Retrouvez ici les produits officiels disponibles.",
     },
     "shop.banner": {
       area: "shop",
       key: "banner",
       eyebrow: "Boutique",
-      title: "Découvrir notre maillot 2026",
-      body: "Une promesse nette, un call to action clair et une entrée rapide vers les produits.",
-      ctaLabel: "Acheter maintenant",
+      title: "Découvrez nos collections",
+      body: "Consultez les produits actuellement disponibles dans la boutique NOW Esport.",
+      ctaLabel: "Voir les produits",
       ctaHref: "/shop",
-      secondaryCtaLabel: "Voir la collection Crystal",
-      secondaryCtaHref: "/shop",
     },
     "roster.intro": {
       area: "roster",
@@ -107,15 +104,15 @@ const defaultBlocksByLocale: Record<SiteLocale, Record<string, CmsBlock>> = {
       area: "events",
       key: "intro",
       eyebrow: "Événements",
-      title: "Timeline d'événements et d'activations",
-      body: "Suis les activations, media days, annonces et rendez-vous qui rythment la saison NOW.",
+      title: "Nos événements",
+      body: "Retrouvez les événements publics de NOW Esport.",
     },
     "partners.intro": {
       area: "partners",
       key: "intro",
       eyebrow: "Partenaires",
-      title: "Blocs partenaires avec image, texte et lien",
-      body: "Découvre les partenaires qui accompagnent NOW eSport sur la performance, l'image et les activations.",
+      title: "Nos partenaires",
+      body: "Découvrez les partenaires officiels de NOW Esport.",
     },
     "maintenance.main": {
       area: "maintenance",
@@ -137,7 +134,7 @@ const defaultBlocksByLocale: Record<SiteLocale, Record<string, CmsBlock>> = {
       metadata: {
         sections: [
           "NOW eSport édite ce site pour présenter sa structure, ses équipes, ses partenaires et sa boutique.",
-          "Les informations d'hébergement, de contact et de responsabilité peuvent être complétées depuis le dashboard admin.",
+          "Les informations légales définitives sont publiées depuis le CMS après validation par NOW Esport.",
         ],
       },
     },
@@ -155,13 +152,13 @@ const defaultBlocksByLocale: Record<SiteLocale, Record<string, CmsBlock>> = {
       eyebrow: "Légal",
       title: "Conditions générales de vente",
       body: "Conditions applicables aux commandes passées sur la boutique NOW eSport.",
-      metadata: { sections: ["Les prix, moyens de paiement, livraisons et retours sont à compléter depuis le CMS."] },
+      metadata: { sections: ["Les conditions applicables sont publiées après validation de la politique commerciale de NOW Esport."] },
     },
     "footer.main": {
       area: "footer",
       key: "main",
       title: "NOW eSport",
-      body: "Boutique, roster et événements.",
+      body: "Retrouvez les équipes, événements et informations officielles de NOW Esport.",
     },
   },
   en: {
@@ -170,35 +167,30 @@ const defaultBlocksByLocale: Record<SiteLocale, Record<string, CmsBlock>> = {
       key: "hero",
       eyebrow: "Home",
       title: "NOW eSport",
-      body: "A full-screen entry with video, partners and fast access to NOW highlights.",
+      body: "Discover NOW Esport, its teams and latest updates.",
       ctaLabel: "Discover the shop",
       ctaHref: "/shop",
       secondaryCtaLabel: "View rosters",
       secondaryCtaHref: "/roster",
-      mediaUrl: "/media/now-academy.mp4",
       metadata: {
-        poster: "/media/jersey.jpeg",
-        videoHref: "https://youtu.be/F7VLXWSbRoE?si=vzBYyV9froSyNNC7",
-        sponsors: ["GENESIS", "leo express", "tp-link"],
+        sponsors: [],
       },
     },
     "shop.intro": {
       area: "shop",
       key: "intro",
       eyebrow: "Shop",
-      title: "Products, collections and customization",
-      body: "The NOW shop brings together drops, performance pieces and essential customization options.",
+      title: "The NOW Esport shop",
+      body: "Find currently available official products here.",
     },
     "shop.banner": {
       area: "shop",
       key: "banner",
       eyebrow: "Shop",
-      title: "Discover our 2026 jersey",
-      body: "A clear promise, a direct call to action and a fast entry point to products.",
-      ctaLabel: "Shop now",
+      title: "Discover our collections",
+      body: "Browse the products currently available from NOW Esport.",
+      ctaLabel: "View products",
       ctaHref: "/shop",
-      secondaryCtaLabel: "View Crystal collection",
-      secondaryCtaHref: "/shop",
     },
     "roster.intro": {
       area: "roster",
@@ -211,15 +203,15 @@ const defaultBlocksByLocale: Record<SiteLocale, Record<string, CmsBlock>> = {
       area: "events",
       key: "intro",
       eyebrow: "Events",
-      title: "Events and activation timeline",
-      body: "Follow activations, media days, announcements and key milestones throughout the NOW season.",
+      title: "Our events",
+      body: "Find NOW Esport public events here.",
     },
     "partners.intro": {
       area: "partners",
       key: "intro",
       eyebrow: "Partners",
-      title: "Partner blocks with image, text and link",
-      body: "Meet the partners supporting NOW eSport across performance, brand image and activations.",
+      title: "Our partners",
+      body: "Discover NOW Esport's official partners.",
     },
     "maintenance.main": {
       area: "maintenance",
@@ -254,13 +246,13 @@ const defaultBlocksByLocale: Record<SiteLocale, Record<string, CmsBlock>> = {
       eyebrow: "Legal",
       title: "Terms of sale",
       body: "Terms applicable to orders placed on the NOW eSport shop.",
-      metadata: { sections: ["Prices, payment methods, delivery and returns can be completed from the CMS."] },
+      metadata: { sections: ["Applicable terms are published after NOW Esport validates its commercial policy."] },
     },
     "footer.main": {
       area: "footer",
       key: "main",
       title: "NOW eSport",
-      body: "Shop, roster and events.",
+      body: "Find NOW Esport teams, events and official information.",
     },
   },
 };
@@ -293,13 +285,16 @@ const defaultSocialLinks: CmsSocialLink[] = footerSocials.map((item, index) => (
 
 export function getDefaultCmsContent(locale: SiteLocale): CmsContent {
   const navigation = defaultNavigationByLocale[locale];
+  const navigationAvailable = hasSupabaseEnv()
+    ? navigation
+    : navigation.filter((item) => !["/cart", "/compte"].includes(item.href));
 
   return {
     locale,
     blocks: defaultBlocksByLocale[locale],
-    navigation: navigation.filter((item) => item.placement === "header"),
-    legalNavigation: navigation.filter((item) => item.placement === "footer_legal"),
-    socialLinks: defaultSocialLinks,
+    navigation: navigationAvailable.filter((item) => item.placement === "header"),
+    legalNavigation: navigationAvailable.filter((item) => item.placement === "footer_legal"),
+    socialLinks: defaultSocialLinks.filter((item) => Boolean(safeExternalUrl(item.href))),
   };
 }
 
@@ -397,16 +392,19 @@ function navigationFallback(
   }
 
   return selectedRows
-    .map((item) => ({
+    .flatMap((item) => {
+      const href = safePublicHref(item.href);
+      return href ? [{
       label: item.label,
-      href: item.href,
+      href,
       placement: item.placement,
       sortOrder: item.sort_order ?? 0,
-    }))
+      }] : [];
+    })
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
-export async function getSiteCmsContent(locale: SiteLocale): Promise<CmsContent> {
+export const getSiteCmsContent = cache(async (locale: SiteLocale): Promise<CmsContent> => {
   noStore();
 
   const fallback = getDefaultCmsContent(locale);
@@ -458,12 +456,15 @@ export async function getSiteCmsContent(locale: SiteLocale): Promise<CmsContent>
     const navigationRows = ((navigationResult.data ?? []) as CmsNavigationRow[]);
     const headerNavigation = navigationFallback(navigationRows, locale, "header");
     const legalNavigation = navigationFallback(navigationRows, locale, "footer_legal");
-    const socialLinks = (socialLinksResult.data ?? []).map((item) => ({
+    const socialLinks = (socialLinksResult.data ?? []).flatMap((item) => {
+      const href = safeExternalUrl(item.href);
+      return href ? [{
       label: item.label,
-      href: item.href,
+      href,
       platform: item.platform ?? item.label.toLowerCase(),
       sortOrder: item.sort_order ?? 0,
-    }));
+      }] : [];
+    });
 
     return {
       locale,
@@ -475,4 +476,4 @@ export async function getSiteCmsContent(locale: SiteLocale): Promise<CmsContent>
   } catch {
     return fallback;
   }
-}
+});

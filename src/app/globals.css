@@ -37,13 +37,20 @@ body {
 
 a,
 button,
-input {
+input,
+select,
+textarea {
   transition:
     color 180ms ease,
     background-color 180ms ease,
     border-color 180ms ease,
     transform 180ms ease,
     opacity 180ms ease;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid var(--color-accent-soft);
+  outline-offset: 3px;
 }
 
 ::selection {

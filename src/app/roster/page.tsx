@@ -47,7 +47,7 @@ export default async function RosterPage() {
                   <div className="relative h-56 overflow-hidden sm:h-64">
                     {team.bannerUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={team.bannerUrl} alt={`Bannière ${team.name}`} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      <img src={team.bannerUrl} alt={`Bannière ${team.name}`} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     ) : <div className="h-full bg-[radial-gradient(circle_at_top_left,rgba(244,108,160,0.34),transparent_35%),linear-gradient(135deg,#19141c,#070708)]" />}
                     <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.05)_0%,rgba(0,0,0,0.82)_100%)]" />
                     <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3 sm:bottom-5 sm:left-5 sm:right-5 sm:gap-4">
@@ -58,7 +58,7 @@ export default async function RosterPage() {
                       <div className="grid h-14 w-14 shrink-0 sm:h-20 sm:w-20 place-items-center overflow-hidden rounded-[1.35rem] border border-white/10 bg-black/45 text-2xl font-black text-white backdrop-blur">
                         {team.gameIconUrl || team.logoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={team.gameIconUrl ?? team.logoUrl ?? ""} alt={`Logo ${team.game}`} className="h-full w-full object-cover" />
+                          <img src={team.gameIconUrl ?? team.logoUrl ?? ""} alt={`Logo ${team.game}`} loading="lazy" className="h-full w-full object-cover" />
                         ) : initials(team.game)}
                       </div>
                     </div>
@@ -66,7 +66,7 @@ export default async function RosterPage() {
                   <div className="grid gap-5 p-5 sm:grid-cols-[1fr_auto] sm:items-end">
                     <div>
                       <p className="text-sm leading-6 text-white/58">{team.description || "Roster NOW eSport."}</p>
-                      <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-white/38">{team.members.length} membre(s)</p>
+                      <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-white/65">{team.members.length} membre(s)</p>
                     </div>
                     <Link href={`/roster/${team.slug}`} className="primary-cta justify-center">Voir l’équipe</Link>
                   </div>
