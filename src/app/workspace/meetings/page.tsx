@@ -1,0 +1,2 @@
+import { WorkspaceCard, WorkspaceHeader } from "@/components/workspace-shell"; import { requireWorkspacePermission } from "@/workspace/core/auth";
+export default async function Page(){await requireWorkspacePermission("meetings.view");return <><WorkspaceHeader eyebrow="Operations" title="Meetings" description="Agendas, notes, décisions et actions transformables en tâches."/><WorkspaceCard title="Aucune réunion">Planifiez une réunion depuis une prochaine itération métier.</WorkspaceCard></>}

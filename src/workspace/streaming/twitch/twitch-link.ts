@@ -1,0 +1,3 @@
+const usernamePattern=/^[a-zA-Z0-9_]{4,25}$/;
+export function parseTwitchIdentity(input:string){const trimmed=input.trim();if(usernamePattern.test(trimmed))return trimmed.toLowerCase();let url:URL;try{url=new URL(trimmed)}catch{return null}if(url.protocol!=="https:"||!new Set(["twitch.tv","www.twitch.tv"]).has(url.hostname.toLowerCase())||url.username||url.password||url.search||url.hash)return null;const parts=url.pathname.split("/").filter(Boolean);if(parts.length!==1||!usernamePattern.test(parts[0]))return null;return parts[0].toLowerCase()}
+export function twitchChannelUrl(username:string){return usernamePattern.test(username)?`https://www.twitch.tv/${username.toLowerCase()}`:null}

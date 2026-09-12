@@ -1,0 +1,2 @@
+import { WorkspaceCard, WorkspaceHeader } from "@/components/workspace-shell"; import { requireWorkspacePermission } from "@/workspace/core/auth";
+export default async function Page(){await requireWorkspacePermission("contracts.view");return <><WorkspaceHeader eyebrow="Management" title="Contracts" description="Accès séparé aux contrats et à leurs champs financiers."/><WorkspaceCard title="Fondation sécurisée">Les montants ne seront sélectionnés côté serveur qu’avec contracts.view_financials.</WorkspaceCard></>}

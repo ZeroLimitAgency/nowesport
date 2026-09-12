@@ -1,0 +1,397 @@
+{
+  "version": "4.0.0",
+  "modules": [
+    "core-rbac",
+    "dashboard",
+    "fortnite-room",
+    "players",
+    "performance",
+    "scouting",
+    "live-center",
+    "calendar",
+    "tasks",
+    "meetings",
+    "notifications",
+    "push-foundation",
+    "fortnite-analytics",
+    "metric-registry",
+    "tracker-contract-adapter",
+    "scouting-cockpit",
+    "player-comparison",
+    "scouting-notes",
+    "score-profiles",
+    "sync-runner",
+    "core.notifications",
+    "core.web_push",
+    "streaming.core",
+    "streaming.twitch",
+    "fortnite.live_ui",
+    "overlays.core",
+    "overlays.renderer",
+    "overlays.editor",
+    "overlays.campaigns",
+    "overlays.now_templates"
+  ],
+  "routes": [
+    "/workspace",
+    "/workspace/fortnite",
+    "/workspace/fortnite/players",
+    "/workspace/fortnite/scouting",
+    "/workspace/fortnite/performance",
+    "/workspace/fortnite/live",
+    "/workspace/calendar",
+    "/workspace/tasks",
+    "/workspace/meetings",
+    "/workspace/contracts",
+    "/workspace/notifications",
+    "/workspace/fortnite/players/[id]",
+    "/workspace/fortnite/scouting/[id]",
+    "/workspace/fortnite/scouting/scores",
+    "/workspace/fortnite/compare",
+    "/api/workspace/fortnite/scouting/export",
+    "/workspace/fortnite/live/[playerId]",
+    "/workspace/fortnite/live/[playerId]/sessions/[sessionId]",
+    "/workspace/fortnite/live/compare",
+    "/api/integrations/twitch/eventsub",
+    "/api/workspace/push/subscriptions",
+    "/api/workspace/push/test",
+    "/workspace/overlays",
+    "/workspace/overlays/[projectId]",
+    "/workspace/overlays/[projectId]/scenes/[sceneId]",
+    "/overlay/[publicId]",
+    "/api/overlays/[publicId]/runtime"
+  ],
+  "databaseMigrations": [
+    "supabase/migrations/20260809_workspace_core_foundations.sql",
+    "supabase/migrations/20260810_fortnite_analytics_scouting.sql",
+    "supabase/migrations/20260811_live_center_web_push.sql",
+    "supabase/migrations/20260812_overlay_cloud.sql"
+  ],
+  "permissions": [
+    "workspace.access",
+    "workspace.dashboard.view",
+    "fortnite.access",
+    "fortnite.dashboard.view",
+    "players.view",
+    "players.create",
+    "players.edit",
+    "players.archive",
+    "players.view_performance",
+    "scouting.view",
+    "scouting.create",
+    "scouting.edit",
+    "scouting.archive",
+    "scouting.compare",
+    "streams.view",
+    "streams.manage",
+    "calendar.view",
+    "calendar.create",
+    "calendar.edit",
+    "calendar.delete",
+    "tasks.view",
+    "tasks.create",
+    "tasks.edit",
+    "tasks.assign",
+    "tasks.delete",
+    "meetings.view",
+    "meetings.create",
+    "meetings.edit",
+    "contracts.view",
+    "contracts.create",
+    "contracts.edit",
+    "contracts.view_financials",
+    "finance.view",
+    "notifications.view",
+    "notifications.manage_preferences",
+    "workspace.users.view",
+    "workspace.users.manage",
+    "workspace.roles.view",
+    "workspace.roles.manage",
+    "administration.access",
+    "scouting.refresh",
+    "scouting.notes.view",
+    "scouting.notes.create",
+    "scouting.notes.direction_view",
+    "scouting.scores.manage",
+    "players.performance.refresh",
+    "players.performance.compare",
+    "analytics.export",
+    "streams.analytics.view",
+    "streams.goals.view",
+    "streams.goals.manage",
+    "streams.compare",
+    "notifications.push.manage",
+    "notifications.test",
+    "overlays.view",
+    "overlays.create",
+    "overlays.edit",
+    "overlays.publish",
+    "overlays.assign",
+    "overlays.tokens.manage",
+    "overlays.campaigns.view",
+    "overlays.campaigns.manage"
+  ],
+  "environmentVariables": [
+    {
+      "name": "FORTNITE_TRACKER_API_KEY",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_API_BASE_URL",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+      "scope": "public",
+      "required": false
+    },
+    {
+      "name": "VAPID_PRIVATE_KEY",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "VAPID_SUBJECT",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_SEARCH_ENDPOINT",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_PROFILE_ENDPOINT",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_PR_ENDPOINT",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_MATCHES_ENDPOINT",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_HISTORY_ENDPOINT",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_LEADERBOARD_ENDPOINT",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_TIMEOUT_MS",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_MAX_RETRIES",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_CACHE_TTL_SECONDS",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_MIN_REQUEST_INTERVAL_MS",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_SYNC_INTERVAL_ACTIVE",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_SYNC_INTERVAL_SCOUTING",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "FORTNITE_TRACKER_SYNC_BATCH_SIZE",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "TWITCH_CLIENT_ID",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "TWITCH_CLIENT_SECRET",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "TWITCH_EVENTSUB_SECRET",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "TWITCH_EVENTSUB_CALLBACK_URL",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "TWITCH_EVENTSUB_TRANSPORT",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "TWITCH_API_TIMEOUT_MS",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "TWITCH_API_MAX_RETRIES",
+      "scope": "server",
+      "required": false
+    },
+    {
+      "name": "STREAM_SNAPSHOT_INTERVAL_MINUTES",
+      "scope": "server",
+      "required": false
+    },
+    "OVERLAY_HEARTBEAT_INTERVAL_SECONDS",
+    "OVERLAY_RUNTIME_REFRESH_SECONDS"
+  ],
+  "storageBuckets": [
+    {
+      "name": "overlays",
+      "access": "public-non-sensitive-assets",
+      "mimeTypes": [
+        "image/png",
+        "image/jpeg",
+        "image/webp",
+        "video/mp4",
+        "video/webm"
+      ]
+    }
+  ],
+  "integrations": [
+    {
+      "id": "fortnite_tracker",
+      "status": "contract-required"
+    },
+    {
+      "id": "twitch",
+      "status": "configuration-required"
+    },
+    {
+      "id": "web_push",
+      "status": "vapid-and-transport-required"
+    }
+  ],
+  "scheduledJobs": [
+    {
+      "id": "fortnite-tracker-sync",
+      "entrypoint": "syncTrackedFortnitePlayers",
+      "status": "prepared-not-scheduled"
+    },
+    {
+      "id": "stream-snapshot-capture",
+      "entrypoint": "captureActiveStreamSnapshots",
+      "status": "prepared-not-scheduled",
+      "recommendedIntervalMinutes": 5
+    },
+    {
+      "id": "overlay-campaign-scheduler",
+      "entrypoint": "applyScheduledOverlayCampaigns",
+      "status": "prepared-not-scheduled"
+    }
+  ],
+  "webhooks": [
+    {
+      "id": "twitch-eventsub",
+      "route": "/api/integrations/twitch/eventsub",
+      "transport": "webhook",
+      "status": "configuration-required"
+    }
+  ],
+  "portablePaths": [
+    "src/workspace/core",
+    "src/components/workspace-shell.tsx",
+    "src/app/workspace",
+    "docs/workspace",
+    "supabase/migrations/20260809_workspace_core_foundations.sql",
+    "src/components/workspace-charts.tsx",
+    "tests/fortnite",
+    "src/workspace/streaming/core",
+    "src/workspace/notifications",
+    "src/components/push-controls.tsx",
+    "public/workspace-sw.js",
+    "public/workspace.webmanifest",
+    "src/app/api/workspace/push",
+    "src/app/workspace/notifications",
+    "src/workspace/overlays/core/",
+    "src/workspace/overlays/renderer/",
+    "src/app/workspace/overlays/",
+    "src/app/overlay/",
+    "src/app/api/overlays/"
+  ],
+  "nowSpecificPaths": [
+    "src/workspace/now",
+    "src/workspace/overlays/now/"
+  ],
+  "fortniteSpecificPaths": [
+    "src/workspace/games/fortnite",
+    "src/app/workspace/fortnite",
+    "src/app/workspace/fortnite/live",
+    "src/components/twitch-connect.tsx"
+  ],
+  "twitchSpecificPaths": [
+    "src/workspace/streaming/twitch",
+    "src/app/api/integrations/twitch/eventsub"
+  ],
+  "databaseTables": [
+    "stream_accounts",
+    "stream_sessions",
+    "stream_snapshots",
+    "stream_goals",
+    "integration_subscriptions",
+    "webhook_events",
+    "notifications",
+    "notification_preferences",
+    "notification_events",
+    "push_subscriptions",
+    "notification_deliveries",
+    "overlay_projects",
+    "overlay_scenes",
+    "overlay_versions",
+    "overlay_assignments",
+    "overlay_access_tokens",
+    "overlay_runtime_state",
+    "overlay_asset_collections",
+    "overlay_assets",
+    "overlay_campaigns",
+    "overlay_campaign_targets"
+  ],
+  "overlaySpecificPaths": [
+    "src/workspace/overlays/",
+    "src/app/overlay/",
+    "src/app/api/overlays/",
+    "src/app/workspace/overlays/"
+  ],
+  "integrationDependencies": {
+    "overlayCloud": {
+      "required": [
+        "Supabase Database"
+      ],
+      "optional": [
+        "Supabase Storage",
+        "Live Center",
+        "Twitch"
+      ]
+    }
+  }
+}
