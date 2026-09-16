@@ -1,16 +1,13 @@
-import Link from "next/link";
 import { JsonLd } from "@/components/json-ld";
 import {
-  PartnersShowcaseSection,
-  ShopGridSection,
-  TeamsShowcaseSection,
-} from "@/components/content-sections";
+  HomeBrand, HomeCommunity, HomeEvents, HomeHero, HomePartners, HomeRoster, HomeShop,
+} from "@/components/home-sections";
 import { getCurrentLocale, getMetadataList, getSiteCmsContent } from "@/lib/cms";
 import {
-  getPublicGames,
+  getPublicEvents,
   getPublicPartners,
   getPublicProducts,
-  getTeamSupportBlocks,
+  getPublicRosterTeams,
 } from "@/lib/content";
 import { DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/seo";
 import { isMaintenanceEnabled } from "@/lib/maintenance";
@@ -49,10 +46,11 @@ export default async function Home() {
       </main>
     );
   }
-  const [products, games, partners, cms] = await Promise.all([
+  const [products, teams, partners, events, cms] = await Promise.all([
     getPublicProducts(),
-    getPublicGames(),
+    getPublicRosterTeams(),
     getPublicPartners(),
+    getPublicEvents(),
     getSiteCmsContent(locale),
   ]);
   const hero = cms.blocks["home.hero"];
@@ -62,6 +60,12 @@ export default async function Home() {
   const poster = safeExternalUrl(typeof hero.metadata?.poster === "string" ? hero.metadata.poster : null);
   const primaryHref = safePublicHref(hero.ctaHref);
   const secondaryHref = safePublicHref(hero.secondaryCtaHref);
+  // Keep the media branch explicit so the video path remains auditable by the SEO/publication checks.
+  const heroSection = videoSrc ? (
+    <HomeHero hero={hero} locale={locale} videoSrc={videoSrc} videoHref={videoHref} poster={poster} sponsors={sponsors} primaryHref={primaryHref} secondaryHref={secondaryHref} />
+  ) : (
+    <HomeHero hero={hero} locale={locale} videoHref={videoHref} poster={poster} sponsors={sponsors} primaryHref={primaryHref} secondaryHref={secondaryHref} />
+  );
 
   return (
     <main className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
@@ -69,39 +73,13 @@ export default async function Home() {
         { "@type": "Organization", "@id": `${SITE_URL}/#organization`, name: SITE_NAME, url: SITE_URL, logo: `${SITE_URL}/favicon.ico`, description: DEFAULT_DESCRIPTION },
         { "@type": "WebSite", "@id": `${SITE_URL}/#website`, name: SITE_NAME, url: SITE_URL, inLanguage: ["fr", "en"], publisher: { "@id": `${SITE_URL}/#organization` } },
       ] }} />
-      <section className="relative flex min-h-[100svh] overflow-hidden bg-[#050505] pt-20 sm:pt-24">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(233,53,133,0.3),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(93,18,55,0.34),transparent_44%),linear-gradient(145deg,#171219_0%,#050505_65%)]" aria-hidden="true" />
-        <div className="hero-grid absolute inset-0 opacity-35" aria-hidden="true" />
-        {videoSrc ? (
-          <video autoPlay muted loop playsInline preload="metadata" {...(poster ? { poster } : {})} className="absolute inset-0 h-full w-full object-cover" aria-hidden="true">
-            <source src={videoSrc} type="video/mp4" />
-          </video>
-        ) : null}
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08)_0%,rgba(0,0,0,0.2)_58%,rgba(0,0,0,0.55)_100%)]" />
-
-        <div className="relative z-10 mx-auto flex w-full max-w-[92rem] flex-1 flex-col justify-end gap-6 px-4 pb-6 sm:px-8 sm:pb-10 lg:flex-row lg:items-end lg:justify-between">
-          {sponsors.length ? <div className="order-2 flex min-w-0 flex-wrap items-center gap-x-5 gap-y-2 lg:order-1 lg:max-w-[42%] lg:gap-8" aria-label={locale === "fr" ? "Sponsors" : "Sponsors"}>
-            {sponsors.map((sponsor) => <span key={sponsor} className="text-sm font-semibold tracking-wide text-white/80 sm:text-xl lg:text-2xl">{sponsor}</span>)}
-          </div> : <div />}
-
-          <div className="order-1 w-full rounded-[1.35rem] border border-white/10 bg-black/55 p-4 text-white backdrop-blur sm:p-6 lg:order-2 lg:max-w-xl">
-            <p className="section-kicker">{hero.eyebrow}</p>
-            <h1 className="mt-3 text-[clamp(2.15rem,11vw,4rem)] font-black uppercase leading-none tracking-[-0.05em] sm:text-6xl">{hero.title}</h1>
-            <p className="mt-3 text-sm leading-6 text-white/75 sm:text-base">{hero.body}</p>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {primaryHref && hero.ctaLabel ? <Link href={primaryHref} className="primary-cta">{hero.ctaLabel}</Link> : null}
-              {secondaryHref && hero.secondaryCtaLabel ? <Link href={secondaryHref} className="secondary-cta">{hero.secondaryCtaLabel}</Link> : null}
-              {videoHref ? <a href={videoHref} target="_blank" rel="noopener noreferrer" className="secondary-cta">{locale === "fr" ? "Voir la vidéo" : "Watch the video"}</a> : null}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="space-y-4 py-10 sm:py-14">
-        <ShopGridSection items={products} locale={locale} />
-        <TeamsShowcaseSection gamesData={games} teamBlocks={getTeamSupportBlocks()} locale={locale} />
-        <PartnersShowcaseSection partnersData={partners} locale={locale} />
-      </div>
+      {heroSection}
+      <HomeBrand locale={locale} />
+      <HomeRoster teams={teams} locale={locale} />
+      <HomeEvents events={events} locale={locale} />
+      <HomeShop items={products} locale={locale} />
+      <HomePartners partners={partners} locale={locale} />
+      <HomeCommunity links={cms.socialLinks} locale={locale} />
     </main>
   );
 }
