@@ -165,28 +165,24 @@ export function SiteShell({ children, cms }: SiteShellProps) {
 
       {children}
 
-      <footer className="mx-auto w-full max-w-[92rem] px-4 pb-8 pt-10 sm:px-8 sm:pb-10 sm:pt-12">
-        <div className="rounded-[1.5rem] border border-white/10 bg-[linear-gradient(180deg,#0f1016_0%,#060608_100%)] p-5 sm:rounded-[2rem] sm:p-9">
-          <h2 className="text-[clamp(1.75rem,10vw,3rem)] font-black uppercase leading-none tracking-[-0.04em] sm:text-5xl">
-            {footer.title}
-          </h2>
-          <p className="mt-4 max-w-2xl text-white/60">{footer.body}</p>
-
-          <div className="mt-8 flex flex-wrap gap-3 text-sm">
+      <footer className="border-t border-white/10 bg-[#080808] px-4 py-7 sm:px-8">
+        <div className="mx-auto w-full max-w-[92rem]">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-3"><span className="logo-mark" aria-hidden="true" /><div><h2 className="text-sm font-black uppercase tracking-[0.18em]">{footer.title}</h2><p className="mt-1 text-xs text-white/45">{footer.body}</p></div></div>
+          <div className="flex flex-wrap gap-2 text-xs">
             {cms.socialLinks.map((item) => (
               <a
                 key={`${item.platform}-${item.href}`}
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-white/10 px-4 py-2 text-white/68 hover:text-white"
+                className="rounded-full border border-white/10 px-3 py-2 text-white/68 hover:text-white"
               >
                 {item.label}
               </a>
             ))}
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center gap-3 border-t border-white/10 pt-5 text-sm text-white/45">
+          </div></div>
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-5 text-xs text-white/45">
             <div className="flex rounded-full border border-white/15 p-1">
               <Link
                 href={languageHref("fr", pathname)}
@@ -201,11 +197,7 @@ export function SiteShell({ children, cms }: SiteShellProps) {
                 EN
               </Link>
             </div>
-          </div>
-
-          <div className="mt-6 text-sm text-white/45">
-            <p>© {new Date().getFullYear()} NOW eSport.</p>
-            <div className="mt-3 flex flex-wrap gap-4">
+            <div className="flex flex-wrap items-center gap-4"><p>© {new Date().getFullYear()} NOW eSport.</p>
               {cms.legalNavigation.map((item) => (
                 <Link key={`${item.href}-${item.label}`} href={item.href} className="hover:text-white/70">
                   {item.label}
